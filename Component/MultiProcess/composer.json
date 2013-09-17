@@ -1,7 +1,7 @@
 {
-    "name": "Slime MultiProcess",
+    "name": "SlimeFramework MultiProcess",
     "description":"A PHP MultiProcess Library",
     "require": {
-        "Slime/Log": "*"
+        "SlimeFramework/Component/Log": "*"
     }
 }
