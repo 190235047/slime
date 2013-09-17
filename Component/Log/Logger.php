@@ -1,7 +1,9 @@
 <?php
 namespace SlimeFramework\Component\Log;
 
-class Logger
+use Psr\Log\LoggerInterface;
+
+class Logger implements LoggerInterface
 {
     const DESC_EMERGENCY = 'emergency';
     const DESC_ALERT     = 'alert';

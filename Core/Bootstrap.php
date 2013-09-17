@@ -1,9 +1,9 @@
 <?php
 namespace SlimeFramework\Core;
 
-use Slime\Config;
-use Slime\Log;
-use Slime\Route;
+use SlimeFramework\Component\Config;
+use SlimeFramework\Component\Log;
+use SlimeFramework\Component\Route;
 
 /**
  * Class Bootstrap

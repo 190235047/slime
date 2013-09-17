@@ -64,7 +64,7 @@ class Response
     const HTTP_NOT_EXTENDED = 510;                                                // RFC2774
     const HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511;                             // RFC6585
 
-    public static $statusTexts = array(
+    public static $aMapStatusText = array(
         100 => 'Continue',
         101 => 'Switching Protocols',
         102 => 'Processing',            // RFC2518
@@ -127,14 +127,15 @@ class Response
         511 => 'Network Authentication Required',                             // RFC6585
     );
 
-    public function __construct($sContent = '', $iStatus = 200, $aHeader = array())
+    public function __construct($sContent = '', $iStatus = 200, $aHeader = array(), $aHeaderCookie = array())
     {
         $this->aHeader = $aHeader;
+        $this->aHeaderCookie = $aHeaderCookie;
         $this->sContent = $sContent;
         $this->iStatus = $iStatus;
-        $this->setProtocolVersion('1.0');
-        if (!$this->aHeader->has('Date')) {
-            $this->setDate(new \DateTime(null, new \DateTimeZone('UTC')));
+        $this->sProtocolVersion = '1.0';
+        if (!isset($this->aHeader['Date'])) {
+            $this->aHeader['Date'] = new \DateTime(null, new \DateTimeZone('UTC'));
         }
     }
 
@@ -151,8 +152,6 @@ class Response
      */
     public function prepare(Request $Request)
     {
-        $aHeader = $this->aHeader;
-
         if ($this->iStatus >= 100 && $this->iStatus < 200 ||
             array_key_exists($this->iStatus, array(204 => true, 304 => true))
         ) {
@@ -160,49 +159,45 @@ class Response
         }
 
         // Content-type based on the Request
-        if (!isset($aHeader['Content-Type'])) {
-            /* @todo i think : set a default is ok
-            $format = $Request->getRequestFormat();
-            if (null !== $format && $mimeType = $Request->getMimeType($format)) {
-                $aHeader['Content-Type'] = $mimeType;
-            }*/
-        }
-
         // Fix Content-Type
-        $charset = $this->charset ?: 'UTF-8';
-        if (!$aHeader->has('Content-Type')) {
-            $aHeader->set('Content-Type', 'text/html; charset='.$charset);
-        } elseif (0 === strpos($aHeader->get('Content-Type'), 'text/') && false === strpos($aHeader->get('Content-Type'), 'charset')) {
+        $sDefaultCharset = 'UTF-8';
+        if (!isset($this->aHeader['Content-Type'])) {
+            $this->aHeader['Content-Type'] = 'text/html; charset=' . $sDefaultCharset;
+        } elseif (
+            strpos($this->aHeader['Content-Type'], 'text/')===0 &&
+            strpos($this->aHeader['Content-Type'], 'charset')===false
+        ) {
             // add the charset
-            $aHeader->set('Content-Type', $aHeader->get('Content-Type').'; charset='.$charset);
+            $this->aHeader['Content-Type'] = $this->aHeader['Content-Type'] . '; charset=' . $sDefaultCharset;
         }
 
         // Fix Content-Length
-        if (isset($aHeader['Transfer-Encoding'])) {
-            unset($aHeader['Content-Length']);
+        if (isset($this->aHeader['Transfer-Encoding'])) {
+            unset($this->aHeader['Content-Length']);
         }
 
-        if ($Request->isMethod('HEAD')) {
+        if ($Request->aServer['REQUEST_METHOD']==='HEAD') {
             // cf. RFC2616 14.13
-            $length = $aHeader->get('Content-Length');
-            $this->setContent(null);
-            if ($length) {
-                $aHeader->set('Content-Length', $length);
+            $iLen = $this->aHeader['Content-Length'];
+            $this->sContent = null;
+            if ($iLen) {
+                $this->aHeader['Content-Length'] = $iLen;
             }
         }
 
         // Fix protocol
-        if ('HTTP/1.0' != $Request->server->get('SERVER_PROTOCOL')) {
-            $this->setProtocolVersion('1.1');
+        if ($Request->aServer['HTTP_SERVER_PROTOCOL'] != 'HTTP/1.0') {
+            $this->sProtocolVersion = '1.1';
         }
 
         // Check if we need to send extra expire info headers
-        if ('1.0' == $this->getProtocolVersion() && 'no-cache' == $this->aHeader->get('Cache-Control')) {
-            $this->aHeader->set('pragma', 'no-cache');
-            $this->aHeader->set('expires', -1);
+        if ($this->sProtocolVersion == '1.0' &&
+            isset($this->aHeader['Cache-Control']) &&
+            $this->aHeader['Cache-Control'] == 'no-cache'
+        ) {
+            $this->aHeader['pragma'] = 'no-cache';
+            $this->aHeader['expires'] = -1;
         }
-
-        $this->ensureIEOverSSLCompatibility($Request);
 
         return $this;
     }
@@ -220,18 +215,25 @@ class Response
         }
 
         // status
-        header(sprintf('HTTP/%s %s %s', $this->version, $this->statusCode, $this->statusText));
+        header(sprintf('HTTP/%s %s %s', $this->sProtocolVersion, $this->iStatus, self::$aMapStatusText[$this->iStatus]));
 
         // headers
-        foreach ($this->headers->allPreserveCase() as $name => $values) {
+        foreach ($this->aHeader as $name => $values) {
             foreach ($values as $value) {
                 header($name.': '.$value, false);
             }
         }
 
         // cookies
-        foreach ($this->headers->getCookies() as $cookie) {
-            setcookie($cookie->getName(), $cookie->getValue(), $cookie->getExpiresTime(), $cookie->getPath(), $cookie->getDomain(), $cookie->isSecure(), $cookie->isHttpOnly());
+        foreach ($this->aHeaderCookie as $sName => $aCookie) {
+            setcookie($sName,
+                $aCookie['value'],
+                $aCookie['expire'],
+                isset($aCookie['path']) ? $aCookie['path'] : null,
+                isset($aCookie['domain']) ? $aCookie['domain'] : null,
+                isset($aCookie['is_secure']) ? $aCookie['is_secure'] : null,
+                isset($aCookie['is_httponly']) ? $aCookie['is_httponly'] : null
+            );
         }
 
         return $this;
