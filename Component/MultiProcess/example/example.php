@@ -2,7 +2,7 @@
 require '../MPPoolModel.php';
 require '../Pool.php';
 require '../Child.php';
-require '../Job.php';
+require '../Task.php';
 require '../../Log/Logger.php';
 require '../../Log/IWriter.php';
 require '../../Log/Writer/STDFD.php';

@@ -86,7 +86,7 @@ class Child
     private function _receive()
     {
         while (true) {
-            /** @var Job $Job */
+            /** @var Task $Job */
             $Job = new $this->sJobClass(fgets($this->rFifoF2C), $this->Logger);
             $bResult = $Job->run();
             unset($Job);

@@ -3,7 +3,7 @@ namespace SlimeFramework\Component\MultiProcess;
 
 use SlimeFramework\Component\Log\Logger;
 
-abstract class Job
+abstract class Task
 {
     public function __construct($sMessage, Logger $Logger)
     {

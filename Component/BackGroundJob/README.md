@@ -1,7 +1,18 @@
+# PHP BackGroundJob
+## Depends on SlimeFramework\MultiProcess
+* /your_path_of_php_bin /your_daemon_file 2>/tmp/sf_bgjob_err 1>/tmp/sf_bgjob_log &
+* Master process init sub process pool
+* Master process pop message from one JobQueue(implements \SlimeFramework\BackGroundJob\IJobQueue)
+* Master process find a idle sub process, mark it as busy and send it job by using fifo
+* Sub process do the job and response to master process by using fifo
+* Master process receive response by using fifo, mark sub process as idle
+* This is an example
+
+#### Task
+`
 <?php
 namespace SlimeFramework\Component\BackGroundJob;
 
-use SlimeFramework\Component\BackGroundJob;
 use SlimeFramework\Component\Log;
 use SlimeFramework\Component\MultiProcess\Task;
 
@@ -22,7 +33,6 @@ class MyTask extends Task
         $sFile = $aMessage['file'];
         $CB = $aMessage['cb'];
         $aParam = $aMessage['param'];
-        $aParam[] = $this->Logger;
 
         require_once $sFile;
         $bRS = call_user_func($CB, $aParam);
@@ -33,7 +43,15 @@ class MyTask extends Task
         return $bRS;
     }
 }
+`
 
+#### Daemon
+`
+<?php
+namespace SlimeFramework\Component\BackGroundJob;
+
+use SlimeFramework\Component\BackGroundJob;
+use SlimeFramework\Component\Log;
 $Daemon = new BackGroundJob\Main(
     10,
     '/tmp/fifo',
@@ -44,8 +62,15 @@ $Daemon = new BackGroundJob\Main(
 $JobQueue = new BackGroundJob\JobQueue_SysMsg();
 $Daemon->setJobQueue($JobQueue);
 $Daemon->run();
+`
 
-class TestLogic
+#### WebLogic
+`
+<?php
+namespace YouApp;
+use SlimeFramework\Component\Log;
+
+class Logic_Test
 {
     protected $JobQueue;
 
@@ -73,3 +98,4 @@ class TestLogic
         return true;
     }
 }
+`
