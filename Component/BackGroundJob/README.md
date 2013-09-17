@@ -9,31 +9,25 @@
 * This is an example
 
 #### Task
-`
-<?php
-namespace SlimeFramework\Component\BackGroundJob;
 
+
+namespace SlimeFramework\Component\BackGroundJob;
 use SlimeFramework\Component\Log;
 use SlimeFramework\Component\MultiProcess\Task;
-
 class MyTask extends Task
 {
     public function run()
     {
         $aMessage = json_decode($this->sMessage, true);
-
         if ($aMessage===false) {
             $this->Logger->warning('message[{msg}] format is error', array('msg' => $this->sMessage));
         }
-
         if (isset($aMessage['__sf_bgjob_retry__']) && $aMessage['__sf_bgjob_retry__'] >= 3) {
             return true;
         }
-
         $sFile = $aMessage['file'];
         $CB = $aMessage['cb'];
         $aParam = $aMessage['param'];
-
         require_once $sFile;
         $bRS = call_user_func($CB, $aParam);
         if ($bRS!==true) {
@@ -43,13 +37,12 @@ class MyTask extends Task
         return $bRS;
     }
 }
-`
+
 
 #### Daemon
-`
-<?php
-namespace SlimeFramework\Component\BackGroundJob;
 
+
+namespace SlimeFramework\Component\BackGroundJob;
 use SlimeFramework\Component\BackGroundJob;
 use SlimeFramework\Component\Log;
 $Daemon = new BackGroundJob\Main(
@@ -62,14 +55,13 @@ $Daemon = new BackGroundJob\Main(
 $JobQueue = new BackGroundJob\JobQueue_SysMsg();
 $Daemon->setJobQueue($JobQueue);
 $Daemon->run();
-`
+
 
 #### WebLogic
-`
-<?php
+
+
 namespace YouApp;
 use SlimeFramework\Component\Log;
-
 class Logic_Test
 {
     protected $JobQueue;
@@ -98,4 +90,4 @@ class Logic_Test
         return true;
     }
 }
-`
+
