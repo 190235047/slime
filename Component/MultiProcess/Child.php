@@ -90,7 +90,7 @@ class Child
             $Job = new $this->sJobClass(fgets($this->rFifoF2C), $this->Logger);
             $bResult = $Job->run();
             unset($Job);
-            fwrite($this->rFifoC2F, ($bResult ? 'ok' : 'fail') . "\n");
+            fwrite($this->rFifoC2F, ($bResult ? '0' : '1') . "\n");
         }
     }
 }

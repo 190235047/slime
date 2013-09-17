@@ -4,47 +4,55 @@
 * Master process init sub process pool
 * Master process pop message from one JobQueue(implements \SlimeFramework\BackGroundJob\IJobQueue)
 * Master process find a idle sub process, mark it as busy and send it job by using fifo
-* Sub process do the job and response to master process by using fifo
-* Master process receive response by using fifo, mark sub process as idle
+* Sub process create task object and run(extends \SlimeFramework\Component\MultiProcess\Task)
+* Sub process send response to master process by using fifo
+* Master process receive response, mark sub process as idle; if response is
 * This is an example
 
-#### Task
-
-
+#### Task impl(use by Daemon)
+<pre><code>
 namespace SlimeFramework\Component\BackGroundJob;
+
 use SlimeFramework\Component\Log;
 use SlimeFramework\Component\MultiProcess\Task;
+
 class MyTask extends Task
 {
     public function run()
     {
+        $iRetry = 0;
         $aMessage = json_decode($this->sMessage, true);
-        if ($aMessage===false) {
-            $this->Logger->warning('message[{msg}] format is error', array('msg' => $this->sMessage));
+        while ($iRetry++ < 3) {
+            if ($aMessage===false) {
+                $this->Logger->warning('message[{msg}] format is error', array('msg' => $this->sMessage));
+                $bRS = false;
+                break;
+            }
+
+            $sFile = $aMessage['file'];
+            $CB = $aMessage['cb'];
+            $aParam = $aMessage['param'];
+
+            require_once $sFile;
+            $bRS = call_user_func($CB, $aParam);
+            if ($bRS===true) {
+                break;
+            }
+            sleep(1);
         }
-        if (isset($aMessage['__sf_bgjob_retry__']) && $aMessage['__sf_bgjob_retry__'] >= 3) {
-            return true;
-        }
-        $sFile = $aMessage['file'];
-        $CB = $aMessage['cb'];
-        $aParam = $aMessage['param'];
-        require_once $sFile;
-        $bRS = call_user_func($CB, $aParam);
-        if ($bRS!==true) {
-            $aMessage['__sf_bgjob_retry__'] = 1;
-            $bRS = false;
-        }
+
         return $bRS;
     }
 }
-
+</pre></code>
 
 #### Daemon
-
-
+<pre><code>
 namespace SlimeFramework\Component\BackGroundJob;
+
 use SlimeFramework\Component\BackGroundJob;
 use SlimeFramework\Component\Log;
+
 $Daemon = new BackGroundJob\Main(
     10,
     '/tmp/fifo',
@@ -52,16 +60,19 @@ $Daemon = new BackGroundJob\Main(
     1000,
     new Log\Logger(array(new Log\Writer_STDFD()), Log\Logger::LEVEL_ALL)
 );
+
 $JobQueue = new BackGroundJob\JobQueue_SysMsg();
 $Daemon->setJobQueue($JobQueue);
-$Daemon->run();
 
+$Daemon->run();
+</code></pre>
 
 #### WebLogic
-
-
+<pre><code>
 namespace YouApp;
+
 use SlimeFramework\Component\Log;
+
 class Logic_Test
 {
     protected $JobQueue;
@@ -90,4 +101,5 @@ class Logic_Test
         return true;
     }
 }
+</pre></code>
 
