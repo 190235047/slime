@@ -10,6 +10,7 @@
 * This is an example
 
 #### Task impl(use by Daemon)
+
 <pre><code>
 namespace SlimeFramework\Component\BackGroundJob;
 
@@ -47,6 +48,7 @@ class MyTask extends Task
 </pre></code>
 
 #### Daemon
+
 <pre><code>
 namespace SlimeFramework\Component\BackGroundJob;
 
@@ -68,6 +70,7 @@ $Daemon->run();
 </code></pre>
 
 #### WebLogic
+
 <pre><code>
 namespace YouApp;
 
