@@ -1,4 +1,4 @@
-# SlimeFramework Component MultiProcess
+# MultiProcess
 
 * Example
 

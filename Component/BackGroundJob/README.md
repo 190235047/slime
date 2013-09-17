@@ -1,4 +1,4 @@
-# SlimeFramework Component BackGroundJob
+# BackGroundJob
 ## Depends on SlimeFramework\MultiProcess
 * /your_path_of_php_bin /your_daemon_file 2>/tmp/sf_bgjob_err 1>/tmp/sf_bgjob_log &
 * Master process init sub process pool
