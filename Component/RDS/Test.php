@@ -43,10 +43,10 @@ $aModelConfig = array(
     )
 );
 
-$Pool = new \Slime\RDS\Model_Pool(
+$Pool = new \SlimeFramework\Component\RDS\Model_Pool(
     $aDBConfig,
     $aModelConfig,
-    new \Slime\Log\Logger(array(new \Slime\Log\Writer_STDFD()))
+    new \SlimeFramework\Component\Log\Logger(array(new \SlimeFramework\Component\Log\Writer_STDFD()))
 );
 /*
 $EGBook = $Pool->get('Book');
@@ -59,7 +59,7 @@ echo $Owner . "\n";
 
 $ModelOwner = $Pool->get('Owner');
 $Owner = $ModelOwner->find(1);
-/** @var \Slime\RDS\Model_Item[] $aBook */
+/** @var \SlimeFramework\Component\RDS\Model_Item[] $aBook */
 $aBook = $Owner->rel('Book');
 
 foreach ($aBook as $Book) {

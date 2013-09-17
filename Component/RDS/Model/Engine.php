@@ -54,7 +54,7 @@ class Engine
             '',
             true,
             \PDO::FETCH_CLASS,
-            array('\\Slime\\RDS\\Model_Item')
+            array('\\SlimeFramework\Component\\RDS\\Model_Item')
         );
         if ($Item instanceof Model_Item) {
             $Item->Engine = $this;
@@ -77,7 +77,7 @@ class Engine
             '',
             false,
             \PDO::FETCH_CLASS,
-            array('\\Slime\\RDS\\Model_Item')
+            array('\\SlimeFramework\Component\\RDS\\Model_Item')
         );
 
         $Group = new Model_Group();

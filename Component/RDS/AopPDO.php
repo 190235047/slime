@@ -18,7 +18,7 @@ class AopPDO
         aop_add_before(
             "PDOStatement->execute()",
             function (\AopJoinPoint $JoinPoint) {
-                /** @var \Slime\Framework\Bootstrap $__Bootstrap__ */
+                /** @var \SlimeFramework\Component\Framework\Bootstrap $__Bootstrap__ */
                 $aArgs = $JoinPoint->getArguments();
                 /** @var \PDOStatement $Object */
                 $Object = $JoinPoint->getObject();
@@ -29,7 +29,7 @@ class AopPDO
         aop_add_before(
             "PDO->exec()",
             function (\AopJoinPoint $JoinPoint) {
-                /** @var \Slime\Framework\Bootstrap $__Bootstrap__ */
+                /** @var \SlimeFramework\Component\Framework\Bootstrap $__Bootstrap__ */
                 $aArgs = $JoinPoint->getArguments();
                 Context::getInst()->Log->debug('SQL : exec[' . $aArgs[0] . ']');
             }
@@ -38,7 +38,7 @@ class AopPDO
         aop_add_before(
             "PDO->query()",
             function (\AopJoinPoint $JoinPoint) {
-                /** @var \Slime\Framework\Bootstrap $__Bootstrap__ */
+                /** @var \SlimeFramework\Component\Framework\Bootstrap $__Bootstrap__ */
                 $aArgs = $JoinPoint->getArguments();
                 Context::getInst()->Log->debug('SQL : query[' . $aArgs[0] . ']');
             }
