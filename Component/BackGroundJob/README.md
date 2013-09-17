@@ -47,7 +47,7 @@ class MyTask extends Task
 }
 </pre></code>
 
-#### Daemon
+#### Daemon(use JobQueue_SysMsg)
 
 <pre><code>
 namespace SlimeFramework\Component\BackGroundJob;
