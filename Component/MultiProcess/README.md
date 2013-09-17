@@ -1,6 +1,7 @@
 # SlimeFramework Component MultiProcess
 
-* example
+* Example
+
     class MyMP extends \SlimeFramework\Component\MultiProcess\MPPoolModel
     {
         /**
