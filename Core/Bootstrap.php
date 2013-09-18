@@ -14,7 +14,14 @@ use SlimeFramework\Component\Route;
  */
 class Bootstrap
 {
-    public function __construct($sENV, $sDirConfig, $sAppNs)
+    /**
+     * @param string $sENV
+     * @param string $sDirConfig
+     * @param string $sAppNs
+     *
+     * @return $this
+     */
+    public static function factory($sENV, $sDirConfig, $sAppNs)
     {
         # get context object from current request
         $Context = Context::getInst();
@@ -45,11 +52,15 @@ class Bootstrap
             exit(1);
         }
         $aWriter = array();
-        foreach ($aLogConfig[PHP_SAPI] as $aRow) {
-            $sClassName = '\\Slime\\Log\\Writer_' . $aRow[0];
-            unset($aRow[0]);
+        foreach ($aLogConfig[PHP_SAPI] as $sWriter => $aArg) {
+            if (is_int($sWriter) && is_string($aArg)) {
+                $sClassName = '\\Slime\\Log\\Writer_' . $aArg;
+                $aArg = array();
+            }  else {
+                $sClassName = '\\Slime\\Log\\Writer_' . $sWriter;
+            }
             $Ref = new \ReflectionClass($sClassName);
-            $aWriter[] = $Ref->newInstanceArgs($aRow);
+            $aWriter[] = $Ref->newInstanceArgs($aArg);
         }
         $Context->register('Log', new Log\Logger($aWriter));
 
@@ -64,8 +75,13 @@ class Bootstrap
             )
         );
 
+        # register self
+        $Context->register('Bootstrap', new self());
+
         # set error handle
-        set_error_handler(array($this, 'handleError'));
+        set_error_handler(array($Context->Bootstrap, 'handleError'));
+
+        return $Context->Bootstrap;
     }
 
     public function run()
