@@ -51,7 +51,6 @@ class Pool
             exit(1);
         }
         $iPID = $Child->iPID;
-        $Child->iStatus = $iStatus;
         if ($iStatus == self::STATUS_BUSY) {
             $this->aBusyChild[$iPID] = $Child;
             unset($this->aIdleChild[$iPID]);
