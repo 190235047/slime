@@ -12,7 +12,7 @@ class Model_Group implements \ArrayAccess, \Iterator
     protected $iDataLen = 0;
     protected $iCursor = 0;
 
-    public function rel($sModelName)
+    public function relation($sModelName)
     {
         ;
     }
