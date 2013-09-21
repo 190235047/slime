@@ -7,7 +7,7 @@ class Model_Group implements \ArrayAccess, \Iterator
     protected $aaData;
 
     /** @var Model */
-    public $Engine;
+    public $Model;
 
     protected $iDataLen = 0;
     protected $iCursor = 0;

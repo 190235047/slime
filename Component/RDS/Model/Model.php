@@ -25,7 +25,7 @@ class Model
 
     public function add($aKVMap)
     {
-        $this->CURD->insertSmarty($this->sTable, $aKVMap);
+        return $this->CURD->insertSmarty($this->sTable, $aKVMap);
     }
 
     public function delete($mPK)
@@ -35,7 +35,7 @@ class Model
 
     public function update($mPK, $aKVMap)
     {
-        $this->CURD->updateSmarty($this->sTable, $aKVMap, array($this->sPK => $mPK));
+        return $this->CURD->updateSmarty($this->sTable, $aKVMap, array($this->sPK => $mPK));
     }
 
     /**
@@ -57,7 +57,7 @@ class Model
             array('\\SlimeFramework\Component\\RDS\\Model_Item')
         );
         if ($Item instanceof Model_Item) {
-            $Item->Engine = $this;
+            $Item->Model = $this;
         }
         return $Item;
     }
@@ -84,7 +84,7 @@ class Model
         foreach ($aItem as $Item) {
             $Group[$Item->{$this->sPK}] = $Item;
         }
-        $Group->Engine = $this;
+        $Group->Model = $this;
 
         return $Group;
     }

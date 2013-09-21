@@ -8,7 +8,7 @@ class Model_Item
     private $aRelation;
 
     /** @var Model */
-    public $Engine;
+    public $Model;
 
     public function __get($sKey)
     {
@@ -22,7 +22,7 @@ class Model_Item
     public function rel($sModelName)
     {
         if (!isset($this->aRelation[$sModelName])) {
-            $this->aRelation[$sModelName] = $this->Engine->relation($sModelName, $this);
+            $this->aRelation[$sModelName] = $this->Model->relation($sModelName, $this);
         }
         return $this->aRelation[$sModelName];
     }
@@ -35,7 +35,17 @@ class Model_Item
 
     public function save()
     {
-        ;
+        if (isset($this->aData[$this->Model->sPK])) {
+            return $this->Model->update($this->aData[$this->Model->sPK], $this->aData);
+        } else {
+            $iID = $this->Model->add($this->aData);
+            if ($iID===null) {
+                return false;
+            } else {
+                $this->aData[$this->Model->sPK] = $iID;
+                return true;
+            }
+        }
     }
 
     public function __toString()

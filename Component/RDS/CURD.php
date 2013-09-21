@@ -102,6 +102,12 @@ class CURD
         return isset($mResult['total']) ? (int)$mResult['total'] : 0;
     }
 
+    /**
+     * @param string $sTable
+     * @param array $aKVMap
+     * @param array $aWhere
+     * @return bool
+     */
     public function updateSmarty($sTable, array $aKVMap, array $aWhere)
     {
         $aUpdatePre = $aUpdateData = array();
@@ -127,6 +133,12 @@ class CURD
         return $STMT->execute(array_values($aWhere));
     }
 
+    /**
+     * @param string $sTable
+     * @param array $aKVMap
+     * @param int $iType
+     * @return null|string
+     */
     public function insertSmarty($sTable, array $aKVMap, $iType = self::INSERT_STANDARD)
     {
         $sSQLPrepare = sprintf(
@@ -136,8 +148,13 @@ class CURD
             isset($aKVMap[0]) ? '' : '(`' . implode('`,`', array_keys($aKVMap)) . '`)',
             implode(',', array_pad(array(), count($aKVMap), '?'))
         );
-        $STMT        = $this->getInstance()->prepare($sSQLPrepare);
-        return $STMT->execute(array_values($aKVMap));
+        $PDO  = $this->getInstance();
+        $STMT = $PDO->prepare($sSQLPrepare);
+        if ($STMT->execute(array_values($aKVMap))) {
+            return $PDO->lastInsertId();
+        } else {
+            return null;
+        }
     }
 
     public function buildCondition($aWhere)
