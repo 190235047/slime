@@ -30,6 +30,7 @@ class Adaptor_PHP implements IAdaptor
     public function setTpl($sTpl)
     {
         $this->sTpl = $this->sBaseDir . DIRECTORY_SEPARATOR . $sTpl;
+        return $this;
     }
 
     /**

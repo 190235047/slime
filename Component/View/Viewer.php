@@ -13,7 +13,7 @@ class Viewer
     public static function factory($sAdaptor, LoggerInterface $Log)
     {
         if ($sAdaptor[0]==='@') {
-            $sAdaptor = '\\SlimeFramework\\Component\\View\\Adaptor_' . $sAdaptor;
+            $sAdaptor = '\\SlimeFramework\\Component\\View\\Adaptor_' . substr($sAdaptor, 1);
         }
         $Obj = new $sAdaptor();
         if (!$Obj instanceof IAdaptor) {

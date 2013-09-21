@@ -5,8 +5,8 @@ class Response
 {
     public $sStatus;
 
-    public $aHeader;
-    public $aHeaderCookie;
+    public $aHeader = array();
+    public $aHeaderCookie = array();
     public $sContent;
 
     public static function factory()
@@ -50,6 +50,12 @@ class Response
     public function setRedirect($sURL, $iCode = null)
     {
         $this->setHeader('Location', $sURL);
+        return $this;
+    }
+
+    public function setContents($sContent)
+    {
+        $this->sContent = $sContent;
         return $this;
     }
 

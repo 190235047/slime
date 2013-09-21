@@ -199,7 +199,7 @@ class Request implements IRequest
         return isset($this->aServer[$sKey]) ? $this->aServer[$sKey] : null;
     }
 
-    public function getCookie($sKey)
+    public function getCookie($sKey, $bXssFilter = null)
     {
         return isset($this->aCookie[$sKey]) ? $this->aCookie[$sKey] : null;
     }
@@ -207,6 +207,33 @@ class Request implements IRequest
     public function getContents()
     {
         return $this->sContents;
+    }
+
+    public function setXSSFilter($bXssFilter = true)
+    {
+        // TODO: Implement setXSSFilter() method.
+    }
+
+    public function getGet($sKey, $bXssFilter = null)
+    {
+        return isset($this->aQuery[$sKey]) ? $this->aQuery[$sKey] : null;
+    }
+
+    public function getPost($sKey, $bXssFilter = null)
+    {
+        return isset($this->aRequest[$sKey]) ? $this->aQuery[$sKey] : null;
+    }
+
+    public function getGetPost($sKey, $bGetFirst = true, $bXssFilter = null)
+    {
+        if ($bGetFirst) {
+            $Q1 = $this->aQuery;
+            $Q2 = $this->aRequest;
+        } else {
+            $Q1 = $this->aRequest;
+            $Q2 = $this->aQuery;
+        }
+        return isset($Q1[$sKey]) ? $Q1[$sKey] : (isset($Q2[$sKey]) ? $Q2[$sKey] : null);
     }
 
     public function isAjax()

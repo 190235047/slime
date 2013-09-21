@@ -7,7 +7,7 @@ class Model_Item
     private $aOldData;
     private $aRelation;
 
-    /** @var Engine */
+    /** @var Model */
     public $Engine;
 
     public function __get($sKey)

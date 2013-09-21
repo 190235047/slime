@@ -25,12 +25,14 @@ class Bootstrap
      * @param string $sDirConfig
      * @param string $sAppNs
      * @param string $sRunMode (cli||http)
+     * @param array $aLogConfig
      *
      * @return $this
      */
-    public static function factory($sENV, $sDirConfig, $sAppNs, $sRunMode)
+    public static function factory($sENV, $sDirConfig, $sAppNs, $sRunMode, array $aLogConfig)
     {
         # get context object from current request
+        Context::makeInst();
         $Context = Context::getInst();
 
         # register execute datetime object
@@ -45,39 +47,35 @@ class Bootstrap
         #register app namespace
         $Context->register('sNS', $sAppNs);
 
-        # register configure
-        $Config = new Config\Configure($sDirConfig . '/' . $sENV, $sDirConfig . '/' . 'publish');
-        $Context->register('Config', $Config);
-
         # register logger
-        $aLogConfig = $Config->get('system.log');
         if (!isset($aLogConfig[$sRunMode])) {
             trigger_error('There is no log config to match current runtime:[' . $sRunMode . ']', E_USER_ERROR);
             exit(1);
         }
         $aWriter = array();
-        foreach ($aLogConfig[$sRunMode] as $sWriter => $aArg) {
-            if (is_int($sWriter) && is_string($aArg)) {
-                $sClassName = '\\Slime\\Log\\Writer_' . $aArg;
-                $aArg = array();
-            }  else {
-                $sClassName = '\\Slime\\Log\\Writer_' . $sWriter;
+        foreach ($aLogConfig[$sRunMode] as $mKey => $mV) {
+            if (is_int($mKey) && is_string($mV)) {
+                $sClassName = $mV[0]==='@' ? '\\SlimeFramework\\Component\\Log\\Writer_' . substr($mV, 1) : $mV;
+                $mV = array();
+            } else {
+                $sClassName = $mKey[0]==='@' ? '\\SlimeFramework\\Component\\Log\\Writer_' . substr($mKey, 1) : $mV;
             }
             $Ref = new \ReflectionClass($sClassName);
-            $aWriter[] = $Ref->newInstanceArgs($aArg);
+            $aWriter[] = $Ref->newInstanceArgs($mV);
         }
-        $Context->register('Log', new Log\Logger($aWriter));
+        $Log = new Log\Logger($aWriter);
+        $Context->register('Log', $Log);
+
+        # register configure
+        $Config = new Config\Configure('@PHP',
+            $sDirConfig . '/' . $sENV,
+            $sDirConfig . '/publish',
+            $Log
+        );
+        $Context->register('Config', $Config);
 
         # register router
-        $aRouteConfig = $Config->get('system.route');
-        $Context->register('Route',
-            new Route\Router(
-                $aRouteConfig['aBaseConfig'],
-                $aRouteConfig['aRule'],
-                $sAppNs,
-                $aRouteConfig['sBLNS']
-            )
-        );
+        $Context->register('Route', new Route\Router($sAppNs, $Log));
 
         # register self
         $SELF = new self();
@@ -101,13 +99,16 @@ class Bootstrap
         #register http request and response
         $HttpRequest = Http\Request::createFromGlobals();
         $HttpResponse = Http\Response::factory()->setNoCache();
-        $this->Context->register('Request', $HttpRequest);
-        $this->Context->register('Response', $HttpResponse);
+        $this->Context->register('HttpRequest', $HttpRequest);
+        $this->Context->register('HttpResponse', $HttpResponse);
 
         # run route
-        Context::getInst()->Route
-            ->generateFromHttp($HttpRequest, $this->Context->Config->get('system.route.rule'))
-            ->call();
+        $CallBack = Context::getInst()->Route->generateFromHttp(
+            $HttpRequest,
+            $this->Context->Config->get('system.route')
+        );
+        $this->Context->register('CallBack', $CallBack);
+        $CallBack->call();
 
         # response
         $HttpResponse->send();

@@ -1,8 +1,16 @@
 <?php
-/**
- * Created by JetBrains PhpStorm.
- * User: smallslime
- * Date: 13-9-20
- * Time: 下午1:47
- * To change this template use File | Settings | File Templates.
- */
+namespace SlimeFramework\Core;
+
+abstract class Controller_Cli
+{
+    protected $Context;
+
+    protected $aData = array();
+
+    public function __construct(array $aParam = array())
+    {
+        $this->Context      = $Context = Context::getInst();
+        $this->Log          = $Context->Log;
+        $this->aParam       = $aParam;
+    }
+}

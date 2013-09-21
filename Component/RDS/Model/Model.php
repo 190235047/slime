@@ -4,7 +4,7 @@ namespace SlimeFramework\Component\RDS;
 use SlimeFramework\Component\Log\Logger;
 use SlimeFramework\Component\RDS\Model_Pool;
 
-class Engine
+class Model
 {
     private $CURD;
 

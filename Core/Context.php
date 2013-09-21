@@ -3,7 +3,7 @@ namespace SlimeFramework\Core;
 
 /**
  * Class Context
- * @package SlimeFramework\Component\Framework
+ * @package SlimeFramework\Core
  *
  * @property-read string sENV
  * @property-read string $sRunMode
@@ -13,6 +13,7 @@ namespace SlimeFramework\Core;
  * @property-read \SlimeFramework\Component\Config\Configure $Config
  * @property-read \SlimeFramework\Component\Log\Logger $Log
  * @property-read \SlimeFramework\Component\Route\Router $Route
+ * @property-read \SlimeFramework\Component\Route\CallBack $CallBack
  * @property-read \SlimeFramework\Component\HTTP\IRequest $HttpRequest
  * @property-read \SlimeFramework\Component\HTTP\Response $HttpResponse
  *
@@ -31,8 +32,11 @@ class Context
         return $GLOBALS['__sf_context__'][$GLOBALS['__sf_guid__']];
     }
 
-    public static function makeInst($sGUID)
+    public static function makeInst($sGUID = null)
     {
+        if ($sGUID===null) {
+            $sGUID = uniqid('SlimeFramework', true);
+        }
         $GLOBALS['__sf_guid__'] = $sGUID;
         $GLOBALS['__sf_context__'][$sGUID] = new self();
     }

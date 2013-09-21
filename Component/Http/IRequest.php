@@ -11,7 +11,15 @@ interface IRequest
 
     public function getHeader($sHeader);
 
-    public function getCookie($sKey);
+    public function setXSSFilter($bXssFilter = true);
+
+    public function getCookie($sKey, $bXssFilter = null);
+
+    public function getGet($sKey, $bXssFilter = null);
+
+    public function getPost($sKey, $bXssFilter = null);
+
+    public function getGetPost($sKey, $bGetFirst = true, $bXssFilter = null);
 
     public function getContents();
 

@@ -22,12 +22,12 @@ class Router
         $this->Log      = $Log;
     }
 
-    public function generateFromHttp(Http\IRequest $Request, $aRule)
+    public function generateFromHttp(Http\IRequest $HttpRequest, $aRule)
     {
         $CallBack = new CallBack($this->sAppNS, $this->Log);
         foreach ($aRule as $sK => $mV) {
             $bContinue = true;
-            if (is_string($sK) && preg_match($sK, $Request->getRequestURI(), $aMatched)) {
+            if (is_string($sK) && preg_match($sK, $HttpRequest->getRequestURI(), $aMatched)) {
                 if (is_callable($mV)) {
                     // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
                     // value: function($a, $b, $c, $d){}
@@ -66,9 +66,8 @@ class Router
                         $this->Log->error('Route rule error. Your own route mode must impl IMode');
                         exit(1);
                     }
-                    $Mode->run($Request, $CallBack);
+                    $bContinue = $Mode->run($HttpRequest, $CallBack);
                     // value: @routeSlimeStyle
-                    $bContinue = call_user_func(array($this, substr($mV, 1)));
                 } elseif (is_callable($mV)) {
                     // value: function(){}
                     $bContinue = call_user_func($mV, $CallBack)!==false;

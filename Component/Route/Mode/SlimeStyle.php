@@ -17,7 +17,7 @@ class Mode_SlimeStyle implements IMode
 
         $iLastIndex = count($aBlock) - 1;
         if ($aBlock[$iLastIndex] === '') {
-            $aBlock[$iLastIndex] = 'actionDefault';
+            $aBlock[$iLastIndex] = 'default';
         }
 
         if (count($aBlock) === 1) {
@@ -33,7 +33,7 @@ class Mode_SlimeStyle implements IMode
             $sAction = strstr($sAction, '.', true);
         }
 
-        $CallBack->setCBObject(implode('_', $aBlock), $sAction);
+        $CallBack->setCBObject('Controller_' . implode('_', $aBlock), $sAction);
 
         return false;
     }

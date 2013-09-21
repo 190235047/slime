@@ -5,14 +5,11 @@ use Psr\Log\LoggerInterface;
 
 class CallBack
 {
-    private $sNSPre;
-
-    private $aObjInitParam = array();
-
-    private $mCallable;
-    private $aParam;
-
-    private $bAsFunc = false;
+    public $mCallable;
+    public $aParam;
+    public $sNSPre;
+    public $aObjInitParam = null;
+    public $bAsFunc = false;
 
     public function __construct($sNSPre, LoggerInterface $Log)
     {
@@ -22,8 +19,10 @@ class CallBack
 
     public function setCBObject($mClassNameOrObject, $sMethod, $aObjInitParam = null)
     {
-        if (is_string($mClassNameOrObject) && $aObjInitParam !== null) {
-            $this->aObjInitParam = is_array($aObjInitParam) ? $aObjInitParam : array($aObjInitParam);
+        if (is_string($mClassNameOrObject)) {
+            $this->aObjInitParam = $aObjInitParam===null ?
+                array() :
+                (is_array($aObjInitParam) ? $aObjInitParam : array($aObjInitParam));
         }
         $this->mCallable = array($this->sNSPre . '\\' . $mClassNameOrObject, $sMethod);
     }
@@ -59,12 +58,18 @@ class CallBack
             $mClassOrObj = $this->mCallable[0];
 
             if (!is_callable($this->mCallable)) {
-                $this->Log->error('{cb} is not callable', array('cb' => $mClassOrObj));
+                $this->Log->error(
+                    'callback [{cb}:{method}] is not callable',
+                    array(
+                        'cb' => $mClassOrObj,
+                        'method' => isset($this->mCallable[1]) ? $this->mCallable[1] : ''
+                    )
+                );
                 exit(1);
             }
 
             # reflection need cache @todo
-            if (!empty($this->aObjInitParam)) {
+            if (is_array($this->aObjInitParam)) {
                 $Ref = new \ReflectionClass($mClassOrObj);
                 $this->mCallable[0] = $mClassOrObj = $Ref->newInstanceArgs($this->aObjInitParam); //create object
             } elseif (is_object($mClassOrObj)) {
@@ -88,6 +93,8 @@ class CallBack
                 );
                 exit(1);
             }
+
+            # before and after
             $sBefore       = $sAfter = null;
             $sExpectBefore = "__before_{$sMid}__";
             $sExpectAfter  = "__after_{$sMid}__";
@@ -98,9 +105,11 @@ class CallBack
             }
             if (isset($aMethod[$sExpectAfter])) {
                 $sAfter = $sExpectAfter;
-            } elseif (isset($aMethod['__before__'])) {
+            } elseif (isset($aMethod['__after__'])) {
                 $sAfter = '__after__';
             }
+
+            # call
             if ($sBefore !== null) {
                 call_user_func(array($mClassOrObj, $sBefore));
             }

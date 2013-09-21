@@ -15,12 +15,12 @@ final class Configure implements IAdaptor
 
     public function __construct($sAdaptor)
     {
-        $sAdaptor = __NAMESPACE__ . "\\$sAdaptor";
+        $sAdaptor = $sAdaptor[0]==='@' ? __NAMESPACE__ . '\\Adaptor_' . substr($sAdaptor, 1) : $sAdaptor;
         $Class = new \ReflectionClass($sAdaptor);
 
         $aParam = func_get_args();
         array_shift($aParam);
-        $Object = $Class->newInstance($aParam);
+        $Object = $Class->newInstanceArgs($aParam);
         if (!$Object instanceof IAdaptor) {
             trigger_error('Configure is not instance of Slime.IAdapt', E_USER_ERROR);
             exit(1);
