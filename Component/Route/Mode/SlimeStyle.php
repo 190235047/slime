@@ -10,7 +10,7 @@ class Mode_SlimeStyle implements IMode
      * @param \SlimeFramework\Component\Route\CallBack $CallBack
      * @return bool [true:continue next rule, false||other:break{default action}]
      */
-    public function run(Http\Request $Request, CallBack $CallBack)
+    public function runHttp(Http\Request $Request, CallBack $CallBack)
     {
         $aUrl   = parse_url($Request->getRequestURI());
         $aBlock = explode('/', strtolower(substr($aUrl['path'], 1)));
@@ -33,8 +33,23 @@ class Mode_SlimeStyle implements IMode
             $sAction = strstr($sAction, '.', true);
         }
 
-        $CallBack->setCBObject('Controller_' . implode('_', $aBlock), $sAction);
+        $CallBack->setCBObject('ControllerHttp_' . implode('_', $aBlock), $sAction);
 
         return false;
+    }
+
+    public function runCli($aArg, CallBack $CallBack)
+    {
+        if (strpos($aArg[0], '.') === false) {
+            $aArr = explode('.', $aArg[0], 2);
+        } else {
+            $aArr[0] = $aArg[0];
+            $aArr[1] = 'Default';
+        }
+        $CallBack->setCBObject("ControllerCli_{$aArr[0]}", "action{$aArr[1]}");
+
+        $aParam  = empty($aArg[1]) ? array() : json_decode($aArg[1], true);
+        $CallBack->setParam($aParam);
+        return $CallBack;
     }
 }

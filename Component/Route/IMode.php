@@ -10,5 +10,7 @@ interface IMode
      * @param \SlimeFramework\Component\Route\CallBack $CallBack
      * @return bool [true:continue next rule, false||other:break{default action}]
      */
-    public function run(Http\Request $Request, CallBack $CallBack);
+    public function runHttp(Http\Request $Request, CallBack $CallBack);
+
+    public function runCli($aArg, CallBack $CallBack);
 }

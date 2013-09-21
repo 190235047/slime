@@ -18,27 +18,32 @@ class Router
      */
     public function __construct($sAppNS, LoggerInterface $Log)
     {
-        $this->sAppNS   = $sAppNS;
-        $this->Log      = $Log;
+        $this->sAppNS = $sAppNS;
+        $this->Log    = $Log;
     }
 
+    /**
+     * @param Http\Request $HttpRequest
+     * @param $aRule
+     * @return CallBack
+     */
     public function generateFromHttp(Http\Request $HttpRequest, $aRule)
     {
         $CallBack = new CallBack($this->sAppNS, $this->Log);
         foreach ($aRule as $sK => $mV) {
-            $bContinue = true;
+            $bContinue = false;
             if (is_string($sK) && preg_match($sK, $HttpRequest->getRequestURI(), $aMatched)) {
                 if (is_callable($mV)) {
                     // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
                     // value: function($a, $b, $c, $d){}
                     array_unshift($aMatched, $CallBack);
-                    $bContinue = call_user_func_array($mV, $aMatched)!==false;
+                    $bContinue = call_user_func_array($mV, $aMatched) !== false;
                 } elseif (is_array($mV)) {
                     // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
                     // value: array('object' => $1, 'method' => $3, 'param' => array('id' => $2, 'status' => $4))
                     // value: array('func' => $1_$3, 'param' => array('id' => $2, 'status' => $4), '_continue'=>false)
                     if (isset($mV['_continue'])) {
-                        $bContinue = $mV['_continue']!==false;
+                        $bContinue = $mV['_continue'] !== false;
                         unset($mV['_continue']);
                     }
                     $mV = $this->replaceRecursive($mV, $aMatched);
@@ -58,7 +63,7 @@ class Router
                 }
             } elseif (is_int($sK)) {
                 if (is_string($mV)) {
-                    if ($mV[0]=='@') {
+                    if ($mV[0] == '@') {
                         $mV = __NAMESPACE__ . '\\Mode_' . substr($mV, 1);
                     }
                     $Mode = new $mV();
@@ -66,14 +71,14 @@ class Router
                         $this->Log->error('Route rule error. Your own route mode must impl IMode');
                         exit(1);
                     }
-                    $bContinue = $Mode->run($HttpRequest, $CallBack);
+                    $bContinue = $Mode->runHttp($HttpRequest, $CallBack);
                     // value: @routeSlimeStyle
                 } elseif (is_callable($mV)) {
                     // value: function(){}
-                    $bContinue = call_user_func($mV, $CallBack)!==false;
+                    $bContinue = call_user_func($mV, $CallBack) !== false;
                 }
             }
-            if ($bContinue===false) {
+            if ($bContinue === false) {
                 break;
             }
         }
@@ -85,30 +90,48 @@ class Router
      * generate from cli input [/your_php_bin/php /your_project/index.php -c class.method|func -p json_str
      * @return array [0=>callable, 1=>params] || []
      */
-    public function generateFromCli()
+
+    /**
+     * @param array $aArg
+     * @param array $aRule
+     * @return CallBack
+     */
+    public function generateFromCli(array $aArg, array $aRule)
     {
-        $aOpt    = getopt('c:p:');
-        $aResult = array();
-        if (!empty($aOpt['c'])) {
-            $CB = strpos($aOpt['c'], '.')===false ? $aOpt['c'] : explode('.', $aOpt['c'], 2);
-            $aParam      = empty($aOpt['p']) ? array() : json_decode($aOpt['p'], true);
-            $aResult     = array(
-                $CB,
-                $aParam,
-            );
+        $CallBack = new CallBack($this->sAppNS, $this->Log);
+        foreach ($aRule as $mV) {
+            $bContinue = false;
+            if (is_string($mV)) {
+                if ($mV[0] == '@') {
+                    $mV = __NAMESPACE__ . '\\Mode_' . substr($mV, 1);
+                }
+                $Mode = new $mV();
+                if (!$Mode instanceof IMode) {
+                    $this->Log->error('Route rule error. Your own route mode must impl IMode');
+                    exit(1);
+                }
+                $bContinue = $Mode->runCli($aArg, $CallBack);
+                // value: @routeSlimeStyle
+            } elseif (is_callable($mV)) {
+                // value: function(){}
+                $bContinue = call_user_func($mV, $CallBack) !== false;
+            }
+            if ($bContinue === false) {
+                break;
+            }
         }
-        return $aResult;
+        return $CallBack;
     }
 
     private function replaceRecursive($aArr, $aMatched)
     {
         foreach ($aArr as $mK => $mRow) {
             $aArr[$mK] = is_array($mRow) ?
-                $this->replaceRecursive($mRow, $aMatched):
+                $this->replaceRecursive($mRow, $aMatched) :
                 (
-                    is_string($mRow) ?
-                        str_replace($mRow, $aMatched, $mRow):
-                        $mRow
+                is_string($mRow) ?
+                    str_replace($mRow, $aMatched, $mRow) :
+                    $mRow
                 );
         }
         return $aArr;
