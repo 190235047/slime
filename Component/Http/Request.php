@@ -1,7 +1,7 @@
 <?php
 namespace SlimeFramework\Component\Http;
 
-class Request
+class Request implements IRequest
 {
     /**
      * Constructor.
@@ -25,14 +25,17 @@ class Request
         array $aServer = array(),
         $sContent = null
     ) {
-        $this->aQuery      = $aQuery;
-        $this->aRequest    = $aRequest;
-        $this->aAttributes = $aAttribute;
-        $this->aCookie     = $aCookie;
-        $this->aFile       = $aFile;
-        $this->aServer     = $aServer;
+        $this->aQuery         = $aQuery;
+        $this->aRequest       = $aRequest;
+        $this->aAttributes    = $aAttribute;
+        $this->aCookie        = $aCookie;
+        $this->aFile          = $aFile;
+        $this->aServer        = $aServer;
+        $this->sRequestMethod = strtoupper($aServer['REQUEST_METHOD']);
+        $this->sRequestURI    = $aServer['REQUEST_URI'];
+        $this->sProtocol      = $aServer['SERVER_PROTOCOL'];
 
-        $this->sContent    = $sContent;
+        $this->sContents    = $sContent;
     }
 
     /**
@@ -40,11 +43,11 @@ class Request
      *
      * @return Request A new request
      */
-    public function createFromGlobals()
+    public static function createFromGlobals()
     {
-        if (strpos($_SERVER['HTTP_CONTENT_TYPE'], 'application/x-www-form-urlencoded') === 0
+        if (strpos($_SERVER['CONTENT_TYPE'], 'application/x-www-form-urlencoded') === 0
             && array_key_exists(
-                strtoupper($_SERVER['HTTP_REQUEST_METHOD']),
+                strtoupper($_SERVER['REQUEST_METHOD']),
                 array('PUT' => true, 'DELETE' => true, 'PATCH' => true)
             )
         ) {
@@ -157,13 +160,13 @@ class Request
 
         $queryString = '';
         if (isset($aComponent['query'])) {
-            parse_str(html_entity_decode($aComponent['query']), $qs);
+            parse_str(html_entity_decode($aComponent['query']), $aQS);
 
             if ($aQuery) {
-                $aQuery      = array_replace($qs, $aQuery);
+                $aQuery      = array_replace($aQS, $aQuery);
                 $queryString = http_build_query($aQuery, '', '&');
             } else {
-                $aQuery      = $qs;
+                $aQuery      = $aQS;
                 $queryString = $aComponent['query'];
             }
         } elseif ($aQuery) {
@@ -173,5 +176,41 @@ class Request
         $aServer['REQUEST_URI']  = $aComponent['path'] . ('' !== $queryString ? '?' . $queryString : '');
         $aServer['QUERY_STRING'] = $queryString;
         return new self($aQuery, $aRequest, array(), $aCookie, $aFile, $aServer, $sContent);
+    }
+
+    public function getRequestMethod()
+    {
+        return $this->sRequestMethod;
+    }
+
+    public function getRequestURI()
+    {
+        return $this->sRequestURI;
+    }
+
+    public function getProtocol()
+    {
+        return $this->sProtocol;
+    }
+
+    public function getHeader($sKey)
+    {
+        $sKey = 'HTTP_' . strtoupper($sKey);
+        return isset($this->aServer[$sKey]) ? $this->aServer[$sKey] : null;
+    }
+
+    public function getCookie($sKey)
+    {
+        return isset($this->aCookie[$sKey]) ? $this->aCookie[$sKey] : null;
+    }
+
+    public function getContents()
+    {
+        return $this->sContents;
+    }
+
+    public function isAjax()
+    {
+        return strtolower($this->getHeader('X_REQUESTED_WITH')) == 'xmlhttprequest';
     }
 }

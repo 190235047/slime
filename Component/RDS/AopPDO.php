@@ -7,7 +7,7 @@ use SlimeFramework\Component\Framework\CTX;
 
 /**
  * Class AopPDO
- * @package Slime\RDS
+ * @package SlimeFramework\Component\RDS
  * @author smallslime@gmail.com
  * @version 0.1
  */

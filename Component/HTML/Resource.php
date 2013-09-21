@@ -3,7 +3,7 @@ namespace SlimeFramework\Component\HTML;
 
 /**
  * Class Resource
- * @package Slime\HTML
+ * @package SlimeFramework\Component\HTML
  * @author smallslime@gmail.com
  * @version 0.1
  */

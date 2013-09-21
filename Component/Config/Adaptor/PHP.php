@@ -6,7 +6,7 @@ use SlimeFramework\Component\Log\Logger;
 
 /**
  * Class Configure
- * @package Slime\Config
+ * @package SlimeFramework\Component\Config
  * @author smallslime@gmail.com
  * @version 1.0
  */

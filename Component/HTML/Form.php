@@ -3,7 +3,7 @@ namespace SlimeFramework\Component\HTML;
 
 /**
  * Class Form
- * @package Slime\HTML
+ * @package SlimeFramework\Component\HTML
  * @author smallslime@gmail.com
  * @version 0.1
  */

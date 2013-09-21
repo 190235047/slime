@@ -3,7 +3,7 @@ namespace SlimeFramework\Component\BackGroundJob;
 
 /**
  * Class JobQueue_Redis
- * @package Slime\BackGroundJob
+ * @package SlimeFramework\Component\BackGroundJob
  */
 class JobQueue_Redis implements IJobQueue
 {

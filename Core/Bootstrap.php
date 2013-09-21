@@ -4,6 +4,7 @@ namespace SlimeFramework\Core;
 use SlimeFramework\Component\Config;
 use SlimeFramework\Component\Log;
 use SlimeFramework\Component\Route;
+use SlimeFramework\Component\Http;
 
 /**
  * Class Bootstrap
@@ -15,19 +16,28 @@ use SlimeFramework\Component\Route;
 class Bootstrap
 {
     /**
+     * @var Context
+     */
+    protected $Context;
+
+    /**
      * @param string $sENV
      * @param string $sDirConfig
      * @param string $sAppNs
+     * @param string $sRunMode (cli||http)
      *
      * @return $this
      */
-    public static function factory($sENV, $sDirConfig, $sAppNs)
+    public static function factory($sENV, $sDirConfig, $sAppNs, $sRunMode)
     {
         # get context object from current request
         $Context = Context::getInst();
 
+        # register execute datetime object
+        $Context->register('DateTime', new \DateTime());
+
         # register s_api
-        $Context->register('sRT', PHP_SAPI);
+        $Context->register('sRunMode', $sRunMode);
 
         #register env
         $Context->register('sENV', $sENV);
@@ -35,24 +45,18 @@ class Bootstrap
         #register app namespace
         $Context->register('sNS', $sAppNs);
 
-        #register SERVER
-        $Context->register('aServer', $_SERVER);
-
-        # register execute datetime object
-        $Context->register('DateTime', new \DateTime(date('Y-m-d H:i:s', $_SERVER['REQUEST_TIME'])));
-
-        # register config object
+        # register configure
         $Config = new Config\Configure($sDirConfig . '/' . $sENV, $sDirConfig . '/' . 'publish');
         $Context->register('Config', $Config);
 
-        # register log object
+        # register logger
         $aLogConfig = $Config->get('system.log');
-        if (!isset($aLogConfig[PHP_SAPI])) {
-            trigger_error('There is no log config to match current runtime:[' . PHP_SAPI . ']', E_USER_ERROR);
+        if (!isset($aLogConfig[$sRunMode])) {
+            trigger_error('There is no log config to match current runtime:[' . $sRunMode . ']', E_USER_ERROR);
             exit(1);
         }
         $aWriter = array();
-        foreach ($aLogConfig[PHP_SAPI] as $sWriter => $aArg) {
+        foreach ($aLogConfig[$sRunMode] as $sWriter => $aArg) {
             if (is_int($sWriter) && is_string($aArg)) {
                 $sClassName = '\\Slime\\Log\\Writer_' . $aArg;
                 $aArg = array();
@@ -64,7 +68,7 @@ class Bootstrap
         }
         $Context->register('Log', new Log\Logger($aWriter));
 
-        # register route object
+        # register router
         $aRouteConfig = $Config->get('system.route');
         $Context->register('Route',
             new Route\Router(
@@ -76,7 +80,9 @@ class Bootstrap
         );
 
         # register self
-        $Context->register('Bootstrap', new self());
+        $SELF = new self();
+        $Context->register('Bootstrap', $SELF);
+        $SELF->Context = $Context;
 
         # set error handle
         set_error_handler(array($Context->Bootstrap, 'handleError'));
@@ -86,32 +92,30 @@ class Bootstrap
 
     public function run()
     {
+        $sMethod = 'run' . $this->Context->sRunMode;
+        $this->$sMethod();
+    }
+
+    public function runHttp()
+    {
+        #register http request and response
+        $HttpRequest = Http\Request::createFromGlobals();
+        $HttpResponse = Http\Response::factory()->setNoCache();
+        $this->Context->register('Request', $HttpRequest);
+        $this->Context->register('Response', $HttpResponse);
+
         # run route
-        $aRoute = Context::getInst()->Route->run();
+        Context::getInst()->Route
+            ->generateFromHttp($HttpRequest, $this->Context->Config->get('system.route.rule'))
+            ->call();
 
-        # if logic is an object
-        $bCreateObject = !empty($aRoute[2]);
+        # response
+        $HttpResponse->send();
+    }
 
-        # pre deal with cb and param
-        $CB = null;
-        if ($bCreateObject) {
-            $RefClass = new \ReflectionClass($aRoute[0][0]);
-            $aArr = isset($aRoute[1]) ? (is_array($aRoute[1]) ? $aRoute[1] : array($aRoute[1])) : array();
-            $CB = array($RefClass->newInstanceArgs($aArr), array());
-            $aParam = array();
-        } else {
-            $CB = $aRoute[0];
-            $aParam = $aRoute[1];
-        }
-
-        # call business logic
-        if ($bCreateObject && method_exists($CB[0], '__before__')) {
-            call_user_func($CB[0], '__before__');
-        }
-        call_user_func($CB, $aParam);
-        if ($bCreateObject && method_exists($CB[0], '__after__')) {
-            call_user_func($CB[0], '__after__');
-        }
+    public function runCli()
+    {
+        ;
     }
 
     public function handleError($iErrNum, $sErrStr, $sErrFile, $iErrLine, $sErrContext)

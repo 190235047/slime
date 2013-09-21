@@ -3,14 +3,17 @@ namespace SlimeFramework\Core;
 
 /**
  * Class Context
- * @package Slime\Framework
+ * @package SlimeFramework\Component\Framework
+ *
+ * @property-read string sENV
+ * @property-read string $sRunMode
  *
  * @property-read \DateTime $DateTime
  * @property-read Bootstrap $Bootstrap
  * @property-read \SlimeFramework\Component\Config\Configure $Config
  * @property-read \SlimeFramework\Component\Log\Logger $Log
  * @property-read \SlimeFramework\Component\Route\Router $Route
- * @property-read \SlimeFramework\Component\HTTP\Request $HttpRequest
+ * @property-read \SlimeFramework\Component\HTTP\IRequest $HttpRequest
  * @property-read \SlimeFramework\Component\HTTP\Response $HttpResponse
  *
  * @property-read array $aServer

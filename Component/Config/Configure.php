@@ -5,7 +5,7 @@ use SlimeFramework\Component\Config\IAdaptor;
 
 /**
  * Class Configure
- * @package Slime\Config
+ * @package SlimeFramework\Component\Config
  * @author smallslime@gmail.com
  * @version 1.0
  */

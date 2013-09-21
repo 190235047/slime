@@ -12,7 +12,7 @@ use SlimeFramework\Component\Log\Logger;
  *     2. create Job object with message and run
  *     3. send result to father process(receiveMessage) and go into next loop
  *
- * @package Slime\MultiProcess
+ * @package SlimeFramework\Component\MultiProcess
  *
  * @author:smallslime@gmail.com
  */
