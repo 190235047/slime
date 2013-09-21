@@ -14,6 +14,7 @@ abstract class Controller_Http
     {
         $this->Context      = $Context = Context::getInst();
         $this->Log          = $Context->Log;
+        $this->Config       = $Context->Config;
         $this->HttpRequest  = $Context->HttpRequest;
         $this->HttpResponse = $Context->HttpResponse;
         $this->aParam       = $aParam;

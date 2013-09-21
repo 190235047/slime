@@ -11,12 +11,9 @@ class Resource
 {
     private $sBaseUrl;
 
-    public function __construct($sBaseUrl = null)
+    public function __construct($sBaseUrl)
     {
         $this->sBaseUrl = $sBaseUrl;
-        if (empty($this->sBaseUrl)) {
-            $this->sBaseUrl = sprintf('http://%s', $_SERVER['HTTP_HOST']);
-        }
     }
 
     public function gentCSS($sName, $sPath = 'css')

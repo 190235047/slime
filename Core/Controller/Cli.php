@@ -11,6 +11,7 @@ abstract class Controller_Cli
     {
         $this->Context      = $Context = Context::getInst();
         $this->Log          = $Context->Log;
+        $this->Config       = $Context->Config;
         $this->aParam       = $aParam;
     }
 }
