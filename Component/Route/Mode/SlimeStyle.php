@@ -6,11 +6,11 @@ use SlimeFramework\Component\Http;
 class Mode_SlimeStyle implements IMode
 {
     /**
-     * @param \SlimeFramework\Component\Http\IRequest $Request
+     * @param \SlimeFramework\Component\Http\Request $Request
      * @param \SlimeFramework\Component\Route\CallBack $CallBack
      * @return bool [true:continue next rule, false||other:break{default action}]
      */
-    public function run(Http\IRequest $Request, CallBack $CallBack)
+    public function run(Http\Request $Request, CallBack $CallBack)
     {
         $aUrl   = parse_url($Request->getRequestURI());
         $aBlock = explode('/', strtolower(substr($aUrl['path'], 1)));

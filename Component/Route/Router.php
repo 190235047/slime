@@ -22,7 +22,7 @@ class Router
         $this->Log      = $Log;
     }
 
-    public function generateFromHttp(Http\IRequest $HttpRequest, $aRule)
+    public function generateFromHttp(Http\Request $HttpRequest, $aRule)
     {
         $CallBack = new CallBack($this->sAppNS, $this->Log);
         foreach ($aRule as $sK => $mV) {

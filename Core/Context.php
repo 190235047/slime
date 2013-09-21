@@ -14,7 +14,7 @@ namespace SlimeFramework\Core;
  * @property-read \SlimeFramework\Component\Log\Logger $Log
  * @property-read \SlimeFramework\Component\Route\Router $Route
  * @property-read \SlimeFramework\Component\Route\CallBack $CallBack
- * @property-read \SlimeFramework\Component\HTTP\IRequest $HttpRequest
+ * @property-read \SlimeFramework\Component\HTTP\Request $HttpRequest
  * @property-read \SlimeFramework\Component\HTTP\Response $HttpResponse
  *
  * @property-read array $aServer

@@ -199,9 +199,9 @@ class Request implements IRequest
         return isset($this->aServer[$sKey]) ? $this->aServer[$sKey] : null;
     }
 
-    public function getCookie($sKey, $bXssFilter = null)
+    public function getCookie($mKeyOrKeys, $bXssFilter = null)
     {
-        return isset($this->aCookie[$sKey]) ? $this->aCookie[$sKey] : null;
+        return $this->_get($this->aCookie, $mKeyOrKeys, $bXssFilter);
     }
 
     public function getContents()
@@ -214,17 +214,30 @@ class Request implements IRequest
         // TODO: Implement setXSSFilter() method.
     }
 
-    public function getGet($sKey, $bXssFilter = null)
+    public function getGet($mKeyOrKeys, $bXssFilter = null)
     {
-        return isset($this->aQuery[$sKey]) ? $this->aQuery[$sKey] : null;
+        return $this->_get($this->aQuery, $mKeyOrKeys, $bXssFilter);
     }
 
-    public function getPost($sKey, $bXssFilter = null)
+    public function getPost($mKeyOrKeys, $bXssFilter = null)
     {
-        return isset($this->aRequest[$sKey]) ? $this->aQuery[$sKey] : null;
+        return $this->_get($this->aRequest, $mKeyOrKeys, $bXssFilter);
     }
 
-    public function getGetPost($sKey, $bGetFirst = true, $bXssFilter = null)
+    private function _get($aArr, $mKeyOrKeys, $bXssFilter = null)
+    {
+        if (is_array($mKeyOrKeys)) {
+            $aResult = array();
+            foreach ($mKeyOrKeys as $sKey) {
+                $aResult[$sKey] = isset($aArr[$sKey]) ? $aArr[$sKey] : null;
+            }
+            return $aResult;
+        } else {
+            return isset($aArr[$mKeyOrKeys]) ? $aArr[$mKeyOrKeys] : null;
+        }
+    }
+
+    public function getGetPost($mKeyOrKeys, $bGetFirst = true, $bXssFilter = null)
     {
         if ($bGetFirst) {
             $Q1 = $this->aQuery;
@@ -233,7 +246,15 @@ class Request implements IRequest
             $Q1 = $this->aRequest;
             $Q2 = $this->aQuery;
         }
-        return isset($Q1[$sKey]) ? $Q1[$sKey] : (isset($Q2[$sKey]) ? $Q2[$sKey] : null);
+        if (is_array($mKeyOrKeys)) {
+            $aResult = array();
+            foreach ($mKeyOrKeys as $sKey) {
+                $aResult[$sKey] =isset($Q1[$sKey]) ? $Q1[$sKey] : (isset($Q2[$sKey]) ? $Q2[$sKey] : null);
+            }
+            return $aResult;
+        } else {
+            return isset($Q1[$mKeyOrKeys]) ? $Q1[$mKeyOrKeys] : (isset($Q2[$mKeyOrKeys]) ? $Q2[$mKeyOrKeys] : null);
+        }
     }
 
     public function isAjax()
