@@ -1,7 +1,7 @@
 <?php
 namespace SlimeFramework\Component\Http;
 
-class Request implements IRequest
+class Request
 {
     /**
      * Constructor.
