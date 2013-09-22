@@ -14,7 +14,7 @@ class Main extends MPPoolModel
     }
 
     /**
-     * @return string|null
+     * @return string
      */
     protected function getMessage()
     {
