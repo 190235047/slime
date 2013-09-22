@@ -4,9 +4,9 @@ namespace SlimeFramework\Component\RDS;
 class Model_Group implements \ArrayAccess, \Iterator
 {
     /** @var array */
-    protected $aaData;
+    protected $aaData = array();
 
-    /** @var Model */
+    /** @var Model_Model */
     public $Model;
 
     protected $iDataLen = 0;
@@ -141,5 +141,14 @@ class Model_Group implements \ArrayAccess, \Iterator
             $this->iDataLen--;
         }
         unset($this->aaData[$offset]);
+    }
+
+    public function __toString()
+    {
+        $sStr = '';
+        foreach ($this->aaData as $Item) {
+            $sStr .= (string)$Item . "\n";
+        }
+        return $sStr;
     }
 }

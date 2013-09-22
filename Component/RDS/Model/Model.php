@@ -1,22 +1,22 @@
 <?php
 namespace SlimeFramework\Component\RDS;
 
-use SlimeFramework\Component\Log\Logger;
+use Psr\Log\LoggerInterface;
 use SlimeFramework\Component\RDS\Model_Pool;
 
-class Model
+class Model_Model
 {
     private $CURD;
 
-    public function __construct(CURD $CURD, $aConfig, Model_Pool $Pool, Logger $Log)
+    public function __construct($sModel, CURD $CURD, $aConfig, Model_Pool $Pool, LoggerInterface $Log)
     {
         $this->CURD = $CURD;
 
         # @todo define default
-        $this->sTable    = $aConfig['table'];
-        $this->sPK       = $aConfig['pk'];
-        $this->sFK       = $aConfig['fk'];
-        $this->aRelation = $aConfig['rel'];
+        $this->sTable    = isset($aConfig['table']) ? $aConfig['table'] : strtolower($sModel);
+        $this->sPK       = isset($aConfig['pk']) ? $aConfig['pk'] : 'id';
+        $this->sFK       = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
+        $this->aRelation = isset($aConfig['relation']) ? $aConfig['relation'] : array();
         $this->Pool      = $Pool;
 
         # @todo loop relation , do something in destruct
@@ -46,20 +46,14 @@ class Model
     {
         $aWhere = is_array($mPKOrWhere) ? $mPKOrWhere : array($this->sPK => $mPKOrWhere);
 
-        /** @var Model_Item $Item */
-        $Item = $this->CURD->querySmarty(
+        $aItem = $this->CURD->querySmarty(
             $this->sTable,
             $aWhere,
             '',
             '',
-            true,
-            \PDO::FETCH_CLASS,
-            array('\\SlimeFramework\Component\\RDS\\Model_Item')
+            true
         );
-        if ($Item instanceof Model_Item) {
-            $Item->Model = $this;
-        }
-        return $Item;
+        return new Model_Item($aItem, $this);
     }
 
     public function findMulti($aWhere = array(), $sOrderBy = null, $iLimit = null, $iOffset = null)
@@ -69,23 +63,20 @@ class Model
         $iLimit !== null && $sAttr .= "LIMIT $iLimit";
         $iOffset !== null && $sAttr .= "OFFSET $iOffset";
 
-        /** @var Model_Item[] $aItem */
         $aItem = $this->CURD->querySmarty(
             $this->sTable,
             $aWhere,
             $sAttr,
             '',
-            false,
-            \PDO::FETCH_CLASS,
-            array('\\SlimeFramework\Component\\RDS\\Model_Item')
+            false
         );
 
         $Group = new Model_Group();
-        foreach ($aItem as $Item) {
-            $Group[$Item->{$this->sPK}] = $Item;
+        if (!empty($aItem)) {
+            foreach ($aItem as $aData) {
+                $Group[$aData[$this->sPK]] = new Model_Item($aData, $this);
+            }
         }
-        $Group->Model = $this;
-
         return $Group;
     }
 

@@ -7,7 +7,8 @@ namespace SlimeFramework\Component\RDS;
  * @author smallslime@gmail.com
  * @version 0.1
  */
-class CURD
+class
+CURD
 {
     const INSERT_STANDARD = 0;
     const INSERT_IGNORE   = 1;
@@ -85,7 +86,12 @@ class CURD
             }
         }
         $Stmt->execute($aExec);
-        return $bOnlyOne ? $Stmt->fetch($iFetchStyle, $mFetchArgs) : ($mFetchArgs===null ? $Stmt->fetchAll($iFetchStyle) : $Stmt->fetchAll($iFetchStyle, $mFetchArgs));
+        if ($mFetchArgs!==null) {
+            $Stmt->setFetchMode($iFetchStyle, $mFetchArgs);
+        } else {
+            $Stmt->setFetchMode($iFetchStyle);
+        }
+        return $bOnlyOne ? $Stmt->fetch() : $Stmt->fetchAll();
     }
 
     public function queryCount(

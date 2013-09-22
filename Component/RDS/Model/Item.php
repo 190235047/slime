@@ -7,8 +7,14 @@ class Model_Item implements \ArrayAccess
     private $aOldData;
     private $aRelation;
 
-    /** @var Model */
+    /** @var Model_Model */
     public $Model;
+
+    public function __construct($aData, Model_Model $Model)
+    {
+        $this->aData = $aData;
+        $this->Model = $Model;
+    }
 
     public function __get($sKey)
     {
@@ -55,7 +61,7 @@ class Model_Item implements \ArrayAccess
 
     public function __toString()
     {
-        return json_encode($this->aData);
+        return var_export($this->aData, true);
     }
 
     /**

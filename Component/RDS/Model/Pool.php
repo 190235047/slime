@@ -3,14 +3,14 @@ namespace SlimeFramework\Component\RDS;
 
 use Psr\Log\LoggerInterface;
 use SlimeFramework\Component\RDS\CURD;
-use SlimeFramework\Component\RDS\Model;
+use SlimeFramework\Component\RDS\Model_Model;
 
 class Model_Pool
 {
     /** @var CURD[] */
     protected $aCURD;
 
-    /** @var Model[] */
+    /** @var Model_Model[] */
     protected $aModel;
 
     protected $aModelConf;
@@ -31,7 +31,7 @@ class Model_Pool
 
     /**
      * @param $sModel
-     * @return Model
+     * @return Model_Model
      */
     public function get($sModel)
     {
@@ -41,7 +41,13 @@ class Model_Pool
                 $this->Log->error('there is no database config [{dbkey}] exist', array('dbkey' => $sDB));
                 exit(1);
             }
-            $this->aModel[$sModel] = new Model($this->aCURD[$sDB], $this->aModelConf[$sModel], $this, $this->Log);
+            $this->aModel[$sModel] = new Model_Model(
+                $sModel,
+                $this->aCURD[$sDB],
+                $this->aModelConf[$sModel],
+                $this,
+                $this->Log
+            );
         }
 
         return $this->aModel[$sModel];
