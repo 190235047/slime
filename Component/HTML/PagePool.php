@@ -1,33 +1,35 @@
 <?php
 namespace SlimeFramework\Component\HTML;
 
+use Psr\Log\LoggerInterface;
+
 class PagePool
 {
     private $aPageStorage = array();
+
+    public function __construct(LoggerInterface $Log)
+    {
+        $this->Log = $Log;
+    }
 
     public function addPageBean(PageBean $PageBean)
     {
         $sKey = $PageBean->sKey;
         if (isset($this->aPageStorage[$sKey])) {
-            throw new \RuntimeException(sprintf("sKey[%s] has been exist", $sKey));
+            $this->Log->warning('Pool has PageBean with key[{key}]', array('key' => $sKey));
         }
         $this->aPageStorage[$sKey] = $PageBean;
     }
 
     /**
      * @param $sKey
-     * @param bool $bExceptionIfNotFound
-     * @return PageBean
-     * @throws \InvalidArgumentException
+     * @return PageBean|null
      */
-    public function find($sKey, $bExceptionIfNotFound = true)
+    public function find($sKey)
     {
         if (!isset($this->aPageStorage[$sKey])) {
-            if ($bExceptionIfNotFound) {
-                throw new \InvalidArgumentException("sKey[$sKey] is not found");
-            } else {
-                return null;
-            }
+            $this->Log->warning('There is no key[{key}] in pool', array('key' => $sKey));
+            return null;
         }
         return $this->aPageStorage[$sKey];
     }
