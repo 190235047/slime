@@ -10,6 +10,7 @@ abstract class Controller_Http
     protected $sTPL  = null;
     protected $aData = array();
 
+    protected $bAutoRender;
     protected $bGet;
     protected $bAjax;
 
@@ -22,14 +23,14 @@ abstract class Controller_Http
         $this->HttpResponse = $Context->HttpResponse;
         $this->aParam       = $aParam;
         $this->View         = Viewer::factory('@PHP', $this->Log)->setBaseDir(DIR_VIEW);
-
-        $this->bGet  = $this->HttpRequest->getRequestMethod() === 'GET';
-        $this->bAjax = $this->HttpRequest->isAjax();
+        $this->bGet         = $this->HttpRequest->getRequestMethod() === 'GET';
+        $this->bAutoRender  = $this->bGet;
+        $this->bAjax        = $this->HttpRequest->isAjax();
     }
 
     public function __after__()
     {
-        if ($this->bGet) {
+        if ($this->bAutoRender) {
             # header
             if ($this->HttpResponse->getHeader('Content-Type')!==null) {
                 if ($this->bAjax) {
@@ -41,17 +42,8 @@ abstract class Controller_Http
 
             # body
             if ($this->sTPL === null) {
-                $CB = $this->Context->CallBack;
-                $aCallable = $CB->mCallable;
-                $this->sTPL = str_replace('_', DIRECTORY_SEPARATOR,
-                    str_replace($CB->sNSPre . '\ControllerHttp_', '', get_class($aCallable[0]))
-                );
-                $sMethod = substr($aCallable[1], 6);
-                if ($sMethod!=='Default') {
-                    $this->sTPL .= "_$sMethod";
-                }
+                $this->sTPL = $this->getDefaultTPL();
             }
-            $this->sTPL .= '.php';
 
             $this->HttpResponse->setContents(
                 $this->View
@@ -60,5 +52,19 @@ abstract class Controller_Http
                     ->renderAsResult()
             );
         }
+    }
+
+    protected function getDefaultTPL()
+    {
+        $CB = $this->Context->CallBack;
+        $aCallable = $CB->mCallable;
+        $sTPL = str_replace('_', DIRECTORY_SEPARATOR,
+            str_replace($CB->sNSPre . '\ControllerHttp_', '', get_class($aCallable[0]))
+        );
+        $sMethod = substr($aCallable[1], 6);
+        if ($sMethod!=='Default') {
+            $sTPL .= "_$sMethod";
+        }
+        return $sTPL . '.php';
     }
 }

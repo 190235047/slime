@@ -16,12 +16,12 @@ class Resource
         $this->sBaseUrl = rtrim($sBaseUrl, '/');
     }
 
-    public function gentCSS($sName, $sPath = 'css')
+    public function gentCSS($sName, $sPath = null)
     {
-        return sprintf('<link href="%s" rel="stylesheet">', $this->sBaseUrl . '/' . $sPath . '/' . $sName);
+        return sprintf('<link href="%s" rel="stylesheet">', $sPath===null ? $sName : $this->sBaseUrl . '/' . $sPath . '/' . $sName);
     }
 
-    public function gentCSSs($aName, $sPath = 'css')
+    public function gentCSSs($aName, $sPath = null)
     {
         $sResult = '';
         foreach ($aName as $sV) {
@@ -30,12 +30,12 @@ class Resource
         return $sResult;
     }
 
-    public function gentJS($sName, $sPath = 'js')
+    public function gentJS($sName, $sPath = null)
     {
-        return sprintf('<script type="text/javascript" src="%s"></script>', $this->sBaseUrl . '/' . $sPath . '/' . $sName);
+        return sprintf('<script type="text/javascript" src="%s"></script>', $sPath===null ? $sName : $this->sBaseUrl . '/' . $sPath . '/' . $sName);
     }
 
-    public function gentJSs($aName, $sPath = 'js')
+    public function gentJSs($aName, $sPath = null)
     {
         $sResult = '';
         foreach ($aName as $sV) {

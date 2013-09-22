@@ -5,7 +5,7 @@ class Writer_WebPage implements IWriter
 {
     public $sDebugLayer;
 
-    protected $aData;
+    protected $aData = array();
 
     public function __construct($sDebugLayer = null)
     {

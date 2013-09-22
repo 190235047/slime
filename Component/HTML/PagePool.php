@@ -1,7 +1,7 @@
 <?php
 namespace SlimeFramework\Component\HTML;
 
-class PageTree
+class PagePool
 {
     private $aPageStorage = array();
 
@@ -35,44 +35,66 @@ class PageTree
 
 class PageBean
 {
-    public $sUrl;
-    public $sName;
-    public $sKey;
-
     /**
      * @var PageBean[]
      */
     public $aChildren = array();
 
     /**
-     * @var PageTree
+     * @var PageBean[]
      */
-    public $PageTree;
+    public $aChildrenAll = array();
 
-    /**
-     * @var PageBean
-     */
-    public $Parent;
-
-    public function __construct($sUrl, $sName, PageTree $PageTree, $Parent = null, $sKey = null)
+    public function __construct($sUrl, $sName, PagePool $PageTree, $Parent = null, $sKey = null, $bDisplay = true)
     {
-        $this->sUrl  = $sUrl;
-        $this->sName = $sName;
-        $this->sKey  = $sKey ? $sKey : $this->sUrl;
-
+        $this->sUrl     = $sUrl;
+        $this->sName    = $sName;
+        $this->sKey     = $sKey ? $sKey : $this->sUrl;
         $this->PageTree = $PageTree;
         $this->Parent   = $Parent;
+        $this->iLevel   = 0;
+        $this->bDisplay = $bDisplay;
     }
 
-    public function addChild($sUrl, $sName, $sKey = null)
+    /**
+     * @param bool $bIncHidden
+     * @return PageBean[]
+     */
+    public function getChildren($bIncHidden = false)
+    {
+        return $bIncHidden ? $this->aChildrenAll : $this->aChildren;
+    }
+
+    /**
+     * @param int $iUntilLevel top is 0
+     * @return PageBean|null
+     */
+    public function findParent($iUntilLevel)
+    {
+        $Bean = $this;
+        while ($Bean->Parent !== null) {
+            if ($iUntilLevel === $Bean->iLevel) {
+                break;
+            }
+            $Bean = $Bean->Parent;
+        }
+
+        return $Bean->iLevel === $iUntilLevel ? $Bean : null;
+    }
+
+    public function addChild($sUrl, $sName, $sKey = null, $bDisplay = true)
     {
         if ($sKey === null) {
             $sKey = $sUrl;
         }
 
-        $PageBean = new self($sUrl, $sName, $this->PageTree, $this, $sKey);
+        $PageBean         = new self($sUrl, $sName, $this->PageTree, $this, $sKey, $bDisplay);
+        $PageBean->iLevel = $this->iLevel + 1;
         $this->PageTree->addPageBean($PageBean);
-        $this->aChildren[$sKey] = $PageBean;
+        $this->aChildrenAll[$sKey] = $PageBean;
+        if ($PageBean->bDisplay) {
+            $this->aChildren[$sKey] = $PageBean;
+        }
         return $PageBean;
     }
 

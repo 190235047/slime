@@ -45,5 +45,5 @@ interface IAdaptor
      * @param array $aData
      * @return string
      */
-    public function subRender($sTpl, array $aData = array());
+    public function  subRender($sTpl, array $aData = array());
 }
