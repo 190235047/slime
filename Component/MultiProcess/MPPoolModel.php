@@ -1,18 +1,20 @@
 <?php
 namespace SlimeFramework\Component\MultiProcess;
 
-use SlimeFramework\Component\Log\Logger;
+use Psr\Log\LoggerInterface;
 
 abstract class MPPoolModel
 {
-    public function __construct($iPoolSize, $sPipeDir, $sJobClass, $iLoopSleepUS = 1000, Logger $Logger)
+    public function __construct($iPoolSize, $sPipeDir, $sJobClass, $iLoopSleepUS = 1000, LoggerInterface $Log)
     {
         $this->iPoolSize    = $iPoolSize;
         $this->sPipeDir     = $sPipeDir;
         $this->sJobClass    = $sJobClass;
-        $Logger->sGUID      = 'MAIN';
         $this->iLoopSleepUS = $iLoopSleepUS;
-        $this->Logger       = $Logger;
+        $this->Log          = $Log;
+        if ($this->Log instanceof \SlimeFramework\Component\Log\Logger) {
+            $this->Log->sGUID = 'Main';
+        }
     }
 
     public function run()
@@ -21,7 +23,7 @@ abstract class MPPoolModel
             $this->iPoolSize,
             $this->sPipeDir,
             $this->sJobClass,
-            $this->Logger
+            $this->Log
         );
         while (true) {
             $sMessage = $this->getMessage();
@@ -29,7 +31,7 @@ abstract class MPPoolModel
                 //$this->Logger->debug('main loop next');
                 goto NEXT_LOOP;
             }
-            $this->Logger->debug('main loop get:' . $sMessage);
+            $this->Log->debug('main loop get:' . $sMessage);
 
             $Child = $Pool->getOneIdleChild();
             if ($Child === null) {

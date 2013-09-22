@@ -53,7 +53,7 @@ class Bootstrap
             exit(1);
         }
         $aWriter = array();
-        foreach ($aLogConfig[$sRunMode] as $mKey => $mV) {
+        foreach ($aLogConfig[$sRunMode]['writer'] as $mKey => $mV) {
             if (is_int($mKey) && is_string($mV)) {
                 $sClassName = $mV[0]==='@' ? '\\SlimeFramework\\Component\\Log\\Writer_' . substr($mV, 1) : $mV;
                 $mV = array();
@@ -63,7 +63,7 @@ class Bootstrap
             $Ref = new \ReflectionClass($sClassName);
             $aWriter[] = $Ref->newInstanceArgs($mV);
         }
-        $Log = new Log\Logger($aWriter);
+        $Log = new Log\Logger($aWriter, $aLogConfig[$sRunMode]['level']);
         $Context->register('Log', $Log);
 
         # register configure

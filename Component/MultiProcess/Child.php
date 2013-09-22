@@ -1,7 +1,7 @@
 <?php
 namespace SlimeFramework\Component\MultiProcess;
 
-use SlimeFramework\Component\Log\Logger;
+use Psr\Log\LoggerInterface;
 
 /**
  * In father process, this class has :
@@ -18,10 +18,10 @@ use SlimeFramework\Component\Log\Logger;
  */
 class Child
 {
-    public function __construct($sPipeDir, $sJobClass, Logger $Logger)
+    public function __construct($sPipeDir, $sJobClass, LoggerInterface $Log)
     {
         $this->sJobClass = $sJobClass;
-        $this->Logger = $Logger;
+        $this->Log = $Log;
         $sPipeDir = rtrim($sPipeDir, '/');
 
         $iPID = pcntl_fork();
@@ -42,9 +42,11 @@ class Child
         } else {
             # child
             $this->iPID = posix_getpid();
-            $this->Logger->sGUID = "CHILD:$this->iPID";
+            if ($this->Log instanceof \SlimeFramework\Component\Log\Logger) {
+                $this->Log->sGUID = "CHILD:$this->iPID";
+            }
 
-            $this->Logger->debug('child start');
+            $this->Log->debug('child start');
 
             $this->sFifoF2C = $sPipeDir . '/sf_mp_f2c_' . $this->iPID;
             $this->sFifoC2F = $sPipeDir . '/sf_mp_c2f_' . $this->iPID;
@@ -54,7 +56,7 @@ class Child
             $this->rFifoC2F = fopen($this->sFifoC2F, 'w');
             stream_set_blocking($this->rFifoC2F, 1);
 
-            $this->Logger->debug('child ready');
+            $this->Log->debug('child ready');
 
             $this->_receive();
         }
@@ -87,7 +89,7 @@ class Child
     {
         while (true) {
             /** @var Task $Job */
-            $Job = new $this->sJobClass(fgets($this->rFifoF2C), $this->Logger);
+            $Job = new $this->sJobClass(fgets($this->rFifoF2C), $this->Log);
             $bResult = $Job->run();
             unset($Job);
             fwrite($this->rFifoC2F, ($bResult ? '0' : '1') . "\n");

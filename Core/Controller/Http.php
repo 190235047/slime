@@ -10,6 +10,9 @@ abstract class Controller_Http
     protected $sTPL  = null;
     protected $aData = array();
 
+    protected $bGet;
+    protected $bAjax;
+
     public function __construct(array $aParam = array())
     {
         $this->Context      = $Context = Context::getInst();
@@ -19,17 +22,20 @@ abstract class Controller_Http
         $this->HttpResponse = $Context->HttpResponse;
         $this->aParam       = $aParam;
         $this->View         = Viewer::factory('@PHP', $this->Log)->setBaseDir(DIR_VIEW);
+
+        $this->bGet  = $this->HttpRequest->getRequestMethod() === 'GET';
+        $this->bAjax = $this->HttpRequest->isAjax();
     }
 
     public function __after__()
     {
-        if ($this->HttpRequest->getRequestMethod() === 'GET') {
+        if ($this->bGet) {
             # header
             if ($this->HttpResponse->getHeader('Content-Type')!==null) {
-                if ($this->HttpRequest->isAjax()) {
+                if ($this->bAjax) {
                     $this->HttpResponse->setHeader('Content-Type', 'application/javascript; charset=utf-8', false);
                 } else {
-                    $this->HttpResponse->setHeader('Content-type', 'text/html; charset=utf-8');
+                    $this->HttpResponse->setHeader('Content-type', 'text/html; charset=utf-8', false);
                 }
             }
 

@@ -1,7 +1,6 @@
 <?php
 namespace SlimeFramework\Component\BackGroundJob;
 
-use SlimeFramework\Component\Log\Logger;
 use SlimeFramework\Component\MultiProcess\MPPoolModel;
 
 class Main extends MPPoolModel

@@ -1,14 +1,14 @@
 <?php
 namespace SlimeFramework\Component\MultiProcess;
 
-use SlimeFramework\Component\Log\Logger;
+use Psr\Log\LoggerInterface;
 
 abstract class Task
 {
-    public function __construct($sMessage, Logger $Logger)
+    public function __construct($sMessage, LoggerInterface $Log)
     {
         $this->sMessage = $sMessage;
-        $this->Logger   = $Logger;
+        $this->Logger   = $Log;
     }
 
     abstract public function run();
