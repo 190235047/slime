@@ -38,7 +38,7 @@ abstract class Controller_Http
                 $CB = $this->Context->CallBack;
                 $aCallable = $CB->mCallable;
                 $this->sTPL = str_replace('_', DIRECTORY_SEPARATOR,
-                    str_replace($CB->sNSPre . '\Controller_', '', get_class($aCallable[0]))
+                    str_replace($CB->sNSPre . '\ControllerHttp_', '', get_class($aCallable[0]))
                 );
                 $sMethod = substr($aCallable[1], 6);
                 if ($sMethod!=='Default') {

@@ -25,8 +25,8 @@ abstract class MPPoolModel
         );
         while (true) {
             $sMessage = $this->getMessage();
-            if ($sMessage === null) {
-                $this->Logger->debug('main loop next');
+            if ($sMessage === '') {
+                //$this->Logger->debug('main loop next');
                 goto NEXT_LOOP;
             }
             $this->Logger->debug('main loop get:' . $sMessage);

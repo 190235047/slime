@@ -103,9 +103,9 @@ class Bootstrap
         $this->Context->register('HttpResponse', $HttpResponse);
 
         # run route
-        $CallBack = Context::getInst()->Route->generateFromHttp(
+        $CallBack = $this->Context->Route->generateFromHttp(
             $HttpRequest,
-            $this->Context->Config->get('system.route')
+            $this->Context->Config->get('system.route_http')
         );
         $this->Context->register('CallBack', $CallBack);
         $CallBack->call();
@@ -116,7 +116,11 @@ class Bootstrap
 
     public function runCli()
     {
-        ;
+        $CallBack = $this->Context->Route->generateFromCli(
+            array_slice($GLOBALS['argv'], 1),
+            $this->Context->Config->get('system.route_cli')
+        );
+        $CallBack->call();
     }
 
     public function handleError($iErrNum, $sErrStr, $sErrFile, $iErrLine, $sErrContext)

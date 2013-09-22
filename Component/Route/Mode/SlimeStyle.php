@@ -41,10 +41,9 @@ class Mode_SlimeStyle implements IMode
     public function runCli($aArg, CallBack $CallBack)
     {
         if (strpos($aArg[0], '.') === false) {
-            $aArr = explode('.', $aArg[0], 2);
+            $aArr = array($aArg[0], 'Default');
         } else {
-            $aArr[0] = $aArg[0];
-            $aArr[1] = 'Default';
+            $aArr = explode('.', $aArg[0], 2);
         }
         $CallBack->setCBObject("ControllerCli_{$aArr[0]}", "action{$aArr[1]}");
 

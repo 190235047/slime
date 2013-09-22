@@ -25,7 +25,7 @@ class Router
     /**
      * @param Http\Request $HttpRequest
      * @param $aRule
-     * @return CallBack
+     * @return \SlimeFramework\Component\Route\CallBack
      */
     public function generateFromHttp(Http\Request $HttpRequest, $aRule)
     {
@@ -87,14 +87,14 @@ class Router
     }
 
     /**
-     * generate from cli input [/your_php_bin/php /your_project/index.php -c class.method|func -p json_str
+     * generate from cli input [/your_php_bin/php /your_project/index.php class.method|func json_str
      * @return array [0=>callable, 1=>params] || []
      */
 
     /**
      * @param array $aArg
      * @param array $aRule
-     * @return CallBack
+     * @return \SlimeFramework\Component\Route\CallBack
      */
     public function generateFromCli(array $aArg, array $aRule)
     {
