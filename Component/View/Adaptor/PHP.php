@@ -86,4 +86,14 @@ class Adaptor_PHP implements IAdaptor
         ob_end_clean();
         return $sResult;
     }
+
+    public function subRender($sTpl, array $aData = array())
+    {
+        $View = clone $this;
+        $View->setTpl($sTpl);
+        if (!empty($aData)) {
+            $View->assignMulti($aData);
+        }
+        return $View->renderAsResult();
+    }
 }

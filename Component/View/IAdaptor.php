@@ -39,4 +39,11 @@ interface IAdaptor
      * @return string
      */
     public function renderAsResult();
+
+    /**
+     * @param string $sTpl
+     * @param array $aData
+     * @return string
+     */
+    public function subRender($sTpl, array $aData = array());
 }
