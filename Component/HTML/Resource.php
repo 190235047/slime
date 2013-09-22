@@ -13,7 +13,7 @@ class Resource
 
     public function __construct($sBaseUrl)
     {
-        $this->sBaseUrl = $sBaseUrl;
+        $this->sBaseUrl = rtrim($sBaseUrl, '/');
     }
 
     public function gentCSS($sName, $sPath = 'css')
@@ -21,11 +21,11 @@ class Resource
         return sprintf('<link href="%s" rel="stylesheet">', $this->sBaseUrl . '/' . $sPath . '/' . $sName);
     }
 
-    public function gentCSSs($aMapPath2Name)
+    public function gentCSSs($aName, $sPath = 'css')
     {
         $sResult = '';
-        foreach ($aMapPath2Name as $mK => $sV) {
-            $sResult .= $this->gentCSS($sV, is_string($mK) ? $mK : 'css');
+        foreach ($aName as $sV) {
+            $sResult .= $this->gentCSS($sV, $sPath);
         }
         return $sResult;
     }
@@ -35,11 +35,11 @@ class Resource
         return sprintf('<script type="text/javascript" src="%s"></script>', $this->sBaseUrl . '/' . $sPath . '/' . $sName);
     }
 
-    public function gentJSs($aMapPath2Name)
+    public function gentJSs($aName, $sPath = 'js')
     {
         $sResult = '';
-        foreach ($aMapPath2Name as $mK => $sV) {
-            $sResult .= $this->gentJS($sV, is_string($mK) ? $mK : 'js');
+        foreach ($aName as $sV) {
+            $sResult .= $this->gentJS($sV, $sPath);
         }
         return $sResult;
     }
