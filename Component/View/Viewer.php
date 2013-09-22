@@ -15,7 +15,7 @@ class Viewer
         if ($sAdaptor[0]==='@') {
             $sAdaptor = '\\SlimeFramework\\Component\\View\\Adaptor_' . substr($sAdaptor, 1);
         }
-        $Obj = new $sAdaptor();
+        $Obj = new $sAdaptor($Log);
         if (!$Obj instanceof IAdaptor) {
             $Log->error('{adaptor} must impl SlimeFramework.Component.IAdaptor', array('adaptor' => $sAdaptor));
             exit(1);

@@ -1,6 +1,8 @@
 <?php
 namespace SlimeFramework\Component\View;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * Class Adaptor_PHP
  * @package SlimeFramework\Component\View
@@ -12,6 +14,11 @@ class Adaptor_PHP implements IAdaptor
     private $sTpl;
 
     private $aData = array();
+
+    public function __construct(LoggerInterface $Log)
+    {
+        $this->Log = $Log;
+    }
 
     /**
      * @param string $sBaseDir
@@ -79,6 +86,10 @@ class Adaptor_PHP implements IAdaptor
      */
     public function renderAsResult()
     {
+        if (!file_exists($this->sTpl)) {
+            $this->Log->error('Template file[{file}] is not exist', array('file' => $this->sTpl));
+            exit(1);
+        }
         extract($this->aData);
         ob_start();
         require $this->sTpl;
