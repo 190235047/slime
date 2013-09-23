@@ -32,6 +32,10 @@ class Mode_SlimeStyle implements IMode
         if (strpos($sAction, '.')) {
             $sAction = strstr($sAction, '.', true);
         }
+        $sRequestMethod = $Request->getRequestMethod();
+        if ($sRequestMethod!=='GET') {
+            $sAction .= '_' . $sRequestMethod;
+        }
 
         $CallBack->setCBObject('ControllerHttp_' . implode('_', $aBlock), $sAction);
 
