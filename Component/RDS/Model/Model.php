@@ -66,9 +66,7 @@ class Model_Model
         $aaData = $this->CURD->querySmarty(
             $this->sTable,
             $aWhere,
-            $sAttr,
-            '',
-            false
+            $sAttr
         );
 
         $Group = new Model_Group($this, $this->Log);

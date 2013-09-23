@@ -27,7 +27,7 @@ class Model_Group implements \ArrayAccess, \Iterator
             $this->aRelation[$sModelName] = $this->$sMethod($sModelName, $ModelItem);
         }
 
-        if ($ModelItem===null) {
+        if ($ModelItem === null) {
             return null;
         } else {
             return isset($this->aRelation[$sModelName][$ModelItem[$this->Model->sPKName]]) ?
@@ -168,8 +168,9 @@ class Model_Group implements \ArrayAccess, \Iterator
      */
     public function offsetSet($offset, $value)
     {
-        $this->aPK[$value[$this->sPK]] = $this->sPK;
-        $this->aaData[$offset]         = $value;
+        $sPK                   = $value[$this->Model->sPKName];
+        $this->aPK[$sPK]       = $sPK;
+        $this->aaData[$offset] = $value;
     }
 
     /**
@@ -183,7 +184,7 @@ class Model_Group implements \ArrayAccess, \Iterator
      */
     public function offsetUnset($offset)
     {
-        unset($this->aPK[$this->aaData[$offset][$this->sPK]]);
+        unset($this->aPK[$this->aaData[$offset][$this->Model->sPKName]]);
         unset($this->aaData[$offset]);
     }
 
