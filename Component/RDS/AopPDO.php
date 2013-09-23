@@ -1,8 +1,7 @@
 <?php
 namespace SlimeFramework\Component\RDS;
 
-use SlimeFramework\Component\Framework\Context;
-use SlimeFramework\Component\Framework\CTX;
+use SlimeFramework\Core\Context;
 
 
 /**
@@ -16,29 +15,28 @@ class AopPDO
     public static function register()
     {
         aop_add_before(
-            "PDOStatement->execute()",
+            'PDOStatement->execute()',
             function (\AopJoinPoint $JoinPoint) {
-                /** @var \SlimeFramework\Component\Framework\Bootstrap $__Bootstrap__ */
                 $aArgs = $JoinPoint->getArguments();
                 /** @var \PDOStatement $Object */
                 $Object = $JoinPoint->getObject();
-                Context::getInst()->Log->debug('SQL : prepare[' . $Object->queryString . '] ; ' . json_encode($aArgs[0]) . '');
+                Context::getInst()->Log->debug(
+                    'SQL : prepare[' . $Object->queryString . '] ; ' . json_encode($aArgs[0]) . ''
+                );
             }
         );
 
         aop_add_before(
-            "PDO->exec()",
+            'PDO->exec()',
             function (\AopJoinPoint $JoinPoint) {
-                /** @var \SlimeFramework\Component\Framework\Bootstrap $__Bootstrap__ */
                 $aArgs = $JoinPoint->getArguments();
                 Context::getInst()->Log->debug('SQL : exec[' . $aArgs[0] . ']');
             }
         );
 
         aop_add_before(
-            "PDO->query()",
+            'PDO->query()',
             function (\AopJoinPoint $JoinPoint) {
-                /** @var \SlimeFramework\Component\Framework\Bootstrap $__Bootstrap__ */
                 $aArgs = $JoinPoint->getArguments();
                 Context::getInst()->Log->debug('SQL : query[' . $aArgs[0] . ']');
             }

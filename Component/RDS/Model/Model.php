@@ -8,19 +8,20 @@ class Model_Model
 {
     private $CURD;
 
-    public function __construct($sModel, CURD $CURD, $aConfig, Model_Pool $Pool, LoggerInterface $Log)
+    public function __construct($sModelName, CURD $CURD, $aConfig, Model_Pool $Pool, LoggerInterface $Log)
     {
-        $this->CURD = $CURD;
+        $this->CURD     = $CURD;
+        $this->sTable   = isset($aConfig['table']) ? $aConfig['table'] : strtolower($sModelName);
+        $this->sPKName  = isset($aConfig['pk']) ? $aConfig['pk'] : 'id';
+        $this->sFKName  = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
+        $this->aRelConf = isset($aConfig['relation']) ? $aConfig['relation'] : array();
+        $this->Pool     = $Pool;
+        $this->Log      = $Log;
+    }
 
-        # @todo define default
-        $this->sTable    = isset($aConfig['table']) ? $aConfig['table'] : strtolower($sModel);
-        $this->sPK       = isset($aConfig['pk']) ? $aConfig['pk'] : 'id';
-        $this->sFK       = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
-        $this->aRelation = isset($aConfig['relation']) ? $aConfig['relation'] : array();
-        $this->Pool      = $Pool;
-
-        # @todo loop relation , do something in destruct
-        $this->Log = $Log;
+    public function createItem(array $aData = array())
+    {
+        return new Model_Item($aData, $this);
     }
 
     public function add($aKVMap)
@@ -30,12 +31,12 @@ class Model_Model
 
     public function delete($mPK)
     {
-        $this->CURD->deleteSmarty($this->sTable, array($this->sPK => $mPK));
+        $this->CURD->deleteSmarty($this->sTable, array($this->sPKName => $mPK));
     }
 
     public function update($mPK, $aKVMap)
     {
-        return $this->CURD->updateSmarty($this->sTable, $aKVMap, array($this->sPK => $mPK));
+        return $this->CURD->updateSmarty($this->sTable, $aKVMap, array($this->sPKName => $mPK));
     }
 
     /**
@@ -44,7 +45,7 @@ class Model_Model
      */
     public function find($mPKOrWhere)
     {
-        $aWhere = is_array($mPKOrWhere) ? $mPKOrWhere : array($this->sPK => $mPKOrWhere);
+        $aWhere = is_array($mPKOrWhere) ? $mPKOrWhere : array($this->sPKName => $mPKOrWhere);
 
         $aItem = $this->CURD->querySmarty(
             $this->sTable,
@@ -56,14 +57,13 @@ class Model_Model
         return new Model_Item($aItem, $this);
     }
 
-    public function findMulti($aWhere = array(), $sOrderBy = null, $iLimit = null, $iOffset = null)
+    public function findMulti($aWhere = array(), $sOrderBy = null, $iLimit = null, $iOffset = null, $sAttr = '')
     {
-        $sAttr = '';
-        $sOrderBy !== null && $sAttr .= "ORDER BY $sOrderBy";
-        $iLimit !== null && $sAttr .= "LIMIT $iLimit";
-        $iOffset !== null && $sAttr .= "OFFSET $iOffset";
+        $sOrderBy !== null && $sAttr .= " ORDER BY $sOrderBy";
+        $iLimit !== null && $sAttr .= " LIMIT $iLimit";
+        $iOffset !== null && $sAttr .= " OFFSET $iOffset";
 
-        $aItem = $this->CURD->querySmarty(
+        $aaData = $this->CURD->querySmarty(
             $this->sTable,
             $aWhere,
             $sAttr,
@@ -71,10 +71,10 @@ class Model_Model
             false
         );
 
-        $Group = new Model_Group();
-        if (!empty($aItem)) {
-            foreach ($aItem as $aData) {
-                $Group[$aData[$this->sPK]] = new Model_Item($aData, $this);
+        $Group = new Model_Group($this, $this->Log);
+        if (!empty($aaData)) {
+            foreach ($aaData as $aRow) {
+                $Group[$aRow[$this->sPKName]] = new Model_Item($aRow, $this);
             }
         }
         return $Group;
@@ -82,59 +82,53 @@ class Model_Model
 
     public function findCount()
     {
-        ;
-    }
-
-    public function create()
-    {
-        return new Model_Item($this, array());
     }
 
     /**
-     * @param $sModel
+     * @param string $sModelName
      * @param Model_Item $ModelItem
      * @return Model_Item|Model_Item[]|null
      */
-    public function relation($sModel, Model_Item $ModelItem)
+    public function relation($sModelName, Model_Item $ModelItem)
     {
-        if (!isset($this->aRelation[$sModel])) {
-            $this->Log->error('Relation model {model} is not exist', array('model' => $sModel));
+        if (!isset($this->aRelConf[$sModelName])) {
+            $this->Log->error('Relation model {model} is not exist', array('model' => $sModelName));
         }
-        $sMethod = $this->aRelation[$sModel];
-        return $this->$sMethod($sModel, $ModelItem);
+        $sMethod = $this->aRelConf[$sModelName];
+        return $this->$sMethod($sModelName, $ModelItem);
     }
 
     /**
-     * @param $sModel
+     * @param string $sModelName
      * @param Model_Item $ModelItem
      * @return Model_Item|null
      */
-    public function hasOne($sModel, $ModelItem)
+    public function hasOne($sModelName, $ModelItem)
     {
-        $Engine = $this->Pool->get($sModel);
-        return $Engine->find(array($this->sFK => $ModelItem->{$this->sPK}));
+        $Model = $this->Pool->get($sModelName);
+        return $Model->find(array($this->sFKName => $ModelItem->{$this->sPKName}));
     }
 
     /**
-     * @param $sModel
+     * @param string $sModelName
      * @param Model_Item $ModelItem
-     * @return Model_Item|mixed
+     * @return Model_Item|null
      */
-    public function belongsTo($sModel, $ModelItem)
+    public function belongsTo($sModelName, $ModelItem)
     {
-        $Engine = $this->Pool->get($sModel);
-        return $Engine->find(array($Engine->sPK => $ModelItem->{$Engine->sPK}));
+        $Model = $this->Pool->get($sModelName);
+        return $Model->find(array($Model->sPKName => $ModelItem->{$Model->sPKName}));
     }
 
     /**
      * @param $sModel
      * @param Model_Item $ModelItem
-     * @return Model_Item|mixed
+     * @return Model_Group
      */
     public function hasMany($sModel, $ModelItem = null)
     {
-        $Engine = $this->Pool->get($sModel);
-        return $Engine->findMulti(array($this->sFK => $ModelItem->{$Engine->sPK}));
+        $Model = $this->Pool->get($sModel);
+        return $Model->findMulti(array($this->sFKName => $ModelItem->{$Model->sPKName}));
     }
 
     public function hasManyThough($sModel, $mPKOrWhere = null)

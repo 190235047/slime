@@ -10,10 +10,14 @@ class Model_Item implements \ArrayAccess
     /** @var Model_Model */
     public $Model;
 
-    public function __construct($aData, Model_Model $Model)
+    /** @var Model_Group|null */
+    public $Group;
+
+    public function __construct($aData, Model_Model $Model, $Group = null)
     {
         $this->aData = $aData;
         $this->Model = $Model;
+        $this->Group = $Group;
     }
 
     public function __get($sKey)
@@ -29,27 +33,31 @@ class Model_Item implements \ArrayAccess
 
     /**
      * @param string $sModelName
-     * @return $this
+     * @param array $mValue
+     * @return $this|null
      */
-    public function relation($sModelName)
+    public function __call($sModelName, $mValue = array())
     {
-        if (!isset($this->aRelation[$sModelName])) {
-            $this->aRelation[$sModelName] = $this->Model->relation($sModelName, $this);
+        if ($this->Group===null || empty($mValue[0])) {
+            if (!isset($this->aRelation[$sModelName])) {
+                $this->aRelation[$sModelName] = $this->Model->relation($sModelName, $this);
+            }
+            return $this->aRelation[$sModelName];
+        } else {
+            return $this->Group->relation($sModelName, $this);
         }
-        return $this->aRelation[$sModelName];
     }
-
 
     public function save()
     {
-        if (isset($this->aData[$this->Model->sPK])) {
-            $bRS = $this->Model->update($this->aData[$this->Model->sPK], $this->aData);
+        if (isset($this->aData[$this->Model->sPKName])) {
+            $bRS = $this->Model->update($this->aData[$this->Model->sPKName], $this->aData);
         } else {
             $iID = $this->Model->add($this->aData);
             if ($iID===null) {
                 $bRS = false;
             } else {
-                $this->aData[$this->Model->sPK] = $iID;
+                $this->aData[$this->Model->sPKName] = $iID;
                 $bRS = true;
             }
         }

@@ -1,20 +1,68 @@
 <?php
 namespace SlimeFramework\Component\RDS;
 
+use Psr\Log\LoggerInterface;
+
 class Model_Group implements \ArrayAccess, \Iterator
 {
-    /** @var array */
-    protected $aaData = array();
-
-    /** @var Model_Model */
-    public $Model;
-
-    protected $iDataLen = 0;
-    protected $iCursor = 0;
-
-    public function relation($sModelName)
+    public function __construct(Model_Model $Model, LoggerInterface $Log)
     {
-        ;
+        $this->Model     = $Model;
+        $this->Log       = $Log;
+        $this->iCursor   = 0;
+        $this->aaData    = array();
+        $this->aPK       = array();
+        $this->aRelation = array();
+    }
+
+    public function relation($sModelName, Model_Item $ModelItem = null)
+    {
+        if (!array_key_exists($sModelName, $this->aRelation) && !empty($this->aPK)) {
+            $aRelConf = $this->Model->aRelConf;
+            if (!isset($aRelConf[$sModelName])) {
+                $this->Log->error('Relation model {model} is not exist', array('model' => $sModelName));
+                exit(1);
+            }
+            $sMethod                      = $aRelConf[$sModelName];
+            $this->aRelation[$sModelName] = $this->$sMethod($sModelName, $ModelItem);
+        }
+
+        if ($ModelItem===null) {
+            return null;
+        } else {
+            return isset($this->aRelation[$sModelName][$ModelItem[$this->Model->sPKName]]) ?
+                $this->aRelation[$sModelName][$ModelItem[$this->Model->sPKName]] : null;
+        }
+    }
+
+    /**
+     * @param $ModelName
+     * @return Model_Group
+     */
+    public function hasOne($ModelName)
+    {
+        $Model = $this->Model->Pool->get($ModelName);
+        return $Model->findMulti(array($this->Model->sFKName . ' IN' => $this->aPK));
+    }
+
+    /**
+     * @param $sModel
+     * @return Model_Group
+     */
+    public function belongsTo($sModel)
+    {
+        $Model = $this->Model->Pool->get($sModel);
+        return $Model->findMulti(array($Model->sPKName . ' IN' => $this->aPK));
+    }
+
+    public function hasMany($sModel)
+    {
+        //@todo
+    }
+
+    public function hasManyThough($sModel, $mPKOrWhere = null)
+    {
+        //@todo
     }
 
     /**
@@ -60,7 +108,7 @@ class Model_Group implements \ArrayAccess, \Iterator
      */
     public function valid()
     {
-        return $this->iCursor < $this->iDataLen;
+        return $this->iCursor < count($this->aaData);
     }
 
     /**
@@ -120,10 +168,8 @@ class Model_Group implements \ArrayAccess, \Iterator
      */
     public function offsetSet($offset, $value)
     {
-        if (!isset($this->aaData[$offset])) {
-            $this->iDataLen++;
-        }
-        $this->aaData[$offset] = $value;
+        $this->aPK[$value[$this->sPK]] = $this->sPK;
+        $this->aaData[$offset]         = $value;
     }
 
     /**
@@ -137,9 +183,7 @@ class Model_Group implements \ArrayAccess, \Iterator
      */
     public function offsetUnset($offset)
     {
-        if (isset($this->aaData[$offset])) {
-            $this->iDataLen--;
-        }
+        unset($this->aPK[$this->aaData[$offset][$this->sPK]]);
         unset($this->aaData[$offset]);
     }
 

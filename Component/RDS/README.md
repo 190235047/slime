@@ -1,14 +1,4 @@
-<?php
-require 'CURD.php';
-require 'Model/Model_Model.php';
-require 'Model/Group.php';
-require 'Model/Item.php';
-require 'Model/Pool.php';
-
-require '../Log/Logger.php';
-require '../Log/IWriter.php';
-require '../Log/Writer/STDFD.php';
-
+```<?php
 $aDBConfig = array(
     'default' => array(
         'dsn'      => 'mysql:host=172.17.181.135;dbname=slime',
@@ -66,3 +56,4 @@ foreach ($aBook as $Book) {
     echo $Book . "\n";
 }
 echo $Owner . "\n";
+```
