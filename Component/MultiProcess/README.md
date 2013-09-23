@@ -1,6 +1,7 @@
 # MultiProcess
 
 * Example
+
 ```php
 <?php
 class MyMP extends \SlimeFramework\Component\MultiProcess\MPPoolModel
