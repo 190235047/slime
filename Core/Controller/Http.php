@@ -32,7 +32,7 @@ abstract class Controller_Http
     {
         if ($this->bAutoRender) {
             # header
-            if ($this->HttpResponse->getHeader('Content-Type')!==null) {
+            if ($this->HttpResponse->getHeader('Content-Type')===null) {
                 if ($this->bAjax) {
                     $this->HttpResponse->setHeader('Content-Type', 'application/javascript; charset=utf-8', false);
                 } else {
