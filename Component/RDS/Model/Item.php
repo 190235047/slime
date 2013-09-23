@@ -67,6 +67,11 @@ class Model_Item implements \ArrayAccess
         return $bRS;
     }
 
+    public function delete()
+    {
+        return $this->Model->delete($this->aData[$this->Model->sPKName]);
+    }
+
     public function __toString()
     {
         return var_export($this->aData, true);

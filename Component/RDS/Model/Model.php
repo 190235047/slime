@@ -31,7 +31,7 @@ class Model_Model
 
     public function delete($mPK)
     {
-        $this->CURD->deleteSmarty($this->sTable, array($this->sPKName => $mPK));
+        return $this->CURD->deleteSmarty($this->sTable, array($this->sPKName => $mPK));
     }
 
     public function update($mPK, $aKVMap)
