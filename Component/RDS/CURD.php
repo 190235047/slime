@@ -72,8 +72,7 @@ class CURD
         if ($bOnlyOne && stripos($sAttr, 'limit')===false) {
             $sAttr .= " LIMIT 1";
         }
-        $aArgs = array();
-        $sWhere      = $this->buildCondition($aWhere, $aArgs);
+        $sWhere      = $this->buildCondition($aWhere, $aArgs = array());
         $sSQLPrepare = "SELECT $sSelect FROM $sTable WHERE $sWhere $sAttr";
         $Stmt        = $this->getInstance()->prepare($sSQLPrepare);
         $Stmt->execute($aArgs);
@@ -91,8 +90,7 @@ class CURD
         $sAttr = '',
         $sSelect = '1'
     ) {
-        $aArgs = array();
-        $sWhere      = $this->buildCondition($aWhere, $aArgs);
+        $sWhere      = $this->buildCondition($aWhere, $aArgs = array());
         $sSQLPrepare = "SELECT count($sSelect) as total FROM $sTable WHERE $sWhere $sAttr";
         $Stmt        = $this->getInstance()->prepare($sSQLPrepare);
         $Stmt->execute($aArgs);
@@ -113,22 +111,20 @@ class CURD
             $aUpdatePre[]  = "`$sK` = ?";
             $aUpdateData[] = $sV;
         }
-        $aArgs = array();
         $sSQLPrepare = sprintf(
             "UPDATE %s SET %s WHERE %s",
             $sTable,
             implode(' , ', $aUpdatePre),
-            $this->buildCondition($aWhere, $aArgs)
+            $this->buildCondition($aWhere, $aArgs = array())
         );
-        $aData       = array_merge($aUpdateData, $aArgs);
+        $aData       = array_merge($aUpdateData, $aArgs = array());
         $STMT        = $this->getInstance()->prepare($sSQLPrepare);
         return $STMT->execute($aData);
     }
 
     public function deleteSmarty($sTable, array $aWhere)
     {
-        $aArgs = array();
-        $sSQLPrepare = sprintf("DELETE FROM %s WHERE %s", $sTable, $this->buildCondition($aWhere, $aArgs));
+        $sSQLPrepare = sprintf("DELETE FROM %s WHERE %s", $sTable, $this->buildCondition($aWhere, $aArgs = array()));
         $STMT        = $this->getInstance()->prepare($sSQLPrepare);
         return $STMT->execute($aArgs);
     }
