@@ -1,10 +1,11 @@
 <?php
 namespace SlimeFramework\Component\Config;
 
-use SlimeFramework\Component\Config\IAdaptor;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class Configure
+ *
  * @package SlimeFramework\Component\Config
  * @author smallslime@gmail.com
  * @version 1.0
@@ -13,16 +14,15 @@ final class Configure implements IAdaptor
 {
     private $Object;
 
-    public function __construct($sAdaptor)
+    public function __construct($sAdaptor, LoggerInterface $Log)
     {
-        $sAdaptor = $sAdaptor[0]==='@' ? __NAMESPACE__ . '\\Adaptor_' . substr($sAdaptor, 1) : $sAdaptor;
-        $Class = new \ReflectionClass($sAdaptor);
-
-        $aParam = func_get_args();
-        array_shift($aParam);
-        $Object = $Class->newInstanceArgs($aParam);
+        $sAdaptor = $sAdaptor[0] === '@' ? __NAMESPACE__ . '\\Adaptor_' . substr($sAdaptor, 1) : $sAdaptor;
+        $Class    = new \ReflectionClass($sAdaptor);
+        $aParam   = array_slice(func_get_args(), 2);
+        $aParam[] = $Log;
+        $Object   = $Class->newInstanceArgs($aParam);
         if (!$Object instanceof IAdaptor) {
-            trigger_error('Configure is not instance of Slime.IAdapt', E_USER_ERROR);
+            $Log->error('Configure is not instance of SlimeFramework.IAdaptor');
             exit(1);
         }
         $this->Object = $Object;

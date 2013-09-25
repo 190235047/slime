@@ -2,6 +2,6 @@
     "name": "SlimeFramework BackGroundJob",
     "description":"Push job to background and runs, in order to make the main process(web cgi) run with none-blocking",
     "require": {
-        "SlimeFramework/Component/MultiProcess": "*",
+        "SlimeFramework/Component/MultiProcess": "*"
     }
 }

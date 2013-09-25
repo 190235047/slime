@@ -7,8 +7,7 @@ namespace SlimeFramework\Component\RDS;
  * @author smallslime@gmail.com
  * @version 0.1
  */
-class
-CURD
+class CURD
 {
     const INSERT_STANDARD = 0;
     const INSERT_IGNORE   = 1;
@@ -73,19 +72,11 @@ CURD
         if ($bOnlyOne && stripos($sAttr, 'limit')===false) {
             $sAttr .= " LIMIT 1";
         }
-
-        $sWhere      = $this->buildCondition($aWhere);
+        $aArgs = array();
+        $sWhere      = $this->buildCondition($aWhere, $aArgs);
         $sSQLPrepare = "SELECT $sSelect FROM $sTable WHERE $sWhere $sAttr";
         $Stmt        = $this->getInstance()->prepare($sSQLPrepare);
-        $aExec       = array();
-        foreach ($aWhere as $mV) {
-            if (is_array($mV)) {
-                $aExec = array_merge($aExec, $mV);
-            } else {
-                $aExec[] = $mV;
-            }
-        }
-        $Stmt->execute($aExec);
+        $Stmt->execute($aArgs);
         if ($mFetchArgs!==null) {
             $Stmt->setFetchMode($iFetchStyle, $mFetchArgs);
         } else {
@@ -93,17 +84,18 @@ CURD
         }
         return $bOnlyOne ? $Stmt->fetch() : $Stmt->fetchAll();
     }
-
+ 
     public function queryCount(
         $sTable,
         $aWhere = array(),
         $sAttr = '',
         $sSelect = '1'
     ) {
-        $sWhere      = $this->buildCondition($aWhere);
+        $aArgs = array();
+        $sWhere      = $this->buildCondition($aWhere, $aArgs);
         $sSQLPrepare = "SELECT count($sSelect) as total FROM $sTable WHERE $sWhere $sAttr";
         $Stmt        = $this->getInstance()->prepare($sSQLPrepare);
-        $Stmt->execute(array_values($aWhere));
+        $Stmt->execute($aArgs);
         $mResult = $Stmt->fetch();
         return isset($mResult['total']) ? (int)$mResult['total'] : 0;
     }
@@ -121,22 +113,24 @@ CURD
             $aUpdatePre[]  = "`$sK` = ?";
             $aUpdateData[] = $sV;
         }
+        $aArgs = array();
         $sSQLPrepare = sprintf(
             "UPDATE %s SET %s WHERE %s",
             $sTable,
             implode(' , ', $aUpdatePre),
-            $this->buildCondition($aWhere)
+            $this->buildCondition($aWhere, $aArgs)
         );
-        $aData       = array_merge($aUpdateData, array_values($aWhere));
+        $aData       = array_merge($aUpdateData, $aArgs);
         $STMT        = $this->getInstance()->prepare($sSQLPrepare);
         return $STMT->execute($aData);
     }
 
     public function deleteSmarty($sTable, array $aWhere)
     {
-        $sSQLPrepare = sprintf("DELETE FROM %s WHERE %s", $sTable, $this->buildCondition($aWhere));
+        $aArgs = array();
+        $sSQLPrepare = sprintf("DELETE FROM %s WHERE %s", $sTable, $this->buildCondition($aWhere, $aArgs));
         $STMT        = $this->getInstance()->prepare($sSQLPrepare);
-        return $STMT->execute(array_values($aWhere));
+        return $STMT->execute($aArgs);
     }
 
     /**
@@ -163,7 +157,7 @@ CURD
         }
     }
 
-    public function buildCondition($aWhere)
+    public function buildCondition($aWhere, &$aArgs = array())
     {
         if (empty($aWhere)) {
             return 1;
@@ -177,16 +171,19 @@ CURD
         }
         foreach ($aWhere as $sK => $mV) {
             if (is_int($sK)) {
-                $aWhereBuild[] = '(' . $this->buildCondition($mV) . ')';
+                $aWhereBuild[] = '(' . $this->buildCondition($mV, $aArgs) . ')';
             } else {
                 $aTmp          = explode(' ', $sK, 2);
                 $sKey          = $aTmp[0];
                 $sOpt          = isset($aTmp[1]) ? trim($aTmp[1]) : '=';
                 # hack
-                if (strtoupper($sOpt)=='IN') {
+                $inOp = strtoupper($sOpt);
+                if ($inOp=='IN' || $inOp=='NOT IN') {
                     $aWhereBuild[] = sprintf("`$sKey` IN (%s)", implode(',', array_fill(0, count($mV), '?')));
+                    $aArgs = array_merge($aArgs, $mV);
                 } else {
                     $aWhereBuild[] = "`$sKey` $sOpt ?";
+                    $aArgs[] = $mV;
                 }
             }
         }
@@ -198,7 +195,6 @@ CURD
         return array('sDSN', 'sUsername', 'sPassword', 'aOptions', 'bCheckConnect');
     }
 }
-
 if (defined('SlimeFramework.RDS:AOP')) {
     AopPDO::register();
 }

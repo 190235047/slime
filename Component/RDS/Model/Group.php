@@ -3,56 +3,93 @@ namespace SlimeFramework\Component\RDS;
 
 use Psr\Log\LoggerInterface;
 
-class Model_Group implements \ArrayAccess, \Iterator
+class Model_Group implements \ArrayAccess, \Iterator, \Countable
 {
+    /** @var Model_Item[] */
+    public $aModelItem;
+
     public function __construct(Model_Model $Model, LoggerInterface $Log)
     {
-        $this->Model     = $Model;
-        $this->Log       = $Log;
-        $this->iCursor   = 0;
-        $this->aaData    = array();
-        $this->aPK       = array();
-        $this->aRelation = array();
+        $this->Model      = $Model;
+        $this->Log        = $Log;
+        $this->aModelItem = array();
+        $this->aaDataMap  = array();
+        $this->aRelation  = array();
+        $this->aRelObj    = array();
     }
 
     public function relation($sModelName, Model_Item $ModelItem = null)
     {
-        if (!array_key_exists($sModelName, $this->aRelation) && !empty($this->aPK)) {
-            $aRelConf = $this->Model->aRelConf;
-            if (!isset($aRelConf[$sModelName])) {
-                $this->Log->error('Relation model {model} is not exist', array('model' => $sModelName));
-                exit(1);
-            }
-            $sMethod                      = $aRelConf[$sModelName];
-            $this->aRelation[$sModelName] = $this->$sMethod($sModelName, $ModelItem);
+        $aRelConf = $this->Model->aRelConf;
+        if (!isset($aRelConf[$sModelName])) {
+            $this->Log->error('Relation model {model} is not exist', array('model' => $sModelName));
+            exit(1);
         }
+        $sMethod = $aRelConf[$sModelName];
+        return $this->$sMethod($sModelName, $ModelItem);
+    }
+
+    /**
+     * @param $sModelName
+     * @param Model_Item $ModelItem
+     * @return Model_Group | Model_Item | null
+     */
+    public function hasOne($sModelName, Model_Item $ModelItem = null)
+    {
+        if ($ModelItem === null && isset($this->aRelation[$sModelName])) {
+            return $this->aRelation[$sModelName];
+        }
+
+        $sPK = $ModelItem[$this->Model->sPKName];
+        if (isset($this->aRelObj[$sModelName][$sPK])) {
+            return $this->aRelObj[$sModelName][$sPK];
+        }
+
+        $aPK                          = array_keys($this->aModelItem);
+        $Model                        = $this->Model->Pool->get($sModelName);
+        $this->aRelation[$sModelName] = $Group = $Model->findMulti(array($this->Model->sFKName . ' IN' => $aPK));
 
         if ($ModelItem === null) {
-            return null;
-        } else {
-            return isset($this->aRelation[$sModelName][$ModelItem[$this->Model->sPKName]]) ?
-                $this->aRelation[$sModelName][$ModelItem[$this->Model->sPKName]] : null;
+            return $Group;
         }
+
+        $this->aRelObj[$sModelName] = array();
+        $aQ = &$this->aRelObj[$sModelName];
+        foreach ($Group as $iID => $ItemNew) {
+            $sThisPK = $this->aModelItem[$ItemNew[$this->Model->sFKName]][$this->Model->sPKName];
+            $aQ[$sThisPK] = $iID;
+        }
+
+        return $aQ[$sPK];
     }
 
     /**
-     * @param $ModelName
-     * @return Model_Group
+     * @param $sModelName
+     * @param Model_Item $ModelItem
+     * @return Model_Group | Model_Item | null
      */
-    public function hasOne($ModelName)
+    public function belongsTo($sModelName, Model_Item $ModelItem = null)
     {
-        $Model = $this->Model->Pool->get($ModelName);
-        return $Model->findMulti(array($this->Model->sFKName . ' IN' => $this->aPK));
-    }
+        if ($ModelItem === null && isset($this->aRelation[$sModelName])) {
+            return $this->aRelation[$sModelName];
+        } else {
+            $Model = $this->Model->Pool->get($sModelName);
+            $sFK   = $ModelItem[$Model->sFKName];
+            if (isset($this->aRelation[$sModelName][$sFK])) {
+                return $this->aRelation[$sModelName][$sFK];
+            }
+        }
 
-    /**
-     * @param $sModel
-     * @return Model_Group
-     */
-    public function belongsTo($sModel)
-    {
-        $Model = $this->Model->Pool->get($sModel);
-        return $Model->findMulti(array($Model->sPKName . ' IN' => $this->aPK));
+        $aFK = array();
+        foreach ($this->aModelItem as $Item) {
+            $aFK[] = $Item[$Model->sFKName];
+        }
+        $this->aRelation[$sModelName] = $Model->findMulti(array($Model->sPKName . ' IN' => $aFK));
+        if ($ModelItem === null) {
+            return $this->aRelation[$sModelName];
+        } else {
+            return $this->aRelation[$sModelName][$sFK];
+        }
     }
 
     public function hasMany($sModel)
@@ -69,11 +106,11 @@ class Model_Group implements \ArrayAccess, \Iterator
      * (PHP 5 &gt;= 5.0.0)<br/>
      * Return the current element
      * @link http://php.net/manual/en/iterator.current.php
-     * @return mixed Can return any type.
+     * @return Model_Item Can return any type.
      */
     public function current()
     {
-        return current($this->aaData);
+        return $this->aModelItem[current($this->aaDataMap)];
     }
 
     /**
@@ -84,8 +121,7 @@ class Model_Group implements \ArrayAccess, \Iterator
      */
     public function next()
     {
-        $this->iCursor++;
-        next($this->aaData);
+        next($this->aaDataMap);
     }
 
     /**
@@ -96,7 +132,7 @@ class Model_Group implements \ArrayAccess, \Iterator
      */
     public function key()
     {
-        return key($this->aaData);
+        return current($this->aaDataMap);
     }
 
     /**
@@ -108,7 +144,7 @@ class Model_Group implements \ArrayAccess, \Iterator
      */
     public function valid()
     {
-        return $this->iCursor < count($this->aaData);
+        return current($this->aaDataMap) !== false;
     }
 
     /**
@@ -119,8 +155,7 @@ class Model_Group implements \ArrayAccess, \Iterator
      */
     public function rewind()
     {
-        $this->iCursor = 0;
-        reset($this->aaData);
+        reset($this->aaDataMap);
     }
 
     /**
@@ -137,7 +172,7 @@ class Model_Group implements \ArrayAccess, \Iterator
      */
     public function offsetExists($offset)
     {
-        return isset($this->aaData[$offset]);
+        return isset($this->aModelItem[$offset]);
     }
 
     /**
@@ -147,11 +182,11 @@ class Model_Group implements \ArrayAccess, \Iterator
      * @param mixed $offset <p>
      * The offset to retrieve.
      * </p>
-     * @return mixed Can return all value types.
+     * @return Model_Item Can return all value types.
      */
     public function offsetGet($offset)
     {
-        return $this->aaData[$offset];
+        return $this->aModelItem[$offset];
     }
 
     /**
@@ -168,9 +203,8 @@ class Model_Group implements \ArrayAccess, \Iterator
      */
     public function offsetSet($offset, $value)
     {
-        $sPK                   = $value[$this->Model->sPKName];
-        $this->aPK[$sPK]       = $sPK;
-        $this->aaData[$offset] = $value;
+        $this->aaDataMap[$value[$this->Model->sPKName]] = $value[$this->Model->sPKName];
+        $this->aModelItem[$offset]                          = $value;
     }
 
     /**
@@ -184,14 +218,28 @@ class Model_Group implements \ArrayAccess, \Iterator
      */
     public function offsetUnset($offset)
     {
-        unset($this->aPK[$this->aaData[$offset][$this->Model->sPKName]]);
-        unset($this->aaData[$offset]);
+        unset($this->aaDataMap[$offset]);
+        unset($this->aModelItem[$offset]);
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.1.0)<br/>
+     * Count elements of an object
+     * @link http://php.net/manual/en/countable.count.php
+     * @return int The custom count as an integer.
+     * </p>
+     * <p>
+     * The return value is cast to an integer.
+     */
+    public function count()
+    {
+        return count($this->aModelItem);
     }
 
     public function __toString()
     {
         $sStr = '';
-        foreach ($this->aaData as $Item) {
+        foreach ($this->aModelItem as $Item) {
             $sStr .= (string)$Item . "\n";
         }
         return $sStr;

@@ -6,7 +6,7 @@ use SlimeFramework\Component\RDS\Model_Pool;
 
 class Model_Model
 {
-    private $CURD;
+    public $CURD;
 
     public function __construct($sModelName, CURD $CURD, $aConfig, Model_Pool $Pool, LoggerInterface $Log)
     {
@@ -57,6 +57,14 @@ class Model_Model
         return new Model_Item($aItem, $this);
     }
 
+    /**
+     * @param array $aWhere
+     * @param string $sOrderBy
+     * @param int $iLimit
+     * @param int $iOffset
+     * @param string $sAttr
+     * @return Model_Group
+     */
     public function findMulti($aWhere = array(), $sOrderBy = null, $iLimit = null, $iOffset = null, $sAttr = '')
     {
         $sOrderBy !== null && $sAttr .= " ORDER BY $sOrderBy";
@@ -72,7 +80,7 @@ class Model_Model
         $Group = new Model_Group($this, $this->Log);
         if (!empty($aaData)) {
             foreach ($aaData as $aRow) {
-                $Group[$aRow[$this->sPKName]] = new Model_Item($aRow, $this);
+                $Group[$aRow[$this->sPKName]] = new Model_Item($aRow, $this, $Group);
             }
         }
         return $Group;
@@ -104,7 +112,7 @@ class Model_Model
     public function hasOne($sModelName, $ModelItem)
     {
         $Model = $this->Pool->get($sModelName);
-        return $Model->find(array($this->sFKName => $ModelItem->{$this->sPKName}));
+        return $Model->find(array($this->sFKName => $ModelItem[$this->sPKName]));
     }
 
     /**
@@ -115,7 +123,7 @@ class Model_Model
     public function belongsTo($sModelName, $ModelItem)
     {
         $Model = $this->Pool->get($sModelName);
-        return $Model->find(array($Model->sPKName => $ModelItem->{$Model->sPKName}));
+        return $Model->find(array($Model->sPKName => $ModelItem[$Model->sFKName]));
     }
 
     /**

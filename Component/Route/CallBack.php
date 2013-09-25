@@ -110,11 +110,14 @@ class CallBack
             }
 
             # call
-            if ($sBefore !== null) {
-                call_user_func(array($mClassOrObj, $sBefore));
+            $bContinue = true;
+            if ($sBefore!==null) {
+                $bContinue = call_user_func(array($mClassOrObj, $sBefore));
             }
-            call_user_func($this->mCallable, $this->aParam);
-            if ($sAfter !== null) {
+            if ($bContinue!==false) {
+                $bContinue = call_user_func($this->mCallable, $this->aParam);
+            }
+            if ($bContinue!==false && $sAfter !== null) {
                 call_user_func(array($mClassOrObj, $sAfter));
             }
         }

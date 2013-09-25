@@ -47,7 +47,7 @@ class PageBean
      */
     public $aChildrenAll = array();
 
-    public function __construct($sUrl, $sName, PagePool $PageTree, $Parent = null, $sKey = null, $bDisplay = true)
+    public function __construct($sUrl, $sName, PagePool $PageTree, $Parent = null, $sKey = null, $bDisplay = true, $aData = array())
     {
         $this->sUrl     = $sUrl;
         $this->sName    = $sName;
@@ -56,6 +56,7 @@ class PageBean
         $this->Parent   = $Parent;
         $this->iLevel   = 0;
         $this->bDisplay = $bDisplay;
+        $this->aData    = $aData;
     }
 
     /**
@@ -84,13 +85,13 @@ class PageBean
         return $Bean->iLevel === $iUntilLevel ? $Bean : null;
     }
 
-    public function addChild($sUrl, $sName, $sKey = null, $bDisplay = true)
+    public function addChild($sUrl, $sName, $sKey = null, $bDisplay = true, $aData = array())
     {
         if ($sKey === null) {
             $sKey = $sUrl;
         }
 
-        $PageBean         = new self($sUrl, $sName, $this->PageTree, $this, $sKey, $bDisplay);
+        $PageBean         = new self($sUrl, $sName, $this->PageTree, $this, $sKey, $bDisplay, $aData);
         $PageBean->iLevel = $this->iLevel + 1;
         $this->PageTree->addPageBean($PageBean);
         $this->aChildrenAll[$sKey] = $PageBean;
@@ -105,15 +106,17 @@ class PageBean
         return sprintf('<a href="%s" title="%s" %s>%s</a>', $this->sUrl, $this->sName, $sAttr, $this->sName);
     }
 
-    public function buildBreadNav()
+    public function buildBreadNav($aAttach = array())
     {
+        $before = isset($aAttach['before']) ? $aAttach['before'] : '';
+        $after = isset($aAttach['after']) ? $aAttach['after'] : '';
         $sResult  = '';
         $PageBean = $this;
         do {
             if (!$sResult) {
                 $sResult = '<span>' . $this->sName . '<span>';
             } else {
-                $sResult = $PageBean->buildA() . $sResult;
+                $sResult = $before . $PageBean->buildA() . $after . $sResult;
             }
             $PageBean = $PageBean->Parent;
         } while ($PageBean);

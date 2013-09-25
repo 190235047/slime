@@ -53,6 +53,11 @@ class Response
         return $this;
     }
 
+    public function unsetRedirect()
+    {
+        unset($this->aHeader['Location']);
+    }
+
     public function setContents($sContent)
     {
         $this->sContent = $sContent;

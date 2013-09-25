@@ -8,7 +8,7 @@ use SlimeFramework\Component\Http;
 
 /**
  * Class Bootstrap
- * @package Slime
+ * @package SlimeFramework
  * @author smallslime@gmail.com
  * @version 1.0
  *
@@ -67,10 +67,11 @@ class Bootstrap
         $Context->register('Log', $Log);
 
         # register configure
-        $Config = new Config\Configure('@PHP',
+        $Config = new Config\Configure(
+            '@PHP',
+            $Log,
             $sDirConfig . '/' . $sENV,
-            $sDirConfig . '/publish',
-            $Log
+            $sDirConfig . '/publish'
         );
         $Context->register('Config', $Config);
 

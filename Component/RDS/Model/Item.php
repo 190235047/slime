@@ -28,7 +28,21 @@ class Model_Item implements \ArrayAccess
     public function __set($sKey, $mValue)
     {
         $this->aOldData[$sKey] = $this->aData[$sKey];
-        $this->aData[$sKey] = $mValue;
+        $this->aData[$sKey]    = $mValue;
+    }
+
+    public function set($mKeyOrKVMap, $mValue = null)
+    {
+        if (!is_array($mKeyOrKVMap)) {
+            $this->aOldData[$mKeyOrKVMap] = $this->aData[$mKeyOrKVMap];
+            $this->aData[$mKeyOrKVMap]    = $mValue;
+        } else {
+            foreach ($mKeyOrKVMap as $sKey => $mValue) {
+                $this->aOldData[$sKey] = $this->aData[$sKey];
+                $this->aData[$sKey]    = $mValue;
+            }
+        }
+        return $this;
     }
 
     /**
@@ -38,7 +52,7 @@ class Model_Item implements \ArrayAccess
      */
     public function __call($sModelName, $mValue = array())
     {
-        if ($this->Group===null || empty($mValue[0])) {
+        if ($this->Group === null || empty($mValue[0])) {
             if (!isset($this->aRelation[$sModelName])) {
                 $this->aRelation[$sModelName] = $this->Model->relation($sModelName, $this);
             }
@@ -54,11 +68,11 @@ class Model_Item implements \ArrayAccess
             $bRS = $this->Model->update($this->aData[$this->Model->sPKName], $this->aData);
         } else {
             $iID = $this->Model->add($this->aData);
-            if ($iID===null) {
+            if ($iID === null) {
                 $bRS = false;
             } else {
                 $this->aData[$this->Model->sPKName] = $iID;
-                $bRS = true;
+                $bRS                                = true;
             }
         }
         if ($bRS) {
