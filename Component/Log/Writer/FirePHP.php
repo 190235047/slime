@@ -27,28 +27,20 @@ class Writer_FirePHP implements IWriter
 
 /**
  * *** BEGIN LICENSE BLOCK *****
- *
  * This file is part of FirePHP (http://www.firephp.org/).
- *
  * Software License Agreement (New BSD License)
- *
  * Copyright (c) 2006-2010, Christoph Dorn
  * All rights reserved.
- *
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
- *
  *     * Redistributions of source code must retain the above copyright notice,
  *       this list of conditions and the following disclaimer.
- *
  *     * Redistributions in binary form must reproduce the above copyright notice,
  *       this list of conditions and the following disclaimer in the documentation
  *       and/or other materials provided with the distribution.
- *
  *     * Neither the name of Christoph Dorn nor the names of its
  *       contributors may be used to endorse or promote products derived from this
  *       software without specific prior written permission.
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -59,7 +51,6 @@ class Writer_FirePHP implements IWriter
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
  * ***** END LICENSE BLOCK *****
  *
  * @copyright       Copyright (C) 2007-2009 Christoph Dorn
@@ -88,7 +79,6 @@ if (!defined('E_USER_DEPRECATED')) {
  * Sends the given data to the FirePHP Firefox Extension.
  * The data can be displayed in the Firebug Console or in the
  * "Server" request tab.
- *
  * For more information see: http://www.firephp.org/
  *
  * @copyright       Copyright (C) 2007-2009 Christoph Dorn
@@ -108,7 +98,6 @@ class FirePHP
 
     /**
      * Firebug LOG level
-     *
      * Logs a message to firebug console.
      *
      * @var string
@@ -117,7 +106,6 @@ class FirePHP
 
     /**
      * Firebug INFO level
-     *
      * Logs a message to firebug console and displays an info icon before the message.
      *
      * @var string
@@ -126,7 +114,6 @@ class FirePHP
 
     /**
      * Firebug WARN level
-     *
      * Logs a message to firebug console, displays an warning icon before the message and colors the line turquoise.
      *
      * @var string
@@ -135,7 +122,6 @@ class FirePHP
 
     /**
      * Firebug ERROR level
-     *
      * Logs a message to firebug console, displays an error icon before the message and colors the line yellow. Also increments the firebug error count.
      *
      * @var string
@@ -158,7 +144,6 @@ class FirePHP
 
     /**
      * Displays an exception in firebug console
-     *
      * Increments the firebug error count.
      *
      * @var string
@@ -286,6 +271,7 @@ class FirePHP
      * Gets singleton instance of FirePHP
      *
      * @param boolean $AutoCreate
+     *
      * @return FirePHP
      */
     public static function getInstance($AutoCreate = false)
@@ -310,6 +296,7 @@ class FirePHP
      * Set the instance of the FirePHP singleton
      *
      * @param FirePHP $instance The FirePHP object instance
+     *
      * @return FirePHP
      */
     public static function setInstance($instance)
@@ -321,6 +308,7 @@ class FirePHP
      * Set an Insight console to direct all logging calls to
      *
      * @param object $console The console object to log to
+     *
      * @return void
      */
     public function setLogToInsightConsole($console)
@@ -339,6 +327,7 @@ class FirePHP
      * Enable and disable logging to Firebug
      *
      * @param boolean $Enabled TRUE to enable, FALSE to disable
+     *
      * @return void
      */
     public function setEnabled($Enabled)
@@ -358,11 +347,11 @@ class FirePHP
 
     /**
      * Specify a filter to be used when encoding an object
-     *
      * Filters are used to exclude object members.
      *
-     * @param string $Class The class name of the object
-     * @param array $Filter An array of members to exclude
+     * @param string $Class  The class name of the object
+     * @param array  $Filter An array of members to exclude
+     *
      * @return void
      */
     public function setObjectFilter($Class, $Filter)
@@ -372,7 +361,6 @@ class FirePHP
 
     /**
      * Set some options for the library
-     *
      * Options:
      *  - maxDepth: The maximum depth to traverse (default: 10)
      *  - maxObjectDepth: The maximum depth to traverse objects (default: 5)
@@ -381,6 +369,7 @@ class FirePHP
      *  - includeLineNumbers: If true will include line numbers and filenames (default: true)
      *
      * @param array $Options The options to be set
+     *
      * @return void
      */
     public function setOptions($Options)
@@ -402,7 +391,8 @@ class FirePHP
      * Set an option for the library
      *
      * @param string $Name
-     * @param mixed $Value
+     * @param mixed  $Value
+     *
      * @throws \Exception
      * @return void
      */
@@ -418,6 +408,7 @@ class FirePHP
      * Get an option from the library
      *
      * @param string $Name
+     *
      * @throws \Exception
      * @return mixed
      */
@@ -431,7 +422,6 @@ class FirePHP
 
     /**
      * Register FirePHP as your error handler
-     *
      * Will throw exceptions for each php error.
      *
      * @return mixed Returns a string containing the previously defined error handler (if any)
@@ -450,14 +440,13 @@ class FirePHP
 
     /**
      * FirePHP's error handler
-     *
      * Throws exception for each php error that will occur.
      *
-     * @param int $errno
+     * @param int    $errno
      * @param string $errstr
      * @param string $errfile
-     * @param int $errline
-     * @param array $errcontext
+     * @param int    $errline
+     * @param array  $errcontext
      */
     public function errorHandler($errno, $errstr, $errfile, $errline, $errcontext)
     {
@@ -491,10 +480,10 @@ class FirePHP
 
     /**
      * FirePHP's exception handler
-     *
      * Logs all exceptions to your firebug console and then stops the script.
      *
      * @param \Exception $Exception
+     *
      * @throws \Exception
      */
     function exceptionHandler($Exception)
@@ -517,6 +506,7 @@ class FirePHP
      *
      * @param boolean $convertAssertionErrorsToExceptions
      * @param boolean $throwAssertionExceptions
+     *
      * @return mixed Returns the original setting or FALSE on errors
      */
     public function registerAssertionHandler(
@@ -537,12 +527,11 @@ class FirePHP
 
     /**
      * FirePHP's assertion handler
-     *
      * Logs all assertions to your firebug console and then stops the script.
      *
      * @param string $file File source of assertion
-     * @param int $line Line source of assertion
-     * @param mixed $code Assertion code
+     * @param int    $line Line source of assertion
+     * @param mixed  $code Assertion code
      */
     public function assertionHandler($file, $line, $code)
     {
@@ -563,13 +552,13 @@ class FirePHP
 
     /**
      * Start a group for following messages.
-     *
      * Options:
      *   Collapsed: [true|false]
      *   Color:     [#RRGGBB|ColorName]
      *
      * @param string $Name
-     * @param array $Options OPTIONAL Instructions on how to log the group
+     * @param array  $Options OPTIONAL Instructions on how to log the group
+     *
      * @return bool
      * @throws \Exception
      */
@@ -607,8 +596,10 @@ class FirePHP
      * Log object with label to firebug console
      *
      * @see FirePHP::LOG
-     * @param mixed $Object
+     *
+     * @param mixed  $Object
      * @param string $Label
+     *
      * @return bool
      * @throws \Exception
      */
@@ -621,8 +612,10 @@ class FirePHP
      * Log object with label to firebug console
      *
      * @see FirePHP::INFO
-     * @param mixed $Object
+     *
+     * @param mixed  $Object
      * @param string $Label
+     *
      * @return bool
      * @throws \Exception
      */
@@ -635,8 +628,10 @@ class FirePHP
      * Log object with label to firebug console
      *
      * @see FirePHP::WARN
-     * @param mixed $Object
+     *
+     * @param mixed  $Object
      * @param string $Label
+     *
      * @return bool
      * @throws \Exception
      */
@@ -649,8 +644,10 @@ class FirePHP
      * Log object with label to firebug console
      *
      * @see FirePHP::ERROR
-     * @param mixed $Object
+     *
+     * @param mixed  $Object
      * @param string $Label
+     *
      * @return bool
      * @throws \Exception
      */
@@ -663,8 +660,10 @@ class FirePHP
      * Dumps key and variable to firebug server panel
      *
      * @see FirePHP::DUMP
+     *
      * @param string $Key
-     * @param mixed $Variable
+     * @param mixed  $Variable
+     *
      * @return bool
      * @throws \Exception
      */
@@ -686,7 +685,9 @@ class FirePHP
      * Log a trace in the firebug console
      *
      * @see FirePHP::TRACE
+     *
      * @param string $Label
+     *
      * @return bool
      * @throws \Exception
      */
@@ -699,8 +700,10 @@ class FirePHP
      * Log a table in the firebug console
      *
      * @see FirePHP::TABLE
+     *
      * @param string $Label
      * @param string $Table
+     *
      * @return bool
      * @throws \Exception
      */
@@ -766,7 +769,9 @@ class FirePHP
      * Log varible to Firebug
      *
      * @see http://www.firephp.org/Wiki/Reference/Fb
+     *
      * @param mixed $Object The variable to be logged
+     *
      * @return bool Return TRUE if message was added to headers, FALSE otherwise
      * @throws \Exception
      */
@@ -1160,6 +1165,7 @@ class FirePHP
      * Standardizes path for windows systems.
      *
      * @param string $Path
+     *
      * @return string
      */
     protected function _standardizePath($Path)
@@ -1171,6 +1177,7 @@ class FirePHP
      * Escape trace path for windows systems
      *
      * @param array $Trace
+     *
      * @return array
      */
     protected function _escapeTrace($Trace)
@@ -1193,6 +1200,7 @@ class FirePHP
      * Escape file information of trace for windows systems
      *
      * @param string $File
+     *
      * @return string
      */
     protected function _escapeTraceFile($File)
@@ -1211,7 +1219,7 @@ class FirePHP
     /**
      * Check if headers have already been sent
      *
-     * @param string $Filename
+     * @param string  $Filename
      * @param integer $Linenum
      */
     protected function headersSent(&$Filename, &$Linenum)
@@ -1287,6 +1295,7 @@ class FirePHP
      * Returns a new \Exception
      *
      * @param string $Message
+     *
      * @return \Exception
      */
     protected function newException($Message)
@@ -1296,10 +1305,10 @@ class FirePHP
 
     /**
      * Encode an object into a JSON string
-     *
      * Uses PHP's jeson_encode() if available
      *
      * @param object $Object The object to be encoded
+     *
      * @return string The JSON string
      */
     public function jsonEncode($Object, $skipObjectEncode = false)
@@ -1322,6 +1331,7 @@ class FirePHP
      * Encodes a table by encoding each row and column with encodeObject()
      *
      * @param array $Table The table to be encoded
+     *
      * @return array
      */
     protected function encodeTable($Table)
@@ -1353,7 +1363,8 @@ class FirePHP
      * protected and private visibility
      *
      * @param Object $Object The object to be encoded
-     * @param int $Depth The current traversal depth
+     * @param int    $Depth  The current traversal depth
+     *
      * @return array All members of the object
      */
     protected function encodeObject($Object, $ObjectDepth = 1, $ArrayDepth = 1, $MaxDepth = 1)
@@ -1523,6 +1534,7 @@ class FirePHP
      * Returns true if $string is valid UTF-8 and false otherwise.
      *
      * @param mixed $str String to be tested
+     *
      * @return boolean
      */
     protected static function is_utf8($str)
@@ -1570,7 +1582,6 @@ class FirePHP
 
     /**
      * Converts to and from JSON format.
-     *
      * JSON (JavaScript Object Notation) is a lightweight data-interchange
      * format. It is easy for humans to read and write. It is easy for machines
      * to parse and generate. It is based on a subset of the JavaScript
@@ -1580,7 +1591,6 @@ class FirePHP
      * to programmers of the C-family of languages, including C, C++, C#, Java,
      * JavaScript, Perl, TCL, and many others. These properties make JSON an
      * ideal data-interchange language.
-     *
      * This package provides a simple encoder and decoder for JSON notation. It
      * is intended for use with client-side Javascript applications that make
      * use of HTTPRequest to perform server communication functions - data can
@@ -1588,9 +1598,7 @@ class FirePHP
      * decoded from incoming Javascript requests. JSON format is native to
      * Javascript, and can be directly eval()'ed with no further parsing
      * overhead
-     *
      * All strings should be in ASCII or UTF-8 format!
-     *
      * LICENSE: Redistribution and use in source and binary forms, with or
      * without modification, are permitted provided that the following
      * conditions are met: Redistributions of source code must retain the
@@ -1599,7 +1607,6 @@ class FirePHP
      * copyright notice, this list of conditions and the following disclaimer
      * in the documentation and/or other materials provided with the
      * distribution.
-     *
      * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESS OR IMPLIED
      * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
      * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN
@@ -1633,12 +1640,12 @@ class FirePHP
 
     /**
      * convert a string from one UTF-8 char to one UTF-16 char
-     *
      * Normally should be handled by mb_convert_encoding, but
      * provides a slower PHP-only method for installations
      * that lack the multibye string extension.
      *
      * @param    string $utf8   UTF-8 character
+     *
      * @return   string  UTF-16 character
      * @access   private
      */
@@ -1684,7 +1691,7 @@ class FirePHP
     /**
      * encodes an arbitrary variable into JSON format
      *
-     * @param    mixed $var    any number, boolean, string, array, or object to be encoded.
+     * @param    mixed $var      any number, boolean, string, array, or object to be encoded.
      *                           see argument 1 to Services_JSON() above for array-parsing behavior.
      *                           if var is a strng, note that encode() always expects it
      *                           to be in ASCII or UTF-8 format!
@@ -1918,7 +1925,7 @@ class FirePHP
      * array-walking function for use in generating JSON-formatted name-value pairs
      *
      * @param    string $name   name of key to use
-     * @param    mixed $value  reference to an array element to be encoded
+     * @param    mixed  $value  reference to an array element to be encoded
      *
      * @return   string  JSON-formatted name-value pair, like '"name":value'
      * @access   private
@@ -2015,7 +2022,9 @@ if (!class_exists('FirePHP')) {
  * "Server" request tab.
  *
  * @see http://www.firephp.org/Wiki/Reference/Fb
+ *
  * @param mixed $Object
+ *
  * @return bool
  * @throws \Exception
  */
@@ -2034,7 +2043,9 @@ class FB
      * Enable and disable logging to Firebug
      *
      * @see FirePHP->setEnabled()
+     *
      * @param boolean $Enabled TRUE to enable, FALSE to disable
+     *
      * @return void
      */
     public static function setEnabled($Enabled)
@@ -2057,12 +2068,13 @@ class FB
 
     /**
      * Specify a filter to be used when encoding an object
-     *
      * Filters are used to exclude object members.
      *
      * @see FirePHP->setObjectFilter()
-     * @param string $Class The class name of the object
-     * @param array $Filter An array or members to exclude
+     *
+     * @param string $Class  The class name of the object
+     * @param array  $Filter An array or members to exclude
+     *
      * @return void
      */
     public static function setObjectFilter($Class, $Filter)
@@ -2075,7 +2087,9 @@ class FB
      * Set some options for the library
      *
      * @see FirePHP->setOptions()
+     *
      * @param array $Options The options to be set
+     *
      * @return void
      */
     public static function setOptions($Options)
@@ -2100,7 +2114,9 @@ class FB
      * Log object to firebug
      *
      * @see http://www.firephp.org/Wiki/Reference/Fb
+     *
      * @param mixed $Object
+     *
      * @return bool
      * @throws \Exception
      */
@@ -2113,13 +2129,13 @@ class FB
 
     /**
      * Start a group for following messages
-     *
      * Options:
      *   Collapsed: [true|false]
      *   Color:     [#RRGGBB|ColorName]
      *
      * @param string $Name
-     * @param array $Options OPTIONAL Instructions on how to log the group
+     * @param array  $Options OPTIONAL Instructions on how to log the group
+     *
      * @return bool
      */
     public static function group($Name, $Options = null)
@@ -2143,8 +2159,10 @@ class FB
      * Log object with label to firebug console
      *
      * @see FirePHP::LOG
-     * @param mixed $Object
+     *
+     * @param mixed  $Object
      * @param string $Label
+     *
      * @return bool
      * @throws \Exception
      */
@@ -2157,8 +2175,10 @@ class FB
      * Log object with label to firebug console
      *
      * @see FirePHP::INFO
-     * @param mixed $Object
+     *
+     * @param mixed  $Object
      * @param string $Label
+     *
      * @return bool
      * @throws \Exception
      */
@@ -2171,8 +2191,10 @@ class FB
      * Log object with label to firebug console
      *
      * @see FirePHP::WARN
-     * @param mixed $Object
+     *
+     * @param mixed  $Object
      * @param string $Label
+     *
      * @return bool
      * @throws \Exception
      */
@@ -2185,8 +2207,10 @@ class FB
      * Log object with label to firebug console
      *
      * @see FirePHP::ERROR
-     * @param mixed $Object
+     *
+     * @param mixed  $Object
      * @param string $Label
+     *
      * @return bool
      * @throws \Exception
      */
@@ -2199,8 +2223,10 @@ class FB
      * Dumps key and variable to firebug server panel
      *
      * @see FirePHP::DUMP
+     *
      * @param string $Key
-     * @param mixed $Variable
+     * @param mixed  $Variable
+     *
      * @return bool
      * @throws \Exception
      */
@@ -2213,7 +2239,9 @@ class FB
      * Log a trace in the firebug console
      *
      * @see FirePHP::TRACE
+     *
      * @param string $Label
+     *
      * @return bool
      * @throws \Exception
      */
@@ -2226,8 +2254,10 @@ class FB
      * Log a table in the firebug console
      *
      * @see FirePHP::TABLE
+     *
      * @param string $Label
      * @param string $Table
+     *
      * @return bool
      * @throws \Exception
      */

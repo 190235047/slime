@@ -3,6 +3,19 @@ namespace SlimeFramework\Component\Http;
 
 class Request
 {
+    public $sProtocol;
+    public $sMethod;
+    public $sRequestURI;
+
+    public $aHeader;
+    public $sBody;
+
+    public $aGetData;
+    public $aPostData;
+    public $aCookies;
+    public $aFile;
+
+
     /**
      * Constructor.
      *
@@ -35,7 +48,7 @@ class Request
         $this->sRequestURI    = $aServer['REQUEST_URI'];
         $this->sProtocol      = $aServer['SERVER_PROTOCOL'];
 
-        $this->sContents    = $sContent;
+        $this->sContents = $sContent;
     }
 
     /**
@@ -62,20 +75,18 @@ class Request
 
     /**
      * Creates a Request based on a given URI and configuration.
-     *
      * The information contained in the URI always take precedence
      * over the other information (server and parameters).
      *
      * @param string $sURI        The URI
      * @param string $sMethod     The HTTP method
-     * @param array $aParameter  The query (GET) or request (POST) parameters
-     * @param array $aCookie     The request cookies ($_COOKIE)
-     * @param array $aFile       The request files ($_FILES)
-     * @param array $aServer     The server parameters ($_SERVER)
+     * @param array  $aParameter  The query (GET) or request (POST) parameters
+     * @param array  $aCookie     The request cookies ($_COOKIE)
+     * @param array  $aFile       The request files ($_FILES)
+     * @param array  $aServer     The server parameters ($_SERVER)
      * @param string $sContent    The raw body data
      *
      * @return Request A Request instance
-     *
      * @api
      */
     public static function create(
@@ -249,7 +260,7 @@ class Request
         if (is_array($mKeyOrKeys)) {
             $aResult = array();
             foreach ($mKeyOrKeys as $sKey) {
-                $aResult[$sKey] =isset($Q1[$sKey]) ? $Q1[$sKey] : (isset($Q2[$sKey]) ? $Q2[$sKey] : null);
+                $aResult[$sKey] = isset($Q1[$sKey]) ? $Q1[$sKey] : (isset($Q2[$sKey]) ? $Q2[$sKey] : null);
             }
             return $aResult;
         } else {

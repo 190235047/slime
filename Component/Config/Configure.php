@@ -7,7 +7,7 @@ use Psr\Log\LoggerInterface;
  * Class Configure
  *
  * @package SlimeFramework\Component\Config
- * @author smallslime@gmail.com
+ * @author  smallslime@gmail.com
  * @version 1.0
  */
 final class Configure implements IAdaptor
@@ -30,8 +30,9 @@ final class Configure implements IAdaptor
 
     /**
      * @param string $sKey
-     * @param mixed $sDefaultValue
-     * @param int $iErrorLevel
+     * @param mixed  $sDefaultValue
+     * @param int    $iErrorLevel
+     *
      * @return mixed
      */
     public function get($sKey, $sDefaultValue = null, $iErrorLevel = 0)

@@ -34,7 +34,7 @@ class Pool
 
     public function getOneIdleChild()
     {
-        return count($this->aIdleChild)===0 ? null : $this->aChild[array_rand($this->aIdleChild)];
+        return count($this->aIdleChild) === 0 ? null : $this->aChild[array_rand($this->aIdleChild)];
     }
 
     public function getBusyChildren()

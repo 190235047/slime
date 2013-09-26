@@ -10,20 +10,20 @@ class Tree_Node
 
     public function __construct(
         Tree_Pool $Pool,
-        $sKey, 
+        $sKey,
         $aAttr = array(),
         Tree_Node $Parent = null
-    )
-    {
-        $this->sKey     = $sKey;
-        $this->Pool     = $Pool;
-        $this->Parent   = $Parent;
-        $this->aAttr    = $aAttr;
-        $this->iLevel   = $Parent===null ? 0 : $Parent->iLevel + 1;
+    ) {
+        $this->sKey   = $sKey;
+        $this->Pool   = $Pool;
+        $this->Parent = $Parent;
+        $this->aAttr  = $aAttr;
+        $this->iLevel = $Parent === null ? 0 : $Parent->iLevel + 1;
     }
 
     /**
      * @param string $sKey
+     *
      * @return mixed
      */
     public function getAttr($sKey)
@@ -58,15 +58,15 @@ class Tree_Node
 
     public function changeParent(Tree_Node $Parent = null)
     {
-        if ($this->Parent!==null) {
+        if ($this->Parent !== null) {
             unset($this->Parent->aChildren[$this->sKey]);
         }
         if ($Parent === null) {
             $iLevel = 0;
         } else {
-            $this->Parent = $Parent;
+            $this->Parent                   = $Parent;
             $Parent->aChildren[$this->sKey] = $this;
-            $iLevel = $Parent->iLevel + 1;
+            $iLevel                         = $Parent->iLevel + 1;
         }
         $this->updateLevel($this, $iLevel);
     }
@@ -76,17 +76,18 @@ class Tree_Node
         if (isset($this->Pool->aaPoolLevel[$Node->iLevel][$Node->sKey])) {
             unset($this->Pool->aaPoolLevel[$Node->iLevel][$Node->sKey]);
         }
-        $Node->iLevel = $iLevel;
+        $Node->iLevel                                        = $iLevel;
         $this->Pool->aaPoolLevel[$Node->iLevel][$Node->sKey] = $Node;
         if (!empty($Node->aChildren)) {
             foreach ($Node->aChildren as $Child) {
-                $this->updateLevel($Child, $iLevel+1);
+                $this->updateLevel($Child, $iLevel + 1);
             }
         }
     }
 
     /**
      * @param int $iUntilLevel top is 0, n>0:level n, n<0:pre n
+     *
      * @return $this|null
      */
     public function findParent($iUntilLevel)
@@ -94,9 +95,9 @@ class Tree_Node
         $Node = $this;
         if ($iUntilLevel < 0) {
             $iUntilLevel = 0 - $iUntilLevel;
-            for ($i=0;$i < $iUntilLevel; $i++) {
+            for ($i = 0; $i < $iUntilLevel; $i++) {
                 $Node = $Node->Parent;
-                if ($Node===null) {
+                if ($Node === null) {
                     break;
                 }
             }
@@ -127,7 +128,7 @@ class Tree_Node
 
     private function __treeString(Tree_Node $Node, $iIndent, &$sStr)
     {
-        $sStr .= '|' . str_repeat('----', $iIndent) . '[' . get_class($Node) . ']' .(string)$Node . PHP_EOL;
+        $sStr .= '|' . str_repeat('----', $iIndent) . '[' . get_class($Node) . ']' . (string)$Node . PHP_EOL;
         if (!empty($Node->aChildren)) {
             $iIndent++;
             foreach ($Node->aChildren as $Child) {

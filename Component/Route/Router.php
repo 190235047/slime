@@ -6,14 +6,15 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Class Route
+ *
  * @package Slime
- * @author smallslime@gmail.com
+ * @author  smallslime@gmail.com
  * @version 1.0
  */
 class Router
 {
     /**
-     * @param string $sAppNS
+     * @param string          $sAppNS
      * @param LoggerInterface $Log
      */
     public function __construct($sAppNS, LoggerInterface $Log)
@@ -24,7 +25,8 @@ class Router
 
     /**
      * @param Http\Request $HttpRequest
-     * @param $aRule
+     * @param              $aRule
+     *
      * @return \SlimeFramework\Component\Route\CallBack
      */
     public function generateFromHttp(Http\Request $HttpRequest, $aRule)
@@ -88,12 +90,14 @@ class Router
 
     /**
      * generate from cli input [/your_php_bin/php /your_project/index.php class.method|func json_str
+     *
      * @return array [0=>callable, 1=>params] || []
      */
 
     /**
      * @param array $aArg
      * @param array $aRule
+     *
      * @return \SlimeFramework\Component\Route\CallBack
      */
     public function generateFromCli(array $aArg, array $aRule)

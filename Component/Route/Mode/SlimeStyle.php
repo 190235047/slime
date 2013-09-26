@@ -6,8 +6,9 @@ use SlimeFramework\Component\Http;
 class Mode_SlimeStyle implements IMode
 {
     /**
-     * @param \SlimeFramework\Component\Http\Request $Request
+     * @param \SlimeFramework\Component\Http\Request   $Request
      * @param \SlimeFramework\Component\Route\CallBack $CallBack
+     *
      * @return bool [true:continue next rule, false||other:break{default action}]
      */
     public function runHttp(Http\Request $Request, CallBack $CallBack)
@@ -33,7 +34,7 @@ class Mode_SlimeStyle implements IMode
             $sAction = strstr($sAction, '.', true);
         }
         $sRequestMethod = $Request->getRequestMethod();
-        if ($sRequestMethod!=='GET') {
+        if ($sRequestMethod !== 'GET') {
             $sAction .= '_' . $sRequestMethod;
         }
 
@@ -51,7 +52,7 @@ class Mode_SlimeStyle implements IMode
         }
         $CallBack->setCBObject("ControllerCli_{$aArr[0]}", "action{$aArr[1]}");
 
-        $aParam  = empty($aArg[2]) ? array() : json_decode($aArg[2], true);
+        $aParam = empty($aArg[2]) ? array() : json_decode($aArg[2], true);
         $CallBack->setParam($aParam);
         return $CallBack;
     }

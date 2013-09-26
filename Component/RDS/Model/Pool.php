@@ -28,6 +28,7 @@ class Model_Pool
 
     /**
      * @param $sModel
+     *
      * @return Model_Model
      */
     public function get($sModel)

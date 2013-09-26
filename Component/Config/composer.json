@@ -1,6 +1,6 @@
 {
     "name": "SlimeFramework Configure",
-    "description":"Load runtime config class",
+    "description": "Load runtime config class",
     "require": {
         "Psr/Log": "*"
     }

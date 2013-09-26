@@ -12,24 +12,28 @@ abstract class Controller_Http
 
     /**
      * default : method get make this value as true
+     *
      * @var bool
      */
     protected $bAutoRender;
 
     /**
      * does method is get
+     *
      * @var bool
      */
     protected $bGet;
 
     /**
      * does request is ajax
+     *
      * @var bool
      */
     protected $bAjax;
 
     /**
      * default : (method not get) and (request not ajax) make this value as true
+     *
      * @var bool
      */
     protected $bAutoRedirect;
@@ -52,14 +56,14 @@ abstract class Controller_Http
     public function __after__()
     {
         # header
-        if ($this->HttpResponse->getHeader('Content-Type')===null) {
+        if ($this->HttpResponse->getHeader('Content-Type') === null) {
             if ($this->bAjax) {
                 $this->HttpResponse->setHeader('Content-Type', 'application/javascript; charset=utf-8', false);
             } else {
                 $this->HttpResponse->setHeader('Content-type', 'text/html; charset=utf-8', false);
             }
         }
-        if ($this->bAutoRedirect && $this->HttpResponse->getHeader('Location')===null) {
+        if ($this->bAutoRedirect && $this->HttpResponse->getHeader('Location') === null) {
             $this->HttpResponse->setRedirect($this->HttpRequest->getHeader('REFERER'));
         }
 

@@ -1,5 +1,6 @@
 <?php
 namespace SlimeFramework\Component\DataStruct;
+
 /*
 $Top = new Tree_Node(new Tree_Pool(new Logger([new Writer_STDFD()]), 'movie', array('cname' => '电影', 'class' => 'c-1', 'hidden' => false));
 
@@ -32,83 +33,83 @@ $aConf = array(
                 'name' => '灰度规则',
                 'icon' => 'icon-task',
                 array(
-                    '/gray/service/' => array(
+                    '/gray/service/'    => array(
                         'name' => '服务管理',
                         'icon' => 'icon-reorder',
                         array(
                             '/gray/service/list' => array(
                                 'name' => '服务列表'
                             ),
-                            '/gray/service/add' => array(
+                            '/gray/service/add'  => array(
                                 'name' => '添加服务'
                             ),
                             '/gray/service/edit' => array(
-                                'name'  => '编辑服务',
-                                'hidden'=> true
+                                'name'   => '编辑服务',
+                                'hidden' => true
                             )
                         )
                     ),
-                    '/gray/cmd/' => array(
+                    '/gray/cmd/'        => array(
                         'name' => '命令管理',
                         'icon' => 'icon-tasks',
                         array(
                             '/gray/cmd/list' => array(
                                 'name' => '命令列表'
                             ),
-                            '/gray/cmd/add' => array(
+                            '/gray/cmd/add'  => array(
                                 'name' => '添加命令'
                             ),
                             '/gray/cmd/edit' => array(
-                                'name'  => '编辑命令',
-                                'hidden'=> true
+                                'name'   => '编辑命令',
+                                'hidden' => true
                             )
                         )
                     ),
-                    '/gray/keyword/' => array(
+                    '/gray/keyword/'    => array(
                         'name' => '关键字管理',
                         'icon' => 'icon-book',
                         array(
                             '/gray/keyword/list' => array(
                                 'name' => '关键字列表'
                             ),
-                            '/gray/keyword/add' => array(
+                            '/gray/keyword/add'  => array(
                                 'name' => '添加关键字'
                             ),
                             '/gray/keyword/edit' => array(
-                                'name'  => '编辑关键字',
-                                'hidden'=> true
+                                'name'   => '编辑关键字',
+                                'hidden' => true
                             )
                         )
                     ),
-                    '/gray/rule/' => array(
+                    '/gray/rule/'       => array(
                         'name' => '规则管理',
                         'icon' => 'icon-random',
                         array(
                             '/gray/rule/list' => array(
                                 'name' => '规则列表'
                             ),
-                            '/gray/rule/add' => array(
+                            '/gray/rule/add'  => array(
                                 'name' => '添加规则'
                             ),
                             '/gray/rule/edit' => array(
-                                'name'  => '编辑规则',
-                                'hidden'=> true
+                                'name'   => '编辑规则',
+                                'hidden' => true
                             )
                         )
                     ),
-                    '/gray/kv_group/' => array(
+                    '/gray/kv_group/'   => array(
                         'name' => '键值对管理',
                         'icon' => 'icon-edit',
                         array(
                             '/gray/kv_group/list' => array(
                                 'name' => '键值对列表'
                             ),
-                            '/gray/kv_group/add' => array(
+                            '/gray/kv_group/add'  => array(
                                 'name' => '添加键值对'
                             ),
                             '/gray/kv_group/edit' => array(
-                                'name'  => '编辑键值对',
-                                'hidden'=> true
+                                'name'   => '编辑键值对',
+                                'hidden' => true
                             )
                         )
                     ),
@@ -119,25 +120,25 @@ $aConf = array(
                             '/gray/file_group/group_add' => array(
                                 'name' => '添加文件组'
                             ),
-                            '/gray/file_group/file_add' => array(
-                                'name'  => '添加文件',
-                                'hidden'=> true
+                            '/gray/file_group/file_add'  => array(
+                                'name'   => '添加文件',
+                                'hidden' => true
                             )
                         )
                     ),
-                    '/gray/kv_action/' => array(
+                    '/gray/kv_action/'  => array(
                         'name' => '动作管理',
                         'icon' => 'icon-bell',
                         array(
                             '/gray/action/list' => array(
                                 'name' => '动作列表'
                             ),
-                            '/gray/action/add' => array(
+                            '/gray/action/add'  => array(
                                 'name' => '添加动作'
                             ),
                             '/gray/action/edit' => array(
-                                'name'  => '编辑动作',
-                                'hidden'=> true
+                                'name'   => '编辑动作',
+                                'hidden' => true
                             )
                         )
                     ),

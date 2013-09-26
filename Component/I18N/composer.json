@@ -1,6 +1,6 @@
 {
     "name": "SlimeFramework I18N",
-    "description":"A PHP I18N Library",
+    "description": "A PHP I18N Library",
     "require": {
         "SlimeFramework/Component/Config": "*"
     }

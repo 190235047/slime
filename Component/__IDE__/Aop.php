@@ -24,92 +24,135 @@ define('AOP_KIND_BEFORE_FUNCTION', 130);
 define('AOP_KIND_AFTER_FUNCTION', 132);
 define('AOP_KIND_AROUND_FUNCTION', 129);
 
-function aop_add_before($pointcut, $advice) {}
-function aop_add_after($pointcut, $advice) {}
-function aop_add_around($pointcut, $advice) {}
+function aop_add_before($pointcut, $advice)
+{
+}
+
+function aop_add_after($pointcut, $advice)
+{
+}
+
+function aop_add_around($pointcut, $advice)
+{
+}
 
 class AopJoinPoint
 {
     /**
      * @return array
      */
-    public function &getArguments() {}
+    public function &getArguments()
+    {
+    }
 
     /**
      * @return string
      */
-    public function getPropertyName() {}
+    public function getPropertyName()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function getPropertyValue() {}
+    public function getPropertyValue()
+    {
+    }
 
     /**
      * @param array $arguments
+     *
      * @return void
      */
-    public function setArguments(array $arguments) {}
+    public function setArguments(array $arguments)
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function getKindOfAdvice() {}
+    public function getKindOfAdvice()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function &getReturnedValue() {}
+    public function &getReturnedValue()
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function &getAssignedValue() {}
+    public function &getAssignedValue()
+    {
+    }
 
     /**
      * @param $value
+     *
      * @return void
      */
-    public function setReturnedValue($value) {}
+    public function setReturnedValue($value)
+    {
+    }
 
     /**
      * @param $value
+     *
      * @return void
      */
-    public function setAssignedValue($value) {}
+    public function setAssignedValue($value)
+    {
+    }
 
     /**
      * @return mixed
      */
-    public function getPointcut() {}
+    public function getPointcut()
+    {
+    }
 
     /**
      * @return Object
      */
-    public function getObject() {}
+    public function getObject()
+    {
+    }
 
     /**
      * @return string
      */
-    public function getClassName() {}
+    public function getClassName()
+    {
+    }
 
     /**
      * @return string
      */
-    public function getMethodName() {}
+    public function getMethodName()
+    {
+    }
 
     /**
      * @return string
      */
-    public function getFunctionName() {}
+    public function getFunctionName()
+    {
+    }
 
     /**
      * @return \Exception
      */
-    public function getException() {}
+    public function getException()
+    {
+    }
 
     /**
      * @return void
      */
-    public function process() {}
+    public function process()
+    {
+    }
 }

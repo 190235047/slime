@@ -14,7 +14,8 @@ class Response
         return new self();
     }
 
-    public function getHeader($sKey) {
+    public function getHeader($sKey)
+    {
         return isset($this->aHeader[$sKey]) ? $this->aHeader[$sKey] : null;
     }
 
@@ -26,14 +27,21 @@ class Response
         return $this;
     }
 
-    public function setCookie($sName, $sValue, $iExpire = null, $sPath = null, $sDomain = null, $bSecure = null, $bHttpOnly = null)
-    {
+    public function setCookie(
+        $sName,
+        $sValue,
+        $iExpire = null,
+        $sPath = null,
+        $sDomain = null,
+        $bSecure = null,
+        $bHttpOnly = null
+    ) {
         $this->aHeaderCookie[$sName] = array(
-            'value' => $sValue,
-            'expire' => $iExpire,
-            'path' => $sPath,
-            'domain' => $sDomain,
-            'is_secure' => $bSecure,
+            'value'       => $sValue,
+            'expire'      => $iExpire,
+            'path'        => $sPath,
+            'domain'      => $sDomain,
+            'is_secure'   => $bSecure,
             'is_httponly' => $bHttpOnly
         );
         return $this;
@@ -78,12 +86,13 @@ class Response
 
         // headers
         foreach ($this->aHeader as $sK => $sV) {
-            header($sK.': '.$sV);
+            header($sK . ': ' . $sV);
         }
 
         // cookies
         foreach ($this->aHeaderCookie as $sName => $aCookie) {
-            setcookie($sName,
+            setcookie(
+                $sName,
                 $aCookie['value'],
                 $aCookie['expire'],
                 isset($aCookie['path']) ? $aCookie['path'] : null,
@@ -112,8 +121,6 @@ class Response
      * Sends HTTP headers and content.
      *
      * @return $this
-     *
-     * @api
      */
     public function send()
     {

@@ -41,6 +41,7 @@ class Model_Model
 
     /**
      * @param $mPKOrWhere
+     *
      * @return Model_Item
      */
     public function find($mPKOrWhere)
@@ -58,11 +59,12 @@ class Model_Model
     }
 
     /**
-     * @param array $aWhere
+     * @param array  $aWhere
      * @param string $sOrderBy
-     * @param int $iLimit
-     * @param int $iOffset
+     * @param int    $iLimit
+     * @param int    $iOffset
      * @param string $sAttr
+     *
      * @return Model_Group
      */
     public function findMulti($aWhere = array(), $sOrderBy = null, $iLimit = null, $iOffset = null, $sAttr = '')
@@ -91,8 +93,9 @@ class Model_Model
     }
 
     /**
-     * @param string $sModelName
+     * @param string     $sModelName
      * @param Model_Item $ModelItem
+     *
      * @return Model_Item|Model_Item[]|null
      */
     public function relation($sModelName, Model_Item $ModelItem)
@@ -105,8 +108,9 @@ class Model_Model
     }
 
     /**
-     * @param string $sModelName
+     * @param string     $sModelName
      * @param Model_Item $ModelItem
+     *
      * @return Model_Item|null
      */
     public function hasOne($sModelName, $ModelItem)
@@ -116,8 +120,9 @@ class Model_Model
     }
 
     /**
-     * @param string $sModelName
+     * @param string     $sModelName
      * @param Model_Item $ModelItem
+     *
      * @return Model_Item|null
      */
     public function belongsTo($sModelName, $ModelItem)
@@ -127,8 +132,9 @@ class Model_Model
     }
 
     /**
-     * @param $sModel
+     * @param            $sModel
      * @param Model_Item $ModelItem
+     *
      * @return Model_Group
      */
     public function hasMany($sModel, $ModelItem = null)

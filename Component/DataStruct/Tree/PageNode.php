@@ -13,13 +13,12 @@ class Tree_PageNode extends Tree_Node
         $sKey,
         $aAttr = array(),
         Tree_PageNode $Parent = null
-    )
-    {
-        $this->sKey     = $sKey;
-        $this->Pool     = $Pool;
-        $this->Parent   = $Parent;
-        $this->aAttr    = $aAttr;
-        $this->iLevel   = $Parent===null ? 0 : $Parent->iLevel + 1;
+    ) {
+        $this->sKey   = $sKey;
+        $this->Pool   = $Pool;
+        $this->Parent = $Parent;
+        $this->aAttr  = $aAttr;
+        $this->iLevel = $Parent === null ? 0 : $Parent->iLevel + 1;
         if (!isset($this->aAttr['url'])) {
             $this->aAttr['url'] = $sKey;
         }

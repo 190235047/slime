@@ -16,8 +16,10 @@ class I18N
 
     public function __construct($sBaseDir, $sLang = null)
     {
-        if ($sLang===null) {
-            $sLang = empty($_COOKIE[self::$sCookieKey]) ? strtolower(strtok(strip_tags($_SERVER['HTTP_ACCEPT_LANGUAGE']), ',')) : $_COOKIE[self::$sCookieKey];
+        if ($sLang === null) {
+            $sLang = empty($_COOKIE[self::$sCookieKey]) ? strtolower(
+                strtok(strip_tags($_SERVER['HTTP_ACCEPT_LANGUAGE']), ',')
+            ) : $_COOKIE[self::$sCookieKey];
         }
         $sLangDir = null;
         foreach (self::$aLangMapDir as $sK => $sV) {
@@ -26,8 +28,7 @@ class I18N
                 break;
             }
         }
-        $this->sLangDir = $sLangDir===null ? self::$sDefaultLangDir : $sLangDir;
-
+        $this->sLangDir  = $sLangDir === null ? self::$sDefaultLangDir : $sLangDir;
         $this->Configure = new Config\Configure(
             'PHP',
             $sBaseDir . DIRECTORY_SEPARATOR . $sLangDir,

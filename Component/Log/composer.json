@@ -1,6 +1,6 @@
 {
     "name": "SlimeFramework Log",
-    "description":"A log library compatible with psr-3",
+    "description": "A log library compatible with psr-3",
     "require": {
         "Psr/Log": "*"
     }

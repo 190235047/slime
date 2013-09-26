@@ -9,7 +9,7 @@ class Writer_WebPage implements IWriter
 
     public function __construct($sDebugLayer = null)
     {
-        if ($sDebugLayer!==null) {
+        if ($sDebugLayer !== null) {
             $this->sDebugLayer = $sDebugLayer;
         }
     }
@@ -21,7 +21,7 @@ class Writer_WebPage implements IWriter
 
     public function __destruct()
     {
-        if ($this->sDebugLayer===null) {
+        if ($this->sDebugLayer === null) {
             $sLi       = $sUl = '';
             $aTidyData = array();
             foreach ($this->aData as $aRow) {
@@ -97,7 +97,7 @@ class Writer_WebPage implements IWriter
     </script>
 HTML;
         } else {
-            $aData = $this->aData;
+            $aData   = $this->aData;
             $sResult = require $this->sDebugLayer;
         }
 

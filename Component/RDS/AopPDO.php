@@ -6,8 +6,9 @@ use SlimeFramework\Core\Context;
 
 /**
  * Class AopPDO
+ *
  * @package SlimeFramework\Component\RDS
- * @author smallslime@gmail.com
+ * @author  smallslime@gmail.com
  * @version 0.1
  */
 class AopPDO
@@ -27,7 +28,7 @@ class AopPDO
                 $Log->debug('SQL : cost[{cost}]', array('cost' => sprintf('%.4f', $fT2 - $fT1)));
             }
         );
- 
+
         \aop_add_around(
             'PDOStatement->execute()',
             function (\AopJoinPoint $JoinPoint) {

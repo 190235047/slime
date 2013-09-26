@@ -3,8 +3,9 @@ namespace SlimeFramework\Component\RDS;
 
 /**
  * Class PDO
- * @package Slime\RDS
- * @author smallslime@gmail.com
+ *
+ * @package SlimeFramework\Component\RDS
+ * @author  smallslime@gmail.com
  * @version 0.1
  */
 class CURD
@@ -33,6 +34,7 @@ class CURD
 
     /**
      * @param bool $bCheckConnect
+     *
      * @return \PDO
      */
     public function getInstance($bCheckConnect = false)
@@ -69,21 +71,21 @@ class CURD
         if (empty($sSelect)) {
             $sSelect = '*';
         }
-        if ($bOnlyOne && stripos($sAttr, 'limit')===false) {
+        if ($bOnlyOne && stripos($sAttr, 'limit') === false) {
             $sAttr .= " LIMIT 1";
         }
         $sWhere      = $this->buildCondition($aWhere, $aArgs = array());
         $sSQLPrepare = "SELECT $sSelect FROM $sTable WHERE $sWhere $sAttr";
         $Stmt        = $this->getInstance()->prepare($sSQLPrepare);
         $Stmt->execute($aArgs);
-        if ($mFetchArgs!==null) {
+        if ($mFetchArgs !== null) {
             $Stmt->setFetchMode($iFetchStyle, $mFetchArgs);
         } else {
             $Stmt->setFetchMode($iFetchStyle);
         }
         return $bOnlyOne ? $Stmt->fetch() : $Stmt->fetchAll();
     }
- 
+
     public function queryCount(
         $sTable,
         $aWhere = array(),
@@ -100,8 +102,9 @@ class CURD
 
     /**
      * @param string $sTable
-     * @param array $aKVMap
-     * @param array $aWhere
+     * @param array  $aKVMap
+     * @param array  $aWhere
+     *
      * @return bool
      */
     public function updateSmarty($sTable, array $aKVMap, array $aWhere)
@@ -131,8 +134,9 @@ class CURD
 
     /**
      * @param string $sTable
-     * @param array $aKVMap
-     * @param int $iType
+     * @param array  $aKVMap
+     * @param int    $iType
+     *
      * @return null|string
      */
     public function insertSmarty($sTable, array $aKVMap, $iType = self::INSERT_STANDARD)
@@ -144,8 +148,8 @@ class CURD
             isset($aKVMap[0]) ? '' : '(`' . implode('`,`', array_keys($aKVMap)) . '`)',
             implode(',', array_pad(array(), count($aKVMap), '?'))
         );
-        $PDO  = $this->getInstance();
-        $STMT = $PDO->prepare($sSQLPrepare);
+        $PDO         = $this->getInstance();
+        $STMT        = $PDO->prepare($sSQLPrepare);
         if ($STMT->execute(array_values($aKVMap))) {
             return $PDO->lastInsertId();
         } else {
@@ -169,17 +173,17 @@ class CURD
             if (is_int($sK)) {
                 $aWhereBuild[] = '(' . $this->buildCondition($mV, $aArgs) . ')';
             } else {
-                $aTmp          = explode(' ', $sK, 2);
-                $sKey          = $aTmp[0];
-                $sOpt          = isset($aTmp[1]) ? trim($aTmp[1]) : '=';
+                $aTmp = explode(' ', $sK, 2);
+                $sKey = $aTmp[0];
+                $sOpt = isset($aTmp[1]) ? trim($aTmp[1]) : '=';
                 # hack
                 $inOp = strtoupper($sOpt);
-                if ($inOp=='IN' || $inOp=='NOT IN') {
+                if ($inOp == 'IN' || $inOp == 'NOT IN') {
                     $aWhereBuild[] = sprintf("`$sKey` IN (%s)", implode(',', array_fill(0, count($mV), '?')));
-                    $aArgs = array_merge($aArgs, $mV);
+                    $aArgs         = array_merge($aArgs, $mV);
                 } else {
                     $aWhereBuild[] = "`$sKey` $sOpt ?";
-                    $aArgs[] = $mV;
+                    $aArgs[]       = $mV;
                 }
             }
         }
@@ -191,6 +195,7 @@ class CURD
         return array('sDSN', 'sUsername', 'sPassword', 'aOptions', 'bCheckConnect');
     }
 }
+
 if (defined('SlimeFramework.RDS:AOP')) {
     AopPDO::register();
 }

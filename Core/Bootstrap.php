@@ -8,10 +8,10 @@ use SlimeFramework\Component\Http;
 
 /**
  * Class Bootstrap
- * @package SlimeFramework
- * @author smallslime@gmail.com
- * @version 1.0
  *
+ * @package SlimeFramework
+ * @author  smallslime@gmail.com
+ * @version 1.0
  */
 class Bootstrap
 {
@@ -25,7 +25,7 @@ class Bootstrap
      * @param string $sDirConfig
      * @param string $sAppNs
      * @param string $sRunMode (cli||http)
-     * @param array $aLogConfig
+     * @param array  $aLogConfig
      *
      * @return $this
      */
@@ -55,12 +55,12 @@ class Bootstrap
         $aWriter = array();
         foreach ($aLogConfig[$sRunMode]['writer'] as $mKey => $mV) {
             if (is_int($mKey) && is_string($mV)) {
-                $sClassName = $mV[0]==='@' ? '\\SlimeFramework\\Component\\Log\\Writer_' . substr($mV, 1) : $mV;
-                $mV = array();
+                $sClassName = $mV[0] === '@' ? '\\SlimeFramework\\Component\\Log\\Writer_' . substr($mV, 1) : $mV;
+                $mV         = array();
             } else {
-                $sClassName = $mKey[0]==='@' ? '\\SlimeFramework\\Component\\Log\\Writer_' . substr($mKey, 1) : $mV;
+                $sClassName = $mKey[0] === '@' ? '\\SlimeFramework\\Component\\Log\\Writer_' . substr($mKey, 1) : $mV;
             }
-            $Ref = new \ReflectionClass($sClassName);
+            $Ref       = new \ReflectionClass($sClassName);
             $aWriter[] = $Ref->newInstanceArgs($mV);
         }
         $Log = new Log\Logger($aWriter, $aLogConfig[$sRunMode]['level']);
@@ -98,7 +98,7 @@ class Bootstrap
     public function runHttp()
     {
         #register http request and response
-        $HttpRequest = Http\Request::createFromGlobals();
+        $HttpRequest  = Http\Request::createFromGlobals();
         $HttpResponse = Http\Response::factory()->setNoCache();
         $this->Context->register('HttpRequest', $HttpRequest);
         $this->Context->register('HttpResponse', $HttpResponse);

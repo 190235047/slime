@@ -6,8 +6,9 @@ use SlimeFramework\Component\Log\Logger;
 
 /**
  * Class Configure
+ *
  * @package SlimeFramework\Component\Config
- * @author smallslime@gmail.com
+ * @author  smallslime@gmail.com
  * @version 1.0
  */
 class Adaptor_PHP implements IAdaptor
@@ -30,8 +31,9 @@ class Adaptor_PHP implements IAdaptor
 
     /**
      * @param string $sKey
-     * @param mixed $sDefaultValue
-     * @param bool $bForce
+     * @param mixed  $sDefaultValue
+     * @param bool   $bForce
+     *
      * @return mixed
      */
     public function get($sKey, $sDefaultValue = null, $bForce = false)
@@ -44,9 +46,9 @@ class Adaptor_PHP implements IAdaptor
             $mResult           = $mCurrentENVResult === null ?
                 $mDefaultResult :
                 (
-                    is_array($mDefaultResult) ?
-                        array_merge($mDefaultResult, $mCurrentENVResult) :
-                        $mCurrentENVResult
+                is_array($mDefaultResult) ?
+                    array_merge($mDefaultResult, $mCurrentENVResult) :
+                    $mCurrentENVResult
                 );
         }
         if ($mResult === null && $bForce) {

@@ -41,8 +41,8 @@ class Logger implements LoggerInterface
 
     /**
      * @param IWriter[] $aWriter
-     * @param int $iLogLevel
-     * @param null $sRequestID
+     * @param int       $iLogLevel
+     * @param null      $sRequestID
      */
     public function __construct(
         array $aWriter,
@@ -58,7 +58,8 @@ class Logger implements LoggerInterface
      * System is unusable.
      *
      * @param string $sMessage
-     * @param array $aContext
+     * @param array  $aContext
+     *
      * @return null
      */
     public function emergency($sMessage, array $aContext = array())
@@ -68,12 +69,12 @@ class Logger implements LoggerInterface
 
     /**
      * Action must be taken immediately.
-     *
      * Example: Entire website down, database unavailable, etc. This should
      * trigger the SMS alerts and wake you up.
      *
      * @param string $sMessage
-     * @param array $aContext
+     * @param array  $aContext
+     *
      * @return null
      */
     public function alert($sMessage, array $aContext = array())
@@ -83,11 +84,11 @@ class Logger implements LoggerInterface
 
     /**
      * Critical conditions.
-     *
      * Example: Application component unavailable, unexpected exception.
      *
      * @param string $sMessage
-     * @param array $aContext
+     * @param array  $aContext
+     *
      * @return null
      */
     public function critical($sMessage, array $aContext = array())
@@ -100,7 +101,8 @@ class Logger implements LoggerInterface
      * be logged and monitored.
      *
      * @param string $sMessage
-     * @param array $aContext
+     * @param array  $aContext
+     *
      * @return null
      */
     public function error($sMessage, array $aContext = array())
@@ -110,12 +112,12 @@ class Logger implements LoggerInterface
 
     /**
      * Exceptional occurrences that are not errors.
-     *
      * Example: Use of deprecated APIs, poor use of an API, undesirable things
      * that are not necessarily wrong.
      *
      * @param string $sMessage
-     * @param array $aContext
+     * @param array  $aContext
+     *
      * @return null
      */
     public function warning($sMessage, array $aContext = array())
@@ -127,7 +129,8 @@ class Logger implements LoggerInterface
      * Normal but significant events.
      *
      * @param string $sMessage
-     * @param array $aContext
+     * @param array  $aContext
+     *
      * @return null
      */
     public function notice($sMessage, array $aContext = array())
@@ -137,11 +140,11 @@ class Logger implements LoggerInterface
 
     /**
      * Interesting events.
-     *
      * Example: User logs in, SQL logs.
      *
      * @param string $sMessage
-     * @param array $aContext
+     * @param array  $aContext
+     *
      * @return null
      */
     public function info($sMessage, array $aContext = array())
@@ -153,7 +156,8 @@ class Logger implements LoggerInterface
      * Detailed debug information.
      *
      * @param string $sMessage
-     * @param array $aContext
+     * @param array  $aContext
+     *
      * @return null
      */
     public function debug($sMessage, array $aContext = array())
@@ -164,9 +168,10 @@ class Logger implements LoggerInterface
     /**
      * Logs with an arbitrary level.
      *
-     * @param int $iLevel
+     * @param int    $iLevel
      * @param string $sMessage
-     * @param array $aContext
+     * @param array  $aContext
+     *
      * @return null
      */
     public function log($iLevel, $sMessage, array $aContext = array())
@@ -194,7 +199,8 @@ class Logger implements LoggerInterface
      * Interpolates context values into the message placeholders.
      *
      * @param string $sMessage
-     * @param array $aContext
+     * @param array  $aContext
+     *
      * @return string
      */
     public static function interpolate($sMessage, array $aContext = array())

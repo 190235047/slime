@@ -14,10 +14,10 @@ class Tree_Pool
 
     public static function initFromArrayRecursion($aArr, LoggerInterface $Log)
     {
-        if (count($aArr)!==1) {
+        if (count($aArr) !== 1) {
             $Log->error('Tree array data must own and only can own one root node');
         }
-        $sKey = key($aArr);
+        $sKey  = key($aArr);
         $aData = current($aArr);
         if (empty($aData[0])) {
             $RootNode = new Tree_Node(new self($Log), $sKey, $aData);
@@ -59,13 +59,14 @@ class Tree_Pool
         if (isset($this->aPool[$sKey])) {
             $this->Log->warning('Pool has node with key[{key}]', array('key' => $sKey));
         } else {
-            $this->aPool[$sKey] = $Node;
+            $this->aPool[$sKey]                      = $Node;
             $this->aaPoolLevel[$Node->iLevel][$sKey] = $Node;
         }
     }
 
     /**
      * @param $iLevel
+     *
      * @return Tree_Node[]
      */
     public function findNodesByLevel($iLevel)
@@ -75,6 +76,7 @@ class Tree_Pool
 
     /**
      * @param $sKey
+     *
      * @return Tree_Node|null
      */
     public function findNode($sKey)
@@ -88,6 +90,7 @@ class Tree_Pool
 
     /**
      * @param string $sKey
+     *
      * @return bool
      */
     public function deleteNode($sKey)

@@ -20,7 +20,7 @@ class CallBack
     public function setCBObject($mClassNameOrObject, $sMethod, $aObjInitParam = null)
     {
         if (is_string($mClassNameOrObject)) {
-            $this->aObjInitParam = $aObjInitParam===null ?
+            $this->aObjInitParam = $aObjInitParam === null ?
                 array() :
                 (is_array($aObjInitParam) ? $aObjInitParam : array($aObjInitParam));
         }
@@ -61,7 +61,7 @@ class CallBack
                 $this->Log->error(
                     'callback [{cb}:{method}] is not callable',
                     array(
-                        'cb' => $mClassOrObj,
+                        'cb'     => $mClassOrObj,
                         'method' => isset($this->mCallable[1]) ? $this->mCallable[1] : ''
                     )
                 );
@@ -70,7 +70,7 @@ class CallBack
 
             # reflection need cache @todo
             if (is_array($this->aObjInitParam)) {
-                $Ref = new \ReflectionClass($mClassOrObj);
+                $Ref                = new \ReflectionClass($mClassOrObj);
                 $this->mCallable[0] = $mClassOrObj = $Ref->newInstanceArgs($this->aObjInitParam); //create object
             } elseif (is_object($mClassOrObj)) {
                 $Ref = new \ReflectionObject($mClassOrObj);
@@ -111,13 +111,13 @@ class CallBack
 
             # call
             $bContinue = true;
-            if ($sBefore!==null) {
+            if ($sBefore !== null) {
                 $bContinue = call_user_func(array($mClassOrObj, $sBefore));
             }
-            if ($bContinue!==false) {
+            if ($bContinue !== false) {
                 $bContinue = call_user_func($this->mCallable, $this->aParam);
             }
-            if ($bContinue!==false && $sAfter !== null) {
+            if ($bContinue !== false && $sAfter !== null) {
                 call_user_func(array($mClassOrObj, $sAfter));
             }
         }

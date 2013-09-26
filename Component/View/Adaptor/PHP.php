@@ -5,8 +5,9 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Class Adaptor_PHP
+ *
  * @package SlimeFramework\Component\View
- * @author smallslime@gmail.com
+ * @author  smallslime@gmail.com
  */
 class Adaptor_PHP implements IAdaptor
 {
@@ -22,6 +23,7 @@ class Adaptor_PHP implements IAdaptor
 
     /**
      * @param string $sBaseDir
+     *
      * @return $this
      */
     public function setBaseDir($sBaseDir)
@@ -32,6 +34,7 @@ class Adaptor_PHP implements IAdaptor
 
     /**
      * @param string $sTpl
+     *
      * @return $this
      */
     public function setTpl($sTpl)
@@ -42,8 +45,9 @@ class Adaptor_PHP implements IAdaptor
 
     /**
      * @param string $sK
-     * @param mixed $mV
-     * @param bool $bOverwrite
+     * @param mixed  $mV
+     * @param bool   $bOverwrite
+     *
      * @return $this
      */
     public function assign($sK, $mV, $bOverwrite = true)
@@ -59,7 +63,8 @@ class Adaptor_PHP implements IAdaptor
 
     /**
      * @param array $aKVMap
-     * @param bool $bOverwrite
+     * @param bool  $bOverwrite
+     *
      * @return $this
      */
     public function assignMulti($aKVMap, $bOverwrite = true)

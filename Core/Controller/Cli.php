@@ -9,9 +9,9 @@ abstract class Controller_Cli
 
     public function __construct(array $aParam = array())
     {
-        $this->Context      = $Context = Context::getInst();
-        $this->Log          = $Context->Log;
-        $this->Config       = $Context->Config;
-        $this->aParam       = $aParam;
+        $this->Context = $Context = Context::getInst();
+        $this->Log     = $Context->Log;
+        $this->Config  = $Context->Config;
+        $this->aParam  = $aParam;
     }
 }

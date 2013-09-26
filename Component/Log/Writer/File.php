@@ -13,16 +13,16 @@ class Writer_File implements IWriter
     public function __construct($sFilePath, $iBuffer = 50)
     {
         $this->sFilePath = $sFilePath;
-        $this->iBuffer = $iBuffer;
+        $this->iBuffer   = $iBuffer;
     }
 
     public function acceptData($aRow)
     {
         $this->aData[] = str_replace(
-            array(':sTime', ':iLevel', ':sMessage', ':sGuid'),
-            array($aRow['sTime'], Logger::getLevelString($aRow['iLevel']), $aRow['sMessage'], $aRow['sGuid']),
-            $this->sFormat
-        ) . PHP_EOL;
+                array(':sTime', ':iLevel', ':sMessage', ':sGuid'),
+                array($aRow['sTime'], Logger::getLevelString($aRow['iLevel']), $aRow['sMessage'], $aRow['sGuid']),
+                $this->sFormat
+            ) . PHP_EOL;
 
         if (count($this->aData) >= $this->iBuffer) {
             $this->flush2File();

@@ -13,16 +13,15 @@ use Psr\Log\LoggerInterface;
  *     3. send result to father process(receiveMessage) and go into next loop
  *
  * @package SlimeFramework\Component\MultiProcess
- *
- * @author:smallslime@gmail.com
+ * @author  smallslime@gmail.com
  */
 class Child
 {
     public function __construct($sPipeDir, $sJobClass, LoggerInterface $Log)
     {
         $this->sJobClass = $sJobClass;
-        $this->Log = $Log;
-        $sPipeDir = rtrim($sPipeDir, '/');
+        $this->Log       = $Log;
+        $sPipeDir        = rtrim($sPipeDir, '/');
 
         $iPID = pcntl_fork();
         if ($iPID < 0) {
@@ -84,12 +83,12 @@ class Child
 
     /**
      * child main loop
-    */
+     */
     private function _receive()
     {
         while (true) {
             /** @var Task $Job */
-            $Job = new $this->sJobClass(fgets($this->rFifoF2C), $this->Log);
+            $Job     = new $this->sJobClass(fgets($this->rFifoF2C), $this->Log);
             $bResult = $Job->run();
             unset($Job);
             fwrite($this->rFifoC2F, ($bResult ? '0' : '1') . "\n");

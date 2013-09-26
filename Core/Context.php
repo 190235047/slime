@@ -3,22 +3,19 @@ namespace SlimeFramework\Core;
 
 /**
  * Class Context
+ *
  * @package SlimeFramework\Core
- *
- * @property-read string sENV
- * @property-read string $sRunMode
- *
- * @property-read \DateTime $DateTime
- * @property-read Bootstrap $Bootstrap
+ * @property-read string                                     sENV
+ * @property-read string                                     $sRunMode
+ * @property-read \DateTime                                  $DateTime
+ * @property-read Bootstrap                                  $Bootstrap
  * @property-read \SlimeFramework\Component\Config\Configure $Config
- * @property-read \SlimeFramework\Component\Log\Logger $Log
- * @property-read \SlimeFramework\Component\Route\Router $Route
- * @property-read \SlimeFramework\Component\Route\CallBack $CallBack
- * @property-read \SlimeFramework\Component\HTTP\Request $HttpRequest
- * @property-read \SlimeFramework\Component\HTTP\Response $HttpResponse
- *
- * @property-read array $aServer
- *
+ * @property-read \SlimeFramework\Component\Log\Logger       $Log
+ * @property-read \SlimeFramework\Component\Route\Router     $Route
+ * @property-read \SlimeFramework\Component\Route\CallBack   $CallBack
+ * @property-read \SlimeFramework\Component\HTTP\Request     $HttpRequest
+ * @property-read \SlimeFramework\Component\HTTP\Response    $HttpResponse
+ * @property-read array                                      $aServer
  */
 class Context
 {
@@ -34,10 +31,10 @@ class Context
 
     public static function makeInst($sGUID = null)
     {
-        if ($sGUID===null) {
+        if ($sGUID === null) {
             $sGUID = uniqid('SlimeFramework', true);
         }
-        $GLOBALS['__sf_guid__'] = $sGUID;
+        $GLOBALS['__sf_guid__']            = $sGUID;
         $GLOBALS['__sf_context__'][$sGUID] = new self();
     }
 
