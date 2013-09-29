@@ -2,6 +2,7 @@
 namespace SlimeFramework\Component\MultiProcess;
 
 use Psr\Log\LoggerInterface;
+use SlimeFramework\Component\Log;
 
 /**
  * 创建一个Child对象, 对象在初始化时, 会fork一个子进程. 至此child的行为在父子进程中会有不同. 而通过这个对象, 可以实现父子进程通信:
@@ -44,7 +45,7 @@ class Child
         } else {
             # child
             $this->iPID = posix_getpid();
-            if ($this->Log instanceof \SlimeFramework\Component\Log\Logger) {
+            if ($this->Log instanceof Log\Logger) {
                 $this->Log->sGUID = "CHILD:$this->iPID";
             }
 
