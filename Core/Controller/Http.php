@@ -3,6 +3,13 @@ namespace SlimeFramework\Core;
 
 use SlimeFramework\Component\View\Viewer;
 
+/**
+ * Class Controller_Http
+ * SlimeFramework 内置Http控制器基类
+ *
+ * @package SlimeFramework\Core
+ * @author  smallslime@gmail.com
+ */
 abstract class Controller_Http
 {
     protected $Context;
@@ -11,28 +18,36 @@ abstract class Controller_Http
     protected $aData = array();
 
     /**
-     * default : method get make this value as true
-     *
-     * @var bool
-     */
-    protected $bAutoRender;
-
-    /**
-     * does method is get
+     * 本次 REQUEST_METHOD 是否为 GET
      *
      * @var bool
      */
     protected $bGet;
 
     /**
-     * does request is ajax
+     * 本次请求是否为 AJAX
      *
      * @var bool
      */
     protected $bAjax;
 
     /**
-     * default : (method not get) and (request not ajax) make this value as true
+     * 是否自动渲染页面
+     *     true  : 业务逻辑完成后, 自动加载模板, 渲染页面;
+     *             模板名默认为类名去掉前面的 NAMESPACE\ControllerHttp_
+     *             可以通过继承 override getDefaultTPL 方法重写取默认模板逻辑
+     *     false : 不自动渲染页面
+     * 变量在构造函数中初始化, 若请求为GET, 则为true, 否则为false
+     *
+     * @var bool
+     */
+    protected $bAutoRender;
+
+    /**
+     * 是否自动重定向
+     *     true     : 业务逻辑完成后, 重定向 REFERER页 或 /
+     *     false    : 不做任何重定向逻辑
+     * 变量在构造函数中初始化, 若请求不为GET且不为Ajax, 则为true, 否则为false
      *
      * @var bool
      */
@@ -75,6 +90,7 @@ abstract class Controller_Http
                 if ($this->sTPL === null) {
                     $this->sTPL = $this->getDefaultTPL();
                 }
+                $this->Log->debug('Use template[{tpl}]', array('tpl' => $this->sTPL));
 
                 $this->HttpResponse->setContents(
                     $this->View

@@ -2,8 +2,9 @@
 namespace SlimeFramework\Component\MultiProcess;
 
 use Psr\Log\LoggerInterface;
+use SlimeFramework\Component\Log;
 
-abstract class MPPoolModel
+abstract class ModelPool
 {
     public function __construct($iPoolSize, $sPipeDir, $sJobClass, $iLoopSleepUS = 1000, LoggerInterface $Log)
     {
@@ -12,7 +13,7 @@ abstract class MPPoolModel
         $this->sJobClass    = $sJobClass;
         $this->iLoopSleepUS = $iLoopSleepUS;
         $this->Log          = $Log;
-        if ($this->Log instanceof \SlimeFramework\Component\Log\Logger) {
+        if ($this->Log instanceof Log\Logger) {
             $this->Log->sGUID = 'Main';
         }
     }

@@ -3,41 +3,67 @@ namespace SlimeFramework\Core;
 
 /**
  * Class Context
+ * 运行时上下文类
+ * 1. 调用 makeInst 静态方法
+ *     1. 生成一个唯一ID $GLOBALS['__sf_guid__']
+ *     2. 生成上下文对象, 置于 $GLOBALS['__sf_context__'][$GLOBALS['__sf_guid__']], 生命周期为Global
+ * 2. 通过 getInst 静态方法获取当前请求中的上下文对象
+ *     1. 调用 getInst 默认获取的是前一次生成的对象
+ *     2. 通过改变 $GLOBALS['__sf_guid__'] 的值可以获取到到不同的上下文对象(一般普通逻辑中无需用到)
+ * 3. 通过 register 可以注册新的运行时对象
+ * 4. 注册对象A, 可以以 Context::getInst()->A 取得
  *
  * @package SlimeFramework\Core
- * @property-read string                                     sENV
- * @property-read string                                     $sRunMode
- * @property-read \DateTime                                  $DateTime
- * @property-read Bootstrap                                  $Bootstrap
- * @property-read \SlimeFramework\Component\Config\Configure $Config
- * @property-read \SlimeFramework\Component\Log\Logger       $Log
- * @property-read \SlimeFramework\Component\Route\Router     $Route
- * @property-read \SlimeFramework\Component\Route\CallBack   $CallBack
- * @property-read \SlimeFramework\Component\HTTP\Request     $HttpRequest
- * @property-read \SlimeFramework\Component\HTTP\Response    $HttpResponse
- * @property-read array                                      $aServer
+ * @author  smallslime@gmail.com
+ * @property-read string                                     sENV          当前环境(例如 publish:生产环境; development:开发环境)
+ * @property-read string                                     $sRunMode     PHP运行方式, 当前支持 (cli||http)
+ * @property-read \DateTime                                  $DateTime     框架初始化时的时间对象
+ * @property-read Bootstrap                                  $Bootstrap    框架核心基础对象
+ * @property-read \SlimeFramework\Component\Config\Configure $Config       配置对象
+ * @property-read \SlimeFramework\Component\Log\Logger       $Log          日志对象
+ * @property-read \SlimeFramework\Component\Route\Router     $Route        路由对象
+ * @property-read \SlimeFramework\Component\Route\CallBack   $CallBack     路由结果回调对象
+ * @property-read \SlimeFramework\Component\HTTP\Request     $HttpRequest  本次Http请求生成的HttpRequest对象
+ * @property-read \SlimeFramework\Component\HTTP\Response    $HttpResponse 响应本次Http请求的HttpResponse对象
  */
 class Context
 {
     protected $aObject = array();
 
     /**
-     * @return $this
+     * 获取当前请求的上下文对象
+     * @return \SlimeFramework\Core\Context
      */
     public static function getInst()
     {
         return $GLOBALS['__sf_context__'][$GLOBALS['__sf_guid__']];
     }
 
+    /**
+     * @param string $sGUID
+     * 生成当前请求的
+     */
     public static function makeInst($sGUID = null)
     {
-        if ($sGUID === null) {
-            $sGUID = uniqid('SlimeFramework', true);
-        }
-        $GLOBALS['__sf_guid__']            = $sGUID;
-        $GLOBALS['__sf_context__'][$sGUID] = new self();
+        $sGUID === null && $sGUID = uniqid('SlimeFramework', true);
+        $GLOBALS['__sf_guid__']                             = $sGUID;
+        $GLOBALS['__sf_context__'][$GLOBALS['__sf_guid__']] = new self();
     }
 
+    private function __construct()
+    {
+    }
+
+    private function __clone()
+    {
+    }
+
+    /**
+     * @param string $sVarName    对象标志(唯一, 作为调用时的Key)
+     * @param mixed  $Object      对象
+     * @param bool   $bOverWrite  是否自动覆盖已存在的同标志对象
+     * @param bool   $bAllowExist 是否允许存在同标志对象(若此值为假, 并且存在同标志的相同, 则将抛错, 程序退出)
+     */
     public function register($sVarName, $Object, $bOverWrite = true, $bAllowExist = true)
     {
         if (isset($this->aObject[$sVarName])) {

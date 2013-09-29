@@ -1,9 +1,9 @@
 <?php
 namespace SlimeFramework\Component\BackGroundJob;
 
-use SlimeFramework\Component\MultiProcess\MPPoolModel;
+use SlimeFramework\Component\MultiProcess\ModelPool;
 
-class Main extends MPPoolModel
+class Main extends ModelPool
 {
     /** @var IJobQueue */
     private $JobQueue;

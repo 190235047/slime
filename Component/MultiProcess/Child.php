@@ -4,13 +4,16 @@ namespace SlimeFramework\Component\MultiProcess;
 use Psr\Log\LoggerInterface;
 
 /**
- * In father process, this class has :
- *     1. method sendMessage(send to child process with block)
- *     2. method receiveMessage(receive from child process with none block)
- * In child process, this class will run in loop:
- *     1. block until receive the message from father process(sendMessage)
- *     2. create Job object with message and run
- *     3. send result to father process(receiveMessage) and go into next loop
+ * 创建一个Child对象, 对象在初始化时, 会fork一个子进程. 至此child的行为在父子进程中会有不同. 而通过这个对象, 可以实现父子进程通信:
+ * 在父进程中 :
+ *     1. 构造函数中: 以写方式打开父到子管道, 以读方式打开子到父管道
+ *     2. Method: sendMessage(发送消息给子进程)
+ *     3. Method: receiveMessage(接受子进程消息, 注意这个是异步方法, 若无消息返回false)
+ * 在子进程中:
+ *     1. 构造函数中: 以写方式打开子到父管道, 以读方式打开父到子管道
+ *     2. 进入主Loop循环, 不断尝试读取主进程发来的消息
+ *     3. 获取到消息后, 创建Job对象, 运行.
+ *     4. 将结果(0:成功;else:失败)通过子到父的写管道写回主进程
  *
  * @package SlimeFramework\Component\MultiProcess
  * @author  smallslime@gmail.com

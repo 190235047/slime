@@ -9,9 +9,17 @@ use SlimeFramework\Component\Http;
 /**
  * Class Bootstrap
  *
- * @package SlimeFramework
+ * 框架核心运行类
+ * 1. 调用静态方法 factory
+ *    1. 生成上下文对象;
+ *    2. 注册各种变量/对象到上下文对象 详见 SlimeFramework\Core\Context;
+ *    3. 注册 ErrorHandle 方法
+ * 2. 调用 run 方法运行
+ *    1. 路由, 获取回调对象
+ *    2. 执行回调
+ *
+ * @package SlimeFramework\Core
  * @author  smallslime@gmail.com
- * @version 1.0
  */
 class Bootstrap
 {
@@ -21,13 +29,13 @@ class Bootstrap
     protected $Context;
 
     /**
-     * @param string $sENV
-     * @param string $sDirConfig
-     * @param string $sAppNs
-     * @param string $sRunMode (cli||http)
-     * @param array  $aLogConfig
+     * @param string $sENV        当前环境(例如 publish:生产环境; development:开发环境)
+     * @param string $sDirConfig  配置文件目录
+     * @param string $sAppNs      应用的命名空间
+     * @param string $sRunMode    PHP运行方式, 当前支持 (cli||http)
+     * @param array  $aLogConfig  Log初始化配置, 详见 SlimeFramework\Component\Log\ReadMe.md
      *
-     * @return $this
+     * @return \SlimeFramework\Core\Bootstrap
      */
     public static function factory($sENV, $sDirConfig, $sAppNs, $sRunMode, array $aLogConfig)
     {
@@ -89,13 +97,24 @@ class Bootstrap
         return $Context->Bootstrap;
     }
 
+    private function __construct()
+    {
+    }
+
+    private function __clone()
+    {
+    }
+
+    /**
+     *
+     */
     public function run()
     {
         $sMethod = 'run' . $this->Context->sRunMode;
         $this->$sMethod();
     }
 
-    public function runHttp()
+    protected function runHttp()
     {
         #register http request and response
         $HttpRequest  = Http\Request::createFromGlobals();
@@ -115,7 +134,7 @@ class Bootstrap
         $HttpResponse->send();
     }
 
-    public function runCli()
+    protected function runCli()
     {
         $CallBack = $this->Context->Route->generateFromCli(
             array_slice($GLOBALS['argv'], 1),
@@ -124,6 +143,13 @@ class Bootstrap
         $CallBack->call();
     }
 
+    /**
+     * @param int    $iErrNum     错误码
+     * @param string $sErrStr     错误信息
+     * @param string $sErrFile    错误发生文件
+     * @param int    $iErrLine    错误发生行
+     * @param string $sErrContext 错误发生上下文
+     */
     public function handleError($iErrNum, $sErrStr, $sErrFile, $iErrLine, $sErrContext)
     {
         $sStr = $iErrNum . ':' . $sErrStr . "\nIn File[$sErrFile]:Line[$iErrLine]";

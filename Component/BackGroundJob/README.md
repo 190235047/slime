@@ -25,7 +25,7 @@ class MyTask extends Task
         $aMessage = json_decode($this->sMessage, true);
         while ($iRetry++ < 3) {
             if ($aMessage===false) {
-                $this->Logger->warning('message[{msg}] format is error', array('msg' => $this->sMessage));
+                $this->Logger->warning('message[{msg}] format is error', array('msg' => json_last_error()));
                 $bRS = false;
                 break;
             }
