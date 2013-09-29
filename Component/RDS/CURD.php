@@ -2,11 +2,13 @@
 namespace SlimeFramework\Component\RDS;
 
 /**
- * Class PDO
+ * Class CURD
  *
  * @package SlimeFramework\Component\RDS
- * @author  smallslime@gmail.com
- * @version 0.1
+ * @property-read string $sDSN
+ * @property-read string $sUsername
+ * @property-read string $sPassword
+ * @property-read array  $aOptions
  */
 class CURD
 {
@@ -17,10 +19,10 @@ class CURD
     /** @var \PDO */
     private $Instance;
 
-    private $sDSN;
-    private $sUsername;
-    private $sPassword;
-    private $aOptions = array();
+    public $sDSN;
+    public $sUsername;
+    public $sPassword;
+    public $aOptions = array();
 
     public $bCheckConnect = false;
 
@@ -74,7 +76,8 @@ class CURD
         if ($bOnlyOne && stripos($sAttr, 'limit') === false) {
             $sAttr .= " LIMIT 1";
         }
-        $sWhere      = $this->buildCondition($aWhere, $aArgs = array());
+        $aArgs       = array();
+        $sWhere      = $this->buildCondition($aWhere, $aArgs);
         $sSQLPrepare = "SELECT $sSelect FROM $sTable WHERE $sWhere $sAttr";
         $Stmt        = $this->getInstance()->prepare($sSQLPrepare);
         $Stmt->execute($aArgs);
@@ -92,7 +95,8 @@ class CURD
         $sAttr = '',
         $sSelect = '1'
     ) {
-        $sWhere      = $this->buildCondition($aWhere, $aArgs = array());
+        $aArgs       = array();
+        $sWhere      = $this->buildCondition($aWhere, $aArgs);
         $sSQLPrepare = "SELECT count($sSelect) as total FROM $sTable WHERE $sWhere $sAttr";
         $Stmt        = $this->getInstance()->prepare($sSQLPrepare);
         $Stmt->execute($aArgs);
@@ -114,20 +118,22 @@ class CURD
             $aUpdatePre[]  = "`$sK` = ?";
             $aUpdateData[] = $sV;
         }
+        $aArgs       = array();
         $sSQLPrepare = sprintf(
             "UPDATE %s SET %s WHERE %s",
             $sTable,
             implode(' , ', $aUpdatePre),
-            $this->buildCondition($aWhere, $aArgs = array())
+            $this->buildCondition($aWhere, $aArgs)
         );
-        $aData       = array_merge($aUpdateData, $aArgs = array());
+        $aData       = array_merge($aUpdateData, $aArgs);
         $STMT        = $this->getInstance()->prepare($sSQLPrepare);
         return $STMT->execute($aData);
     }
 
     public function deleteSmarty($sTable, array $aWhere)
     {
-        $sSQLPrepare = sprintf("DELETE FROM %s WHERE %s", $sTable, $this->buildCondition($aWhere, $aArgs = array()));
+        $aArgs       = array();
+        $sSQLPrepare = sprintf("DELETE FROM %s WHERE %s", $sTable, $this->buildCondition($aWhere, $aArgs));
         $STMT        = $this->getInstance()->prepare($sSQLPrepare);
         return $STMT->execute($aArgs);
     }
@@ -157,6 +163,34 @@ class CURD
         }
     }
 
+    /**
+     * @param string $sTable
+     * @param array  $aKVMap
+     * @param array  $aUpdateKey
+     *
+     * @return null|string
+     */
+    public function insertUpdateSmarty($sTable, array $aKVMap, $aUpdateKey)
+    {
+        $aUpdatePre = $aUpdateData = array();
+        foreach ($aUpdateKey as $sK) {
+            $aUpdatePre[]  = "`$sK` = ?";
+            $aUpdateData[] = $aKVMap[$sK];
+        }
+        $sSQLPrepare = sprintf(
+            "%s INTO %s %s VALUES(%s) ON DUPLICATE KEY UPDATE %s",
+            'INSERT',
+            $sTable,
+            '(`' . implode('`,`', array_keys($aKVMap)) . '`)',
+            implode(',', array_pad(array(), count($aKVMap), '?')),
+            implode(' , ', $aUpdatePre)
+        );
+        $PDO         = $this->getInstance();
+        $STMT        = $PDO->prepare($sSQLPrepare);
+        $aData       = array_merge(array_values($aKVMap), $aUpdateData);
+        return $STMT->execute($aData);
+    }
+
     public function buildCondition($aWhere, &$aArgs = array())
     {
         if (empty($aWhere)) {
@@ -173,16 +207,23 @@ class CURD
             if (is_int($sK)) {
                 $aWhereBuild[] = '(' . $this->buildCondition($mV, $aArgs) . ')';
             } else {
-                $aTmp = explode(' ', $sK, 2);
-                $sKey = $aTmp[0];
-                $sOpt = isset($aTmp[1]) ? trim($aTmp[1]) : '=';
-                # hack
-                $inOp = strtoupper($sOpt);
+                $aTmp        = explode(' ', $sK, 2);
+                $sKey        = $aTmp[0];
+                $sOpt        = isset($aTmp[1]) ? trim($aTmp[1]) : '=';
+                $inOp        = strtoupper($sOpt);
+                $sKeyWrapper = '`';
+                if ($sKey[0] === ':') {
+                    $sKey        = substr($sKey, 1);
+                    $sKeyWrapper = '';
+                }
                 if ($inOp == 'IN' || $inOp == 'NOT IN') {
-                    $aWhereBuild[] = sprintf("`$sKey` IN (%s)", implode(',', array_fill(0, count($mV), '?')));
+                    $aWhereBuild[] = sprintf(
+                        "$sKeyWrapper{$sKey}$sKeyWrapper IN (%s)",
+                        implode(',', array_fill(0, count($mV), '?'))
+                    );
                     $aArgs         = array_merge($aArgs, $mV);
                 } else {
-                    $aWhereBuild[] = "`$sKey` $sOpt ?";
+                    $aWhereBuild[] = "$sKeyWrapper{$sKey}$sKeyWrapper $sOpt ?";
                     $aArgs[]       = $mV;
                 }
             }

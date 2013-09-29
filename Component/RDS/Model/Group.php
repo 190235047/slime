@@ -13,7 +13,7 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
         $this->Model      = $Model;
         $this->Log        = $Log;
         $this->aModelItem = array();
-        $this->aaDataMap  = array();
+        $this->aMapPK2PK  = array();
         $this->aRelation  = array();
         $this->aRelObj    = array();
     }
@@ -94,18 +94,8 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
         }
     }
 
-    public function hasMany($sModel)
-    {
-        //@todo
-    }
-
-    public function hasManyThough($sModel, $mPKOrWhere = null)
-    {
-        //@todo
-    }
-
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Return the current element
      *
      * @link http://php.net/manual/en/iterator.current.php
@@ -113,11 +103,11 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
      */
     public function current()
     {
-        return $this->aModelItem[current($this->aaDataMap)];
+        return $this->aModelItem[current($this->aMapPK2PK)];
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Move forward to next element
      *
      * @link http://php.net/manual/en/iterator.next.php
@@ -125,11 +115,11 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
      */
     public function next()
     {
-        next($this->aaDataMap);
+        next($this->aMapPK2PK);
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Return the key of the current element
      *
      * @link http://php.net/manual/en/iterator.key.php
@@ -137,11 +127,11 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
      */
     public function key()
     {
-        return current($this->aaDataMap);
+        return current($this->aMapPK2PK);
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Checks if current position is valid
      *
      * @link http://php.net/manual/en/iterator.valid.php
@@ -150,11 +140,11 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
      */
     public function valid()
     {
-        return current($this->aaDataMap) !== false;
+        return current($this->aMapPK2PK) !== false;
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Rewind the Iterator to the first element
      *
      * @link http://php.net/manual/en/iterator.rewind.php
@@ -162,22 +152,18 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
      */
     public function rewind()
     {
-        reset($this->aaDataMap);
+        reset($this->aMapPK2PK);
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Whether a offset exists
      *
      * @link http://php.net/manual/en/arrayaccess.offsetexists.php
      *
-     * @param mixed $offset <p>
-     *                      An offset to check for.
-     * </p>
+     * @param mixed $offset An offset to check for.
      *
      * @return boolean true on success or false on failure.
-     * </p>
-     * <p>
      *       The return value will be casted to boolean if non-boolean was returned.
      */
     public function offsetExists($offset)
@@ -186,74 +172,83 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Offset to retrieve
      *
      * @link http://php.net/manual/en/arrayaccess.offsetget.php
      *
-     * @param mixed $offset <p>
-     *                      The offset to retrieve.
-     * </p>
+     * @param mixed $offset The offset to retrieve.
      *
-     * @return Model_Item Can return all value types.
+     * @return Model_Item|null Can return all value types.
      */
     public function offsetGet($offset)
     {
+        if (!isset($this->aModelItem[$offset])) {
+            $this->Log->warning(
+                '{offset} is not exist in group[{group}]',
+                array('offset' => $offset, 'group' => (string)$this)
+            );
+            return null;
+        }
         return $this->aModelItem[$offset];
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Offset to set
      *
      * @link http://php.net/manual/en/arrayaccess.offsetset.php
      *
-     * @param mixed $offset <p>
-     *                      The offset to assign the value to.
-     * </p>
-     * @param mixed $value  <p>
-     *                      The value to set.
-     * </p>
+     * @param mixed $offset The offset to assign the value to.
+     * @param mixed $value  The value to set.
      *
      * @return void
      */
     public function offsetSet($offset, $value)
     {
-        $this->aaDataMap[$value[$this->Model->sPKName]] = $value[$this->Model->sPKName];
+        $this->aMapPK2PK[$value[$this->Model->sPKName]] = $value[$this->Model->sPKName];
         $this->aModelItem[$offset]                      = $value;
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Offset to unset
      *
      * @link http://php.net/manual/en/arrayaccess.offsetunset.php
      *
-     * @param mixed $offset <p>
-     *                      The offset to unset.
-     * </p>
+     * @param mixed $offset The offset to unset.
      *
      * @return void
      */
     public function offsetUnset($offset)
     {
-        unset($this->aaDataMap[$offset]);
+        unset($this->aMapPK2PK[$offset]);
         unset($this->aModelItem[$offset]);
     }
 
     /**
-     * (PHP 5 &gt;= 5.1.0)<br/>
+     * (PHP 5 &gt;= 5.1.0)
      * Count elements of an object
      *
      * @link http://php.net/manual/en/countable.count.php
      * @return int The custom count as an integer.
-     * </p>
-     * <p>
      *       The return value is cast to an integer.
      */
     public function count()
     {
         return count($this->aModelItem);
+    }
+
+    public function toArray($bRecursive = false)
+    {
+        $aArr = $this->aModelItem;
+        if ($bRecursive) {
+            $aArr = $this->aModelItem;
+            foreach ($aArr as $sPK => $Model) {
+                $aArr[$sPK] = $Model->toArray();
+            }
+        }
+        return $aArr;
     }
 
     public function __toString()

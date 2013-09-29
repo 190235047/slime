@@ -8,8 +8,6 @@ use SlimeFramework\Core\Context;
  * Class AopPDO
  *
  * @package SlimeFramework\Component\RDS
- * @author  smallslime@gmail.com
- * @version 0.1
  */
 class AopPDO
 {

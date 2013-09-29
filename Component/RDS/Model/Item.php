@@ -53,7 +53,15 @@ class Model_Item implements \ArrayAccess
      */
     public function __call($sModelName, $mValue = array())
     {
-        if ($this->Group === null || empty($mValue[0])) {
+        if (!isset($this->Model->aRelConf[$sModelName])) {
+            $this->Model->Log->error('can not find ralation for [{model}]', array('model' => $sModelName));
+            exit(1);
+        }
+        $sRelation = strtolower($this->Model->aRelConf[$sModelName]);
+        if (
+            ($sRelation !== 'hasone' && $sRelation !== 'belongsto') ||
+            $this->Group === null || empty($mValue[0])
+        ) {
             if (!isset($this->aRelation[$sModelName])) {
                 $this->aRelation[$sModelName] = $this->Model->relation($sModelName, $this);
             }
@@ -87,24 +95,25 @@ class Model_Item implements \ArrayAccess
         return $this->Model->delete($this->aData[$this->Model->sPKName]);
     }
 
+    public function toArray()
+    {
+        return $this->aData;
+    }
+
     public function __toString()
     {
         return var_export($this->aData, true);
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Whether a offset exists
      *
      * @link http://php.net/manual/en/arrayaccess.offsetexists.php
      *
-     * @param mixed $offset <p>
-     *                      An offset to check for.
-     * </p>
+     * @param mixed $offset An offset to check for.
      *
      * @return boolean true on success or false on failure.
-     * </p>
-     * <p>
      *       The return value will be casted to boolean if non-boolean was returned.
      */
     public function offsetExists($offset)
@@ -113,14 +122,12 @@ class Model_Item implements \ArrayAccess
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Offset to retrieve
      *
      * @link http://php.net/manual/en/arrayaccess.offsetget.php
      *
-     * @param mixed $offset <p>
-     *                      The offset to retrieve.
-     * </p>
+     * @param mixed $offset The offset to retrieve.
      *
      * @return mixed Can return all value types.
      */
@@ -130,17 +137,13 @@ class Model_Item implements \ArrayAccess
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Offset to set
      *
      * @link http://php.net/manual/en/arrayaccess.offsetset.php
      *
-     * @param mixed $offset <p>
-     *                      The offset to assign the value to.
-     * </p>
-     * @param mixed $value  <p>
-     *                      The value to set.
-     * </p>
+     * @param mixed $offset The offset to assign the value to.
+     * @param mixed $value  The value to set.
      *
      * @return void
      */
@@ -150,14 +153,12 @@ class Model_Item implements \ArrayAccess
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
+     * (PHP 5 &gt;= 5.0.0)
      * Offset to unset
      *
      * @link http://php.net/manual/en/arrayaccess.offsetunset.php
      *
-     * @param mixed $offset <p>
-     *                      The offset to unset.
-     * </p>
+     * @param mixed $offset The offset to unset.
      *
      * @return void
      */

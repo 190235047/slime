@@ -6,8 +6,6 @@ use SlimeFramework\Component\RDS\Model_Pool;
 
 class Model_Model
 {
-    public $CURD;
-
     public function __construct($sModelName, CURD $CURD, $aConfig, Model_Pool $Pool, LoggerInterface $Log)
     {
         $this->CURD     = $CURD;
@@ -29,6 +27,11 @@ class Model_Model
         return $this->CURD->insertSmarty($this->sTable, $aKVMap);
     }
 
+    public function addUpdate($aKVMap, $aUpdateKey)
+    {
+        return $this->CURD->insertUpdateSmarty($this->sTable, $aKVMap, $aUpdateKey);
+    }
+
     public function delete($mPK)
     {
         return $this->CURD->deleteSmarty($this->sTable, array($this->sPKName => $mPK));
@@ -40,9 +43,9 @@ class Model_Model
     }
 
     /**
-     * @param $mPKOrWhere
+     * @param mixed $mPKOrWhere
      *
-     * @return Model_Item
+     * @return Model_Item|null
      */
     public function find($mPKOrWhere)
     {
@@ -55,7 +58,7 @@ class Model_Model
             '',
             true
         );
-        return new Model_Item($aItem, $this);
+        return empty($aItem) ? null : new Model_Item($aItem, $this);
     }
 
     /**
@@ -65,7 +68,7 @@ class Model_Model
      * @param int    $iOffset
      * @param string $sAttr
      *
-     * @return Model_Group
+     * @return Model_Group|null
      */
     public function findMulti($aWhere = array(), $sOrderBy = null, $iLimit = null, $iOffset = null, $sAttr = '')
     {
@@ -88,8 +91,35 @@ class Model_Model
         return $Group;
     }
 
-    public function findCount()
+    /**
+     * @param array $aWhere
+     *
+     * @return int
+     */
+    public function findCount($aWhere = array())
     {
+        return $this->CURD->queryCount($this->sTable, $aWhere);
+    }
+
+    /**
+     * @param array  $aWhere
+     * @param string $sAttr
+     * @param string $sSelect
+     * @param bool   $bOnlyOne
+     * @param        $iFetchStyle
+     * @param null   $mFetchArgs
+     *
+     * @return array|bool|mixed
+     */
+    public function findCustom(
+        $aWhere = array(),
+        $sAttr = '',
+        $sSelect = '',
+        $bOnlyOne = false,
+        $iFetchStyle = \PDO::FETCH_ASSOC,
+        $mFetchArgs = null
+    ) {
+        return $this->CURD->querySmarty($this->sTable, $aWhere, $sAttr, $sSelect, $bOnlyOne, $iFetchStyle, $mFetchArgs);
     }
 
     /**
@@ -132,19 +162,53 @@ class Model_Model
     }
 
     /**
-     * @param            $sModel
+     * @param string     $sModel
      * @param Model_Item $ModelItem
      *
      * @return Model_Group
      */
-    public function hasMany($sModel, $ModelItem = null)
+    public function hasMany($sModel, $ModelItem)
     {
         $Model = $this->Pool->get($sModel);
         return $Model->findMulti(array($this->sFKName => $ModelItem->{$Model->sPKName}));
     }
 
-    public function hasManyThough($sModel, $mPKOrWhere = null)
+    /**
+     * @param string      $sModelTarget
+     * @param Model_Item  $ModelItem
+     * @param string|null $sModelRelated
+     *
+     * @return null|Model_Group
+     */
+    public function hasManyThough($sModelTarget, Model_Item $ModelItem, $sModelRelated = null)
     {
-        ;
+        $ModelTarget = $this->Pool->get($sModelTarget);
+        $ModelOrg    = $ModelItem->Model;
+        if ($sModelRelated === null) {
+            $sRelatedTableName = strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
+                $ModelTarget->sTable . '_' . $ModelOrg->sTable :
+                $ModelOrg->sTable . '_' . $ModelTarget->sTable;
+            $CURD              = $ModelOrg->CURD;
+        } else {
+            $ModelRelated      = $this->Pool->get($sModelRelated);
+            $CURD              = $ModelRelated->CURD;
+            $sRelatedTableName = $ModelRelated->sTable;
+        }
+
+        $aIDS = $CURD->querySmarty(
+            $sRelatedTableName,
+            array($ModelOrg->sFKName => $ModelItem->{$ModelOrg->sFKName}),
+            '',
+            $ModelTarget->sFKName,
+            false,
+            \PDO::FETCH_COLUMN
+        );
+
+        $Group = null;
+        if (!empty($aIDS)) {
+            $Group = $ModelTarget->findMulti($aIDS);
+        }
+
+        return $Group;
     }
 }
