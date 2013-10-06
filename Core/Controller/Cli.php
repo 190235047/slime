@@ -1,6 +1,8 @@
 <?php
 namespace SlimeFramework\Core;
 
+use SlimeFramework\Component\Route\CallBack;
+
 /**
  * Class Controller_Cli
  * SlimeFramework 内置Cli控制器基类
@@ -36,5 +38,19 @@ abstract class Controller_Cli
         $this->Log     = $Context->Log;
         $this->Config  = $Context->Config;
         $this->aParam  = $aParam;
+    }
+
+    public function innerCall($sController, $sMethod, $aParam = null)
+    {
+        if ($aParam===null) {
+            $aParam = $this->aParam;
+        }
+        $CallBack = new CallBack($this->Context->sNS, $this->Log);
+        $CallBack->setCBObject(
+            $sController,
+            $sMethod,
+            $aParam
+        );
+        $CallBack->call();
     }
 }

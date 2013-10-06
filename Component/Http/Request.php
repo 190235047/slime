@@ -10,12 +10,6 @@ class Request
     public $aHeader;
     public $sBody;
 
-    public $aGetData;
-    public $aPostData;
-    public $aCookies;
-    public $aFile;
-
-
     /**
      * Constructor.
      *

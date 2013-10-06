@@ -1,10 +1,10 @@
 <?php
-namespace SlimeFramework\Component\DataStruct;
+namespace SlimeFramework\Component\DataStructure\Tree;
 
-class Tree_Node
+class Node
 {
     /**
-     * @var Tree_Node[]
+     * @var Node[]
      */
     public $aChildren = array();
 
@@ -12,7 +12,7 @@ class Tree_Node
         Tree_Pool $Pool,
         $sKey,
         $aAttr = array(),
-        Tree_Node $Parent = null
+        Node $Parent = null
     ) {
         $this->sKey   = $sKey;
         $this->Pool   = $Pool;
@@ -39,7 +39,7 @@ class Tree_Node
     public function bornChild($sKey, $aAttr = array())
     {
         $Node = new static($this->Pool, $sKey, $aAttr, $this);
-        if (!$Node instanceof Tree_Node) {
+        if (!$Node instanceof Node) {
             $this->Pool->Log->warning('Node[{node}] is not impl {class}', array('node' => $sKey, 'class' => __CLASS__));
             return null;
         }
@@ -56,7 +56,7 @@ class Tree_Node
         unset($this->aChildren);
     }
 
-    public function changeParent(Tree_Node $Parent = null)
+    public function changeParent(Node $Parent = null)
     {
         if ($this->Parent !== null) {
             unset($this->Parent->aChildren[$this->sKey]);
@@ -71,7 +71,7 @@ class Tree_Node
         $this->updateLevel($this, $iLevel);
     }
 
-    private function updateLevel(Tree_Node $Node, $iLevel)
+    private function updateLevel(Node $Node, $iLevel)
     {
         if (isset($this->Pool->aaPoolLevel[$Node->iLevel][$Node->sKey])) {
             unset($this->Pool->aaPoolLevel[$Node->iLevel][$Node->sKey]);
@@ -126,7 +126,7 @@ class Tree_Node
         return $sStr;
     }
 
-    private function __treeString(Tree_Node $Node, $iIndent, &$sStr)
+    private function __treeString(Node $Node, $iIndent, &$sStr)
     {
         $sStr .= '|' . str_repeat('----', $iIndent) . '[' . get_class($Node) . ']' . (string)$Node . PHP_EOL;
         if (!empty($Node->aChildren)) {

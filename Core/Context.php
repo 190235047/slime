@@ -1,6 +1,8 @@
 <?php
 namespace SlimeFramework\Core;
 
+use SlimeFramework\Component\DataStructure\Stack;
+
 /**
  * Class Context
  * 运行时上下文类
@@ -14,9 +16,9 @@ namespace SlimeFramework\Core;
  * 4. 注册对象A, 可以以 Context::getInst()->A 取得
  *
  * @package SlimeFramework\Core
- * @author  smallslime@gmail.com
- * @property-read string                                     sENV          当前环境(例如 publish:生产环境; development:开发环境)
+` * @property-read string                                     $sENV         当前环境(例如 publish:生产环境; development:开发环境)
  * @property-read string                                     $sRunMode     PHP运行方式, 当前支持 (cli||http)
+ * @property-read string                                     $sNS          当前应用的命名空间
  * @property-read \DateTime                                  $DateTime     框架初始化时的时间对象
  * @property-read Bootstrap                                  $Bootstrap    框架核心基础对象
  * @property-read \SlimeFramework\Component\Config\Configure $Config       配置对象
@@ -36,18 +38,23 @@ class Context
      */
     public static function getInst()
     {
-        return $GLOBALS['__sf_context__'][$GLOBALS['__sf_guid__']];
+        /** @var Stack\Stack $__SF_CONTEXT__ */
+        global $__SF_CONTEXT__;
+        return $__SF_CONTEXT__->getCurrent();
     }
 
     /**
-     * @param string $sGUID
-     * 生成当前请求的
+     * 生成上下文
      */
-    public static function makeInst($sGUID = null)
+    public static function makeInst()
     {
-        $sGUID === null && $sGUID = uniqid('SlimeFramework', true);
-        $GLOBALS['__sf_guid__']                             = $sGUID;
-        $GLOBALS['__sf_context__'][$GLOBALS['__sf_guid__']] = new self();
+        if (!isset($GLOBALS['__SF_CONTEXT__'])) {
+            $GLOBALS['__SF_CONTEXT__'] = new Stack\Stack();
+        }
+
+        /** @var Stack\Stack $__SF_CONTEXT__ */
+        global $__SF_CONTEXT__;
+        $__SF_CONTEXT__->push(new self());
     }
 
     private function __construct()
@@ -62,7 +69,7 @@ class Context
      * @param string $sVarName    对象标志(唯一, 作为调用时的Key)
      * @param mixed  $Object      对象
      * @param bool   $bOverWrite  是否自动覆盖已存在的同标志对象
-     * @param bool   $bAllowExist 是否允许存在同标志对象(若此值为假, 并且存在同标志的相同, 则将抛错, 程序退出)
+     * @param bool   $bAllowExist 是否允许存在同标志对象(若此值为假, 并且存在相同标志对象, 则将抛错, 程序退出)
      */
     public function register($sVarName, $Object, $bOverWrite = true, $bAllowExist = true)
     {
@@ -83,6 +90,11 @@ class Context
         }
     }
 
+    public function isRegister($sVarName)
+    {
+        return array_key_exists($sVarName, $this->aObject);
+    }
+
     public function __get($sVarName)
     {
         if (!isset($this->aObject[$sVarName])) {
@@ -93,5 +105,26 @@ class Context
             exit(1);
         }
         return $this->aObject[$sVarName];
+    }
+
+    public function copy()
+    {
+        $OldContext = Context::getInst();
+        Context::makeInst();
+        $Context = Context::getInst();
+        foreach ($Context->aObject as $sK => $mV) {
+            $this->aObject[$sK] = clone $OldContext->aObject[$sK];
+        }
+        return $Context;
+    }
+
+    public function destroy()
+    {
+        /** @var Stack\Stack $__SF_CONTEXT__ */
+        global $__SF_CONTEXT__;
+        $SELF = $__SF_CONTEXT__->pop();
+        foreach (get_object_vars($SELF) as $sK => $mV) {
+            $this->$sK = null;
+        }
     }
 }

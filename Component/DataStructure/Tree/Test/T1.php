@@ -1,8 +1,8 @@
 <?php
-namespace SlimeFramework\Component\DataStruct;
+namespace SlimeFramework\Component\DataStructure\Tree;
 
 /*
-$Top = new Tree_Node(new Tree_Pool(new Logger([new Writer_STDFD()]), 'movie', array('cname' => '电影', 'class' => 'c-1', 'hidden' => false));
+$Top = new Node(new Tree_Pool(new Logger([new Writer_STDFD()]), 'movie', array('cname' => '电影', 'class' => 'c-1', 'hidden' => false));
 
 $C2 = $Top->bornChild('movie-happy', array('cname' => '喜剧', 'class' => 'c-2', 'hidden' => false));
 $C2->bornChild('movie-happy-black', array('cname' => '黑色幽默', 'class' => 'c-3', 'hidden' => false));

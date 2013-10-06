@@ -78,7 +78,7 @@ class CallBack
                 $Ref = new \ReflectionClass($mClassOrObj);
             }
 
-            # get all pulic method map
+            # get all public method map
             $aMethod = array();
             foreach ($Ref->getMethods(\ReflectionMethod::IS_PUBLIC) as $Method) {
                 $aMethod[$Method->getName()] = true;

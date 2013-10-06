@@ -39,6 +39,12 @@ class Bootstrap
      */
     public static function factory($sENV, $sDirConfig, $sAppNs, $sRunMode, array $aLogConfig)
     {
+        # register self
+        $SELF = new self();
+
+        # set error handle
+        set_error_handler(array($SELF, 'handleError'));
+
         # get context object from current request
         Context::makeInst();
         $Context = Context::getInst();
@@ -86,15 +92,22 @@ class Bootstrap
         # register router
         $Context->register('Route', new Route\Router($sAppNs, $Log));
 
-        # register self
-        $SELF = new self();
         $Context->register('Bootstrap', $SELF);
         $SELF->Context = $Context;
 
-        # set error handle
-        set_error_handler(array($Context->Bootstrap, 'handleError'));
-
         return $Context->Bootstrap;
+    }
+
+    public static function factoryWithContext(Context $Context)
+    {
+        # register self
+        $SELF = new self();
+
+        # set error handle
+        set_error_handler(array($SELF, 'handleError'));
+
+        $SELF->Context = $Context;
+        return $SELF;
     }
 
     private function __construct()
@@ -117,17 +130,25 @@ class Bootstrap
     protected function runHttp()
     {
         #register http request and response
-        $HttpRequest  = Http\Request::createFromGlobals();
+        if ($this->Context->isRegister('HttpRequest')) {
+            $HttpRequest = $this->Context->HttpRequest;
+        } else {
+            $HttpRequest = Http\Request::createFromGlobals();
+            $this->Context->register('HttpRequest', $HttpRequest);
+        }
         $HttpResponse = Http\Response::factory()->setNoCache();
-        $this->Context->register('HttpRequest', $HttpRequest);
         $this->Context->register('HttpResponse', $HttpResponse);
 
         # run route
-        $CallBack = $this->Context->Route->generateFromHttp(
-            $HttpRequest,
-            $this->Context->Config->get('system.route_http')
-        );
-        $this->Context->register('CallBack', $CallBack);
+        if ($this->Context->isRegister('CallBack')) {
+            $CallBack = $this->Context->CallBack;
+        } else {
+            $CallBack = $this->Context->Route->generateFromHttp(
+                $HttpRequest,
+                $this->Context->Config->get('system.route_http')
+            );
+            $this->Context->register('CallBack', $CallBack);
+        }
         $CallBack->call();
 
         # response

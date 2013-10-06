@@ -1,6 +1,8 @@
 <?php
 namespace SlimeFramework\Core;
 
+use SlimeFramework\Component\Http;
+use SlimeFramework\Component\Route\CallBack;
 use SlimeFramework\Component\View\Viewer;
 
 /**
@@ -68,8 +70,14 @@ abstract class Controller_Http
         $this->bAutoRedirect = (!$this->bGet) && (!$this->bAjax);
     }
 
+    /**
+     * 主逻辑完成后运行
+     */
     public function __after__()
     {
+        if (!empty($this->aParam['__INNER_CALL__'])) {
+            return;
+        }
         # header
         if ($this->HttpResponse->getHeader('Content-Type') === null) {
             if ($this->bAjax) {
@@ -100,6 +108,38 @@ abstract class Controller_Http
                 );
             }
         }
+    }
+
+    public function innerCall($sController, $sMethod, $aParam = null, $bNoAfterRender = true)
+    {
+        if ($aParam === null) {
+            $aParam = $this->aParam;
+        }
+        $CallBack = new CallBack($this->Context->sNS, $this->Log);
+        $CallBack->setCBObject(
+            $sController,
+            $sMethod,
+            $bNoAfterRender ? array_merge($aParam, array('__INNER_CALL__' => true)) : $aParam
+        );
+        $CallBack->call();
+        return $CallBack->mCallable->aData;
+    }
+
+    public function outerCall(Http\Request $HttpRequest = null)
+    {
+        # 获取一个 Context 副本
+        $Context = $this->Context->copy();
+
+        # 复写原始 HttpRequest
+        if ($HttpRequest !== null) {
+            $Context->register('HttpRequest', $HttpRequest);
+        }
+
+        # 运行
+        Bootstrap::factoryWithContext(Context::getInst())->run();
+
+        # 销毁
+        $Context->destroy();
     }
 
     protected function getDefaultTPL()

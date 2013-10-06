@@ -1,5 +1,5 @@
 <?php
-namespace SlimeFramework\Component\DataStruct;
+namespace SlimeFramework\Component\DataStructure\Tree;
 
 use Psr\Log\LoggerInterface;
 
@@ -13,12 +13,12 @@ class Tree_PagePool extends Tree_Pool
         $sKey  = key($aArr);
         $aData = current($aArr);
         if (empty($aData[0])) {
-            $RootNode = new Tree_PageNode(new self($Log), $sKey, $aData);
+            $RootNode = new PageNode(new self($Log), $sKey, $aData);
         } else {
             $aChildren = $aData[0];
             unset($aData[0]);
             $Pool     = new self($Log);
-            $RootNode = new Tree_PageNode($Pool, $sKey, $aData);
+            $RootNode = new PageNode($Pool, $sKey, $aData);
             $Pool->addNode($RootNode);
             self::_initFromArrayRecursion($aChildren, $RootNode);
         }

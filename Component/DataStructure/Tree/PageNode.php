@@ -1,10 +1,10 @@
 <?php
-namespace SlimeFramework\Component\DataStruct;
+namespace SlimeFramework\Component\DataStructure\Tree;
 
-class Tree_PageNode extends Tree_Node
+class PageNode extends Node
 {
     /**
-     * @var Tree_PageNode[]
+     * @var PageNode[]
      */
     public $aChildren = array();
 
@@ -12,7 +12,7 @@ class Tree_PageNode extends Tree_Node
         Tree_PagePool $Pool,
         $sKey,
         $aAttr = array(),
-        Tree_PageNode $Parent = null
+        PageNode $Parent = null
     ) {
         $this->sKey   = $sKey;
         $this->Pool   = $Pool;

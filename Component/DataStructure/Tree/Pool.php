@@ -1,12 +1,12 @@
 <?php
-namespace SlimeFramework\Component\DataStruct;
+namespace SlimeFramework\Component\DataStructure\Tree;
 
 use Psr\Log\LoggerInterface;
 
 class Tree_Pool
 {
     /**
-     * @var Tree_Node[]
+     * @var Node[]
      */
     public $aPool = array();
 
@@ -20,17 +20,17 @@ class Tree_Pool
         $sKey  = key($aArr);
         $aData = current($aArr);
         if (empty($aData[0])) {
-            $RootNode = new Tree_Node(new self($Log), $sKey, $aData);
+            $RootNode = new Node(new self($Log), $sKey, $aData);
         } else {
             $aChildren = $aData[0];
             unset($aData[0]);
-            $RootNode = new Tree_Node(new self($Log), $sKey, $aData);
+            $RootNode = new Node(new self($Log), $sKey, $aData);
             self::_initFromArrayRecursion($aChildren, $RootNode);
         }
         return $RootNode;
     }
 
-    protected static function _initFromArrayRecursion($aArr, Tree_Node $Parent)
+    protected static function _initFromArrayRecursion($aArr, Node $Parent)
     {
         foreach ($aArr as $sK => $aData) {
             if (isset($aData[0])) {
@@ -53,7 +53,7 @@ class Tree_Pool
         $this->Log = $Log;
     }
 
-    public function addNode(Tree_Node $Node)
+    public function addNode(Node $Node)
     {
         $sKey = $Node->sKey;
         if (isset($this->aPool[$sKey])) {
@@ -67,7 +67,7 @@ class Tree_Pool
     /**
      * @param $iLevel
      *
-     * @return Tree_Node[]
+     * @return Node[]
      */
     public function findNodesByLevel($iLevel)
     {
@@ -77,7 +77,7 @@ class Tree_Pool
     /**
      * @param $sKey
      *
-     * @return Tree_Node|null
+     * @return Node|null
      */
     public function findNode($sKey)
     {
