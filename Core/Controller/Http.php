@@ -137,9 +137,6 @@ abstract class Controller_Http
 
         # 运行
         Bootstrap::factoryWithContext(Context::getInst())->run();
-
-        # 销毁
-        $Context->destroy();
     }
 
     protected function getDefaultTPL()

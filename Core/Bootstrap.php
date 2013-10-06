@@ -125,6 +125,7 @@ class Bootstrap
     {
         $sMethod = 'run' . $this->Context->sRunMode;
         $this->$sMethod();
+        $this->Context->destroy();
     }
 
     protected function runHttp()
