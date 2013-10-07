@@ -10,7 +10,7 @@ class HttpResponse
     public $Header;
     public $sContent;
 
-    public $aPreCookie;
+    public $aPreCookie = array();
 
     public static function create()
     {

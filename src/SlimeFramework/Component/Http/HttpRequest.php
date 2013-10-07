@@ -19,11 +19,18 @@ class HttpRequest
     public static function createFromGlobals($bGetRawData = false)
     {
         $Header = new Bag_Header();
-        if (!empty($aServer)) {
-            foreach ($aServer as $sK => $sV) {
-                if (substr($sK, 0, 5) === 'HTTP_') {
-                    $Header[substr($sK, 5)] = $sV;
-                }
+        foreach ($_SERVER as $sK => $sV) {
+            if (substr($sK, 0, 5) === 'HTTP_') {
+                $sKK          = implode(
+                    '_',
+                    array_map(
+                        function ($sItem) {
+                            return ucfirst(strtolower($sItem));
+                        },
+                        explode('_', substr($sK, 5))
+                    )
+                );
+                $Header[$sKK] = $sV;
             }
         }
         return new self(
@@ -47,7 +54,7 @@ class HttpRequest
      * @param string $sMethod     The HTTP method
      * @param string $sURL        The URL
      * @param string $sProtocol   协议
-     * @param array  $aHeader     The Header KVPair
+     * @param array  $aHeader     The Header KeyValue pair
      * @param array  $aParam      The query (GET) or request (POST) parameters
      * @param array  $aCookie     The request cookies ($_COOKIE)
      * @param array  $aFile       The request files ($_FILES)
@@ -77,8 +84,6 @@ class HttpRequest
             $Get  = new Bag_Get();
             $Post = new Bag_Post($aParam);
         }
-        $this->Header['File'] = new Bag_File($aFile);
-        $this->sContent       = $sContent;
         return new self(
             $sProtocol,
             $sMethod,
@@ -120,9 +125,9 @@ class HttpRequest
     {
         $XSS = $this->getXSSLib();
         $XSS->setCharset($sXSSCharset);
-        $this->Get            = new Bag_Get($XSS->xss_clean($this->Get->getArrayCopy()));
-        $this->Post           = new Bag_Get($XSS->xss_clean($this->Post->getArrayCopy()));
-        $this->Cookie         = new Bag_Get($XSS->xss_clean($this->Cookie->getArrayCopy()));
+        $this->Get            = new Bag_Get($XSS->xss_clean($this->Get->toArray()));
+        $this->Post           = new Bag_Get($XSS->xss_clean($this->Post->toArray()));
+        $this->Cookie         = new Bag_Get($XSS->xss_clean($this->Cookie->toArray()));
         $this->bHasXssPreDeal = true;
     }
 
@@ -156,7 +161,7 @@ class HttpRequest
 
     public function getCookie($mKeyOrKeys, $bXssFilter = false)
     {
-        return $this->_get($this->Header['Cookie'], $mKeyOrKeys, $bXssFilter);
+        return $this->_get($this->Cookie, $mKeyOrKeys, $bXssFilter);
     }
 
     public function getContents()
@@ -236,7 +241,7 @@ class HttpRequest
         if ($this->sRequestMethod === 'GET' && count($this->Get) > 0) {
             $aArr = parse_url($this->sRequestURI);
             if (empty($aArr['query'])) {
-                $aQ = $this->Get->getArrayCopy();
+                $aQ = $this->Get->toArray();
             } else {
                 parse_str($aArr['query'], $aQ);
                 $aQ = array_merge($aArr['query'], $aQ);
@@ -247,7 +252,7 @@ class HttpRequest
 
         # POST LOGIC
         if ($this->sRequestMethod === 'POST' && count($this->Post) > 0) {
-            $this->sContent = http_build_query($this->Post->getArrayCopy());
+            $this->sContent = http_build_query($this->Post->toArray());
             if ($this->Header['Content-Type'] === null) {
                 $this->Header['Content-Type'] = 'application/x-www-form-urlencoded';
             }
@@ -262,9 +267,9 @@ class HttpRequest
         }
 
         # sock open
-        $aArr = explode($this->Header['HOST'], ':', 2);
+        $aArr = explode($this->Header['Host'], ':', 2);
 
-        $rSock = fsockopen($this->Header['HOST'], empty($aArr[1]) ? 80 : $aArr[1]);
+        $rSock = fsockopen($this->Header['Host'], empty($aArr[1]) ? 80 : $aArr[1]);
         socket_set_blocking($rSock, $bBlock);
         fwrite($rSock, sprintf("%s %s %s\r\n", $this->sRequestMethod, $this->sRequestURI, $this->sProtocol));
 
@@ -319,7 +324,7 @@ class HttpRequest
                 $aArr    = explode(':  ', $sLine, 2);
                 $sKey    = ($aArr[0]);
                 $aArr[1] = isset($aArr[1]) ? ltrim($aArr[1]) : '';
-                if (strtoupper($sKey) === 'CONTENT-LENGTH') {
+                if ($sKey === 'Content-Length') {
                     $iContentLen = (int)$aArr[1];
                 }
                 $HttpResponse->setHeader($sKey, $aArr[1]);
