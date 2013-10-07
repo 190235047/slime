@@ -16,7 +16,7 @@ use SlimeFramework\Component\DataStructure\Stack;
  * 4. 注册对象A, 可以以 Context::getInst()->A 取得
  *
  * @package SlimeFramework\Core
-` * @property-read string                                     $sENV         当前环境(例如 publish:生产环境; development:开发环境)
+ * @property-read string                                     $sENV         当前环境(例如 publish:生产环境; development:开发环境)
  * @property-read string                                     $sRunMode     PHP运行方式, 当前支持 (cli||http)
  * @property-read string                                     $sNS          当前应用的命名空间
  * @property-read \DateTime                                  $DateTime     框架初始化时的时间对象
@@ -40,7 +40,7 @@ class Context
     {
         /** @var Stack\Stack $__SF_CONTEXT__ */
         global $__SF_CONTEXT__;
-        return $__SF_CONTEXT__->getCurrent();
+        return $__SF_CONTEXT__->current();
     }
 
     /**

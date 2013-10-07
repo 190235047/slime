@@ -1,28 +1,23 @@
 <?php
-namespace SlimeFramework\Component\DataStructure\Stack;
+namespace SlimeFramework\Component\DataStructure\Queue;
 
-class Stack implements \Countable
+class Queue implements \Countable
 {
-    protected $aData = array();
+    protected $aData;
 
-    public function push($mV)
+    public function add($mV)
     {
         if (empty($this->aData)) {
             $this->aData[] = $mV;
             reset($this->aData);
         } else {
             $this->aData[] = $mV;
-            next($this->aData);
         }
     }
 
-    public function pop()
+    public function get()
     {
-        $mV = array_pop($this->aData);
-        if ($mV!==null) {
-            prev($this->aData);
-        }
-        return $mV;
+        return array_shift($this->aData);
     }
 
     public function current()
