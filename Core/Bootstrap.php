@@ -134,10 +134,10 @@ class Bootstrap
         if ($this->Context->isRegister('HttpRequest')) {
             $HttpRequest = $this->Context->HttpRequest;
         } else {
-            $HttpRequest = Http\Request::createFromGlobals();
+            $HttpRequest = Http\HttpRequest::createFromGlobals();
             $this->Context->register('HttpRequest', $HttpRequest);
         }
-        $HttpResponse = Http\Response::factory()->setNoCache();
+        $HttpResponse = Http\HttpResponse::create()->setNoCache();
         $this->Context->register('HttpResponse', $HttpResponse);
 
         # run route

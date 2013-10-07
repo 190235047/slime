@@ -1,29 +1,38 @@
 <?php
 namespace SlimeFramework\Component\Http;
 
-class Response
+class HttpResponse
 {
-    public $sStatus;
+    public $iStatus;
+    public $sProtocol;
+    public $sStatusMessage;
 
-    public $aHeader = array();
-    public $aHeaderCookie = array();
+    public $Header;
     public $sContent;
 
-    public static function factory()
+    public $aPreCookie;
+
+    public static function create()
     {
         return new self();
     }
 
-    public function getHeader($sKey)
+    public function __construct()
     {
-        return isset($this->aHeader[$sKey]) ? $this->aHeader[$sKey] : null;
+        $this->Header = new Bag_Header();
     }
 
-    public function setHeader($sKey, $sValue, $bOverwrite = true)
+    public function getHeader($sKey)
     {
-        if ($bOverwrite || (!$bOverwrite && !isset($this->aHeader[$sKey]))) {
-            $this->aHeader[$sKey] = $sValue;
+        return $this->Header[$sKey];
+    }
+
+    public function setHeader($sKey, $sValue)
+    {
+        if ($sValue===null) {
+            unset($this->Header[$sKey]);
         }
+        $this->Header[$sKey] = $sValue;
         return $this;
     }
 
@@ -36,7 +45,7 @@ class Response
         $bSecure = null,
         $bHttpOnly = null
     ) {
-        $this->aHeaderCookie[$sName] = array(
+        $this->aPreCookie[$sName] = array(
             'value'       => $sValue,
             'expire'      => $iExpire,
             'path'        => $sPath,
@@ -63,10 +72,11 @@ class Response
 
     public function unsetRedirect()
     {
-        unset($this->aHeader['Location']);
+        $this->setHeader('Location', null);
+        return $this;
     }
 
-    public function setContents($sContent)
+    public function setContent($sContent)
     {
         $this->sContent = $sContent;
         return $this;
@@ -75,7 +85,7 @@ class Response
     /**
      * Sends HTTP headers.
      *
-     * @return Response
+     * @return HttpResponse
      */
     public function sendHeaders()
     {
@@ -85,12 +95,12 @@ class Response
         }
 
         // headers
-        foreach ($this->aHeader as $sK => $sV) {
+        foreach ($this->Header as $sK => $sV) {
             header($sK . ': ' . $sV);
         }
 
         // cookies
-        foreach ($this->aHeaderCookie as $sName => $aCookie) {
+        foreach ($this->aPreCookie as $sName => $aCookie) {
             setcookie(
                 $sName,
                 $aCookie['value'],

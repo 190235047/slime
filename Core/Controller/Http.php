@@ -63,11 +63,14 @@ abstract class Controller_Http
         $this->HttpRequest   = $Context->HttpRequest;
         $this->HttpResponse  = $Context->HttpResponse;
         $this->aParam        = $aParam;
-        $this->View          = Viewer::factory('@PHP', $this->Log)->setBaseDir(DIR_VIEW);
+        $this->View          = Viewer::factory('@PHP', $this->Log);
         $this->bGet          = $this->HttpRequest->getRequestMethod() === 'GET';
         $this->bAutoRender   = $this->bGet;
         $this->bAjax         = $this->HttpRequest->isAjax();
         $this->bAutoRedirect = (!$this->bGet) && (!$this->bAjax);
+        if (defined('DIR_VIEW')) {
+            $this->View->setBaseDir(DIR_VIEW);
+        }
     }
 
     /**
@@ -92,7 +95,7 @@ abstract class Controller_Http
 
         # body
         if ($this->bAjax) {
-            $this->HttpResponse->setContents(json_encode($this->aData));
+            $this->HttpResponse->setContent(json_encode($this->aData));
         } else {
             if ($this->bAutoRender) {
                 if ($this->sTPL === null) {
@@ -100,7 +103,7 @@ abstract class Controller_Http
                 }
                 $this->Log->debug('Use template[{tpl}]', array('tpl' => $this->sTPL));
 
-                $this->HttpResponse->setContents(
+                $this->HttpResponse->setContent(
                     $this->View
                         ->setTpl($this->sTPL)
                         ->assignMulti($this->aData)
@@ -125,7 +128,7 @@ abstract class Controller_Http
         return $CallBack->mCallable->aData;
     }
 
-    public function outerCall(Http\Request $HttpRequest = null)
+    public function outerCall(Http\HttpRequest $HttpRequest = null)
     {
         # 获取一个 Context 副本
         $Context = $this->Context->copy();

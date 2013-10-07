@@ -102,5 +102,7 @@ HTML;
         }
 
         echo $sResult;
+
+        unset($this->aData);
     }
 }

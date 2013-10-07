@@ -25,8 +25,8 @@ use SlimeFramework\Component\DataStructure\Stack;
  * @property-read \SlimeFramework\Component\Log\Logger       $Log          日志对象
  * @property-read \SlimeFramework\Component\Route\Router     $Route        路由对象
  * @property-read \SlimeFramework\Component\Route\CallBack   $CallBack     路由结果回调对象
- * @property-read \SlimeFramework\Component\HTTP\Request     $HttpRequest  本次Http请求生成的HttpRequest对象
- * @property-read \SlimeFramework\Component\HTTP\Response    $HttpResponse 响应本次Http请求的HttpResponse对象
+ * @property-read \SlimeFramework\Component\HTTP\HttpRequest     $HttpRequest  本次Http请求生成的HttpRequest对象
+ * @property-read \SlimeFramework\Component\HTTP\HttpResponse    $HttpResponse 响应本次Http请求的HttpResponse对象
  */
 class Context
 {

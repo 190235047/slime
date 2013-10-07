@@ -24,12 +24,12 @@ class Router
     }
 
     /**
-     * @param Http\Request $HttpRequest
-     * @param              $aRule
+     * @param Http\HttpRequest $HttpRequest
+     * @param array            $aRule
      *
      * @return \SlimeFramework\Component\Route\CallBack
      */
-    public function generateFromHttp(Http\Request $HttpRequest, $aRule)
+    public function generateFromHttp(Http\HttpRequest $HttpRequest, $aRule)
     {
         $CallBack = new CallBack($this->sAppNS, $this->Log);
         foreach ($aRule as $sK => $mV) {
