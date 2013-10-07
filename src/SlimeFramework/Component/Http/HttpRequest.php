@@ -113,7 +113,7 @@ class HttpRequest
         $this->Post             = $Post;
         $this->Cookie           = $Cookie;
         $this->File             = $File;
-        $this->Header['Cookie'] = & $Cookie;
+        $this->Header['Cookie'] = $Cookie;
     }
 
     public function preDealXss($sXSSCharset = 'UTF-8')
