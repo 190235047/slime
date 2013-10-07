@@ -118,10 +118,11 @@ class HttpRequest
 
     public function preDealXss($sXSSCharset = 'UTF-8')
     {
-        $this->XSS->setCharset($sXSSCharset);
-        $this->Get            = new Bag_Get($this->getXSSLib()->xss_clean($this->Get->getArrayCopy()));
-        $this->Post           = new Bag_Get($this->getXSSLib()->xss_clean($this->Post->getArrayCopy()));
-        $this->Cookie         = new Bag_Get($this->getXSSLib()->xss_clean($this->Cookie->getArrayCopy()));
+        $XSS = $this->getXSSLib();
+        $XSS->setCharset($sXSSCharset);
+        $this->Get            = new Bag_Get($XSS->xss_clean($this->Get->getArrayCopy()));
+        $this->Post           = new Bag_Get($XSS->xss_clean($this->Post->getArrayCopy()));
+        $this->Cookie         = new Bag_Get($XSS->xss_clean($this->Cookie->getArrayCopy()));
         $this->bHasXssPreDeal = true;
     }
 
@@ -185,10 +186,10 @@ class HttpRequest
         if (is_array($mKeyOrKeys)) {
             $mRS = array();
             foreach ($mKeyOrKeys as $sKey) {
-                $mRS[$sKey] = $Q1[$sKey]===null ? (isset($Q2[$sKey]) ? $Q2[$sKey] : null) : $Q1[$sKey];
+                $mRS[$sKey] = $Q1[$sKey] === null ? (isset($Q2[$sKey]) ? $Q2[$sKey] : null) : $Q1[$sKey];
             }
         } else {
-            $mRS = $Q1[$mKeyOrKeys]===null ? (isset($Q2[$mKeyOrKeys]) ? $Q2[$mKeyOrKeys] : null) : $Q1[$mKeyOrKeys];
+            $mRS = $Q1[$mKeyOrKeys] === null ? (isset($Q2[$mKeyOrKeys]) ? $Q2[$mKeyOrKeys] : null) : $Q1[$mKeyOrKeys];
         }
         if ($bXssFilter && !$this->bHasXssPreDeal) {
             $mRS = $this->getXSSLib()->xss_clean($mRS);
@@ -240,28 +241,28 @@ class HttpRequest
                 parse_str($aArr['query'], $aQ);
                 $aQ = array_merge($aArr['query'], $aQ);
             }
-            $aArr['query'] = http_build_query($aQ);
+            $aArr['query']     = http_build_query($aQ);
             $this->sRequestURI = http_build_url($aArr);
         }
 
         # POST LOGIC
         if ($this->sRequestMethod === 'POST' && count($this->Post) > 0) {
             $this->sContent = http_build_query($this->Post->getArrayCopy());
-            if ($this->Header['Content-Type']===null) {
+            if ($this->Header['Content-Type'] === null) {
                 $this->Header['Content-Type'] = 'application/x-www-form-urlencoded';
             }
         }
 
         # preset header
-        if ($this->Header['Content-Length']===null && $this->sContent!==null && strlen($this->sContent)>0) {
+        if ($this->Header['Content-Length'] === null && $this->sContent !== null && strlen($this->sContent) > 0) {
             $this->Header['Content-Length'] = strlen($this->sContent);
         }
-        if ($this->Header['Content-Type']===null) {
+        if ($this->Header['Content-Type'] === null) {
             $this->Header['Content-Type'] = 'text/html; charset=utf-8';
         }
 
         # sock open
-        $aArr  = explode($this->Header['HOST'], ':', 2);
+        $aArr = explode($this->Header['HOST'], ':', 2);
 
         $rSock = fsockopen($this->Header['HOST'], empty($aArr[1]) ? 80 : $aArr[1]);
         socket_set_blocking($rSock, $bBlock);
@@ -299,9 +300,9 @@ class HttpRequest
             $sErrMsg  = 'none result';
             return null;
         }
-        $aArr = explode(' ', $sLine, 3);
-        $HttpResponse->iStatus = (int)$aArr[0];
-        $HttpResponse->sProtocol = (string)$aArr[1];
+        $aArr                         = explode(' ', $sLine, 3);
+        $HttpResponse->iStatus        = (int)$aArr[0];
+        $HttpResponse->sProtocol      = (string)$aArr[1];
         $HttpResponse->sStatusMessage = (string)$aArr[2];
 
         $iContentLen = null;
@@ -315,8 +316,8 @@ class HttpRequest
                 $HttpResponse->setContent(fread($rSock, $iContentLen));
                 break;
             } else {
-                $aArr = explode(':  ', $sLine, 2);
-                $sKey = ($aArr[0]);
+                $aArr    = explode(':  ', $sLine, 2);
+                $sKey    = ($aArr[0]);
                 $aArr[1] = isset($aArr[1]) ? ltrim($aArr[1]) : '';
                 if (strtoupper($sKey) === 'CONTENT-LENGTH') {
                     $iContentLen = (int)$aArr[1];
@@ -330,8 +331,8 @@ class HttpRequest
 
     /**
      * @param HttpRequest[] $aRequest
-     * @param int       $iTimeout
-     * @param int       $iInterval 微秒
+     * @param int           $iTimeout
+     * @param int           $iInterval 微秒
      *
      * @return HttpResponse[]
      */
