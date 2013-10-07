@@ -57,7 +57,7 @@ class Bag_Bag implements \ArrayAccess, \Iterator, \Countable
      */
     public function valid()
     {
-        return $this->iCursor <= $this->iLen;
+        return $this->iCursor < $this->iLen;
     }
 
     /**

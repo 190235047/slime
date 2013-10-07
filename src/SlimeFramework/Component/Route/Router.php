@@ -34,33 +34,37 @@ class Router
         $CallBack = new CallBack($this->sAppNS, $this->Log);
         foreach ($aRule as $sK => $mV) {
             $bContinue = false;
-            if (is_string($sK) && preg_match($sK, $HttpRequest->getRequestURI(), $aMatched)) {
-                if (is_callable($mV)) {
-                    // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
-                    // value: function($a, $b, $c, $d){}
-                    array_unshift($aMatched, $CallBack);
-                    $bContinue = call_user_func_array($mV, $aMatched) !== false;
-                } elseif (is_array($mV)) {
-                    // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
-                    // value: array('object' => $1, 'method' => $3, 'param' => array('id' => $2, 'status' => $4))
-                    // value: array('func' => $1_$3, 'param' => array('id' => $2, 'status' => $4), '_continue'=>false)
-                    if (isset($mV['_continue'])) {
-                        $bContinue = $mV['_continue'] !== false;
-                        unset($mV['_continue']);
-                    }
-                    $mV = $this->replaceRecursive($mV, $aMatched);
-                    if (isset($mV['object'])) {
-                        $CallBack->setCBObject($mV['object'], $mV['method']);
-                    } elseif (isset($mV['class'])) {
-                        $CallBack->setCBClass($mV['class'], $mV['method']);
-                    } elseif (isset($mV['func'])) {
-                        $CallBack->setCBFunc($mV['func']);
-                    } else {
-                        $this->Log->error('Route rule error. one of [object, class, func] must be used for array key');
-                        exit(1);
-                    }
-                    if (isset($mV['param'])) {
-                        $CallBack->setParam($mV['param']);
+            if (is_string($sK)) {
+                if (!preg_match($sK, $HttpRequest->getRequestURI(), $aMatched)) {
+                    $bContinue = true;
+                } else {
+                    if (is_callable($mV)) {
+                        // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
+                        // value: function($a, $b, $c, $d){}
+                        array_unshift($aMatched, $CallBack);
+                        $bContinue = call_user_func_array($mV, $aMatched) !== false;
+                    } elseif (is_array($mV)) {
+                        // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
+                        // value: array('object' => $1, 'method' => $3, 'param' => array('id' => $2, 'status' => $4))
+                        // value: array('func' => $1_$3, 'param' => array('id' => $2, 'status' => $4), '_continue'=>false)
+                        if (isset($mV['_continue'])) {
+                            $bContinue = $mV['_continue'] !== false;
+                            unset($mV['_continue']);
+                        }
+                        $mV = $this->replaceRecursive($mV, $aMatched);
+                        if (isset($mV['object'])) {
+                            $CallBack->setCBObject($mV['object'], $mV['method']);
+                        } elseif (isset($mV['class'])) {
+                            $CallBack->setCBClass($mV['class'], $mV['method']);
+                        } elseif (isset($mV['func'])) {
+                            $CallBack->setCBFunc($mV['func']);
+                        } else {
+                            $this->Log->error('Route rule error. one of [object, class, func] must be used for array key');
+                            exit(1);
+                        }
+                        if (isset($mV['param'])) {
+                            $CallBack->setParam($mV['param']);
+                        }
                     }
                 }
             } elseif (is_int($sK)) {
