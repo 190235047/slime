@@ -62,10 +62,10 @@ class HttpRequest
      *
      * @return HttpRequest A Request instance
      */
-    public function create(
+    public static function create(
         $sMethod = 'GET',
         $sURL,
-        $sProtocol = 'http/1.1',
+        $sProtocol = 'HTTP/1.1',
         $aHeader = array(),
         $aParam = array(),
         $aCookie = array(),
@@ -74,10 +74,11 @@ class HttpRequest
     ) {
         $aArr = parse_url($sURL);
         if (!isset($aHeader['Host'])) {
+            $aArr['port'] = isset($aArr['port']) ? $aArr['port'] : 80;
             $aHeader['Host'] = $aArr['port'] == 80 ? $aArr['host'] : "{$aArr['host']}:{$aArr['port']}";
         }
         $Header = new Bag_Header($aHeader);
-        if ($this->sRequestMethod === 'GET') {
+        if ($sMethod === 'GET') {
             $Get  = new Bag_Get($aParam);
             $Post = new Bag_Post();
         } else {
@@ -267,20 +268,26 @@ class HttpRequest
         }
 
         # sock open
-        $aArr = explode($this->Header['Host'], ':', 2);
+        $aArr = explode(':', $this->Header['Host'], 2);
 
-        $rSock = fsockopen($this->Header['Host'], empty($aArr[1]) ? 80 : $aArr[1]);
+        $rSock = fsockopen($this->Header['Host'], isset($aArr[1]) ? $aArr[1] : 80);
         socket_set_blocking($rSock, $bBlock);
         fwrite($rSock, sprintf("%s %s %s\r\n", $this->sRequestMethod, $this->sRequestURI, $this->sProtocol));
 
         # 写 header
         foreach ($this->Header as $sK => $mV) {
-            fwrite($rSock, sprintf("%s: %s", $sK, (string)$mV));
+            $sStr = (string)$mV;
+            if ($sStr!=='') {
+                fwrite($rSock, sprintf("%s: %s\r\n", $sK, $sStr));
+            }
         }
         fwrite($rSock, "\r\n");
 
         # 写 body
-        fwrite($rSock, (string)$this->sContent);
+        $sContent = (string)$this->sContent;
+        if ($sContent !== '') {
+            fwrite($rSock, (string)$sContent);
+        }
 
         return $rSock;
     }
@@ -295,7 +302,7 @@ class HttpRequest
     public static function read($rSock, &$iErrCode = 0, &$sErrMsg = '')
     {
         $HttpResponse = new HttpResponse();
-        while ($sLine = fgets($rSock) !== false) {
+        while (($sLine = fgets($rSock)) !== false) {
             if (trim($sLine) !== '') {
                 break;
             }
@@ -321,8 +328,8 @@ class HttpRequest
                 $HttpResponse->setContent(fread($rSock, $iContentLen));
                 break;
             } else {
-                $aArr    = explode(':  ', $sLine, 2);
-                $sKey    = ($aArr[0]);
+                $aArr    = explode(': ', $sLine, 2);
+                $sKey    = $aArr[0];
                 $aArr[1] = isset($aArr[1]) ? ltrim($aArr[1]) : '';
                 if ($sKey === 'Content-Length') {
                     $iContentLen = (int)$aArr[1];
