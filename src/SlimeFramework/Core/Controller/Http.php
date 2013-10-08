@@ -78,9 +78,12 @@ abstract class Controller_Http
      */
     public function __after__()
     {
-        if (!empty($this->aParam['__INNER_CALL__'])) {
+        # has bean outer call
+        if (count($GLOBALS['__SF_CONTEXT__']) > 1) {
             return;
         }
+
+
         # header
         if ($this->HttpResponse->getHeader('Content-Type') === null) {
             if ($this->bAjax) {
@@ -113,7 +116,7 @@ abstract class Controller_Http
         }
     }
 
-    public function innerCall($sController, $sMethod, $aParam = null, $bNoAfterRender = true)
+    public function innerCall($sController, $sMethod, $aParam = null)
     {
         if ($aParam === null) {
             $aParam = $this->aParam;
@@ -122,24 +125,27 @@ abstract class Controller_Http
         $CallBack->setCBObject(
             $sController,
             $sMethod,
-            $bNoAfterRender ? array_merge($aParam, array('__INNER_CALL__' => true)) : $aParam
+            $aParam
         );
         $CallBack->call();
         return $CallBack->mCallable->aData;
     }
 
-    public function outerCall(Http\HttpRequest $HttpRequest = null)
+    public function outerCall(Http\HttpRequest $HttpRequest)
     {
         # 获取一个 Context 副本
         $Context = $this->Context->copy();
 
         # 复写原始 HttpRequest
-        if ($HttpRequest !== null) {
-            $Context->register('HttpRequest', $HttpRequest);
-        }
+        $HttpRequest = clone $HttpRequest;
+        $Context->register('HttpRequest', $HttpRequest);
 
         # 运行
-        Bootstrap::factoryWithContext(Context::getInst())->run();
+        Bootstrap::factoryWithContext($Context)->run();
+        $aResult = $Context->CallBack->mCallable->aData;
+        $Context->destroy();
+
+        return $aResult;
     }
 
     protected function getDefaultTPL()
