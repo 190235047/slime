@@ -236,8 +236,7 @@ class HttpRequest
                 parse_str($aArr['query'], $aQ);
                 $aQ = array_merge($aArr['query'], $aQ);
             }
-            $aArr['query']     = http_build_query($aQ);
-            $this->sRequestURI = http_build_url($aArr);
+            $this->sRequestURI = $aArr['path'] . '?' . http_build_query($aQ);
         } elseif ($this->sRequestMethod === 'POST' && count($this->Post) > 0) {
             $this->sContent = http_build_query($this->Post->toArray());
             if ($this->Header['Content-Type'] === null) {
@@ -276,10 +275,8 @@ class HttpRequest
             goto RET_callByCurl;
         }
 
-        $aInfo = curl_getinfo($rCurl);
-        var_dump($mData, $aInfo);exit;
         $mResult = new HttpResponse();
-        $mResult->sContent = $mData;
+        $mResult->initFromResponse($mData);
 
         RET_callByCurl:
             curl_close($rCurl);

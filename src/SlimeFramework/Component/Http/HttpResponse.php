@@ -27,13 +27,43 @@ class HttpResponse
         return $this->Header[$sKey];
     }
 
-    public function setHeader($sKey, $sValue)
+    public function setHeader($mKeyOrKVMap, $sValue = null)
     {
-        if ($sValue===null) {
-            unset($this->Header[$sKey]);
+        if (is_array($mKeyOrKVMap)) {
+            foreach ($mKeyOrKVMap as $sK => $sV) {
+                if ($sV === null) {
+                    unset($this->Header[$sK]);
+                } else {
+                    $this->Header[$sK] = $sV;
+                }
+            }
+        } else {
+            if ($sValue===null) {
+                unset($this->Header[$mKeyOrKVMap]);
+            } else {
+                $this->Header[$mKeyOrKVMap] = $sValue;
+            }
         }
-        $this->Header[$sKey] = $sValue;
+
         return $this;
+    }
+
+    public function initFromResponse($sStr)
+    {
+        list($sHeader, $sContent) = array_replace(array('', ''), explode("\r\n\r\n", $sStr, 2));
+        $aHeader = explode("\r\n", $sHeader);
+
+        foreach ($aHeader as $iK => $sV) {
+            if ($iK === 0) {
+                list($this->sProtocol, $this->iStatus, $this->sStatusMessage) =
+                    array_replace(array('', -1, ''), explode(' ', $aHeader, 3));
+            } else {
+                list($sKey, $sValue) = array_replace(array('', ''), explode(':', $sV, 2));
+                $this->Header[$sKey] = ltrim($sValue);
+            }
+        }
+
+        $this->sContent = $sContent;
     }
 
     public function setCookie(
