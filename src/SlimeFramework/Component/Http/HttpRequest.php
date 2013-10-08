@@ -1,7 +1,7 @@
 <?php
 namespace SlimeFramework\Component\Http;
 
-class HttpRequest
+class HttpRequest extends HttpCommon
 {
     /** @var Helper_XSS */
     private $XSS;
@@ -141,14 +141,15 @@ class HttpRequest
         return $this->XSS;
     }
 
-    public function getRequestMethod()
-    {
-        return $this->sRequestMethod;
-    }
-
     public function getRequestURI()
     {
         return $this->sRequestURI;
+    }
+
+    public function setRequestURI($sRequestURI)
+    {
+        $this->sRequestURI = $sRequestURI;
+        return $this;
     }
 
     public function getProtocol()
@@ -156,19 +157,15 @@ class HttpRequest
         return $this->sProtocol;
     }
 
-    public function getHeader($sKey)
+    public function setProtocol($sProtocol)
     {
-        return $this->Header[$sKey];
+        $this->sProtocol = $sProtocol;
+        return $this;
     }
 
-    public function getCookie($mKeyOrKeys, $bXssFilter = false)
+    public function isAjax()
     {
-        return $this->_get($this->Cookie, $mKeyOrKeys, $bXssFilter);
-    }
-
-    public function getContents()
-    {
-        return $this->sContent;
+        return strtolower($this->getHeader('X_REQUESTED_WITH')) == 'xmlhttprequest';
     }
 
     public function getGet($mKeyOrKeys, $bXssFilter = false)
@@ -204,6 +201,11 @@ class HttpRequest
         return $mRS;
     }
 
+    public function getCookie($mKeyOrKeys, $bXssFilter = false)
+    {
+        return $this->_get($this->Cookie, $mKeyOrKeys, $bXssFilter);
+    }
+
     protected function _get($aArr, $mKeyOrKeys, $bXssFilter)
     {
         if (is_array($mKeyOrKeys)) {
@@ -218,11 +220,6 @@ class HttpRequest
             $mRS = $this->getXSSLib()->xss_clean($mRS);
         }
         return $mRS;
-    }
-
-    public function isAjax()
-    {
-        return strtolower($this->getHeader('X_REQUESTED_WITH')) == 'xmlhttprequest';
     }
 
     protected function tidyHeader()
@@ -275,14 +272,14 @@ class HttpRequest
             goto RET_callByCurl;
         }
 
-        $mResult = new HttpResponse();
-        $mResult->initFromResponse($mData);
+        $mResult = HttpResponse::createFromResponseString($mData);
 
         RET_callByCurl:
             curl_close($rCurl);
             return $mResult;
     }
 
+    /*
     public function call($iTimeout = 3, &$iErrNum = 0, &$sErrMsg = '')
     {
         return self::read($this->_call(true, $iTimeout), $iErrNum, $sErrMsg);
@@ -322,13 +319,6 @@ class HttpRequest
         return $rSock;
     }
 
-    /**
-     * @param resource $rSock
-     * @param int      $iErrCode
-     * @param string   $sErrMsg
-     *
-     * @return null|HttpResponse
-     */
     public static function read($rSock, &$iErrCode = 0, &$sErrMsg = '')
     {
         $HttpResponse = new HttpResponse();
@@ -360,17 +350,6 @@ class HttpRequest
                 var_dump($i, $sContent);exit;
 
                 $HttpResponse->setContent($sContent);
-                /*
-                if ($iContentLen === null) {
-                    $sContent = '';
-                    while (($sLine = fgets($rSock))!==false) {
-                        $sContent .= $sLine;
-                    }
-                    $HttpResponse->setContent($sContent);
-                } else {
-                    //@todo chunked
-                    $HttpResponse->setContent(fread($rSock, $iContentLen * 1024));
-                }*/
                 break;
             } else {
                 $aArr    = explode(': ', $sLine, 2);
@@ -388,13 +367,6 @@ class HttpRequest
         return $HttpResponse;
     }
 
-    /**
-     * @param HttpRequest[] $aRequest
-     * @param int           $iTimeout
-     * @param int           $iInterval 微秒
-     *
-     * @return HttpResponse[]
-     */
     public static function callMulti(array $aRequest, $iTimeout = 10, $iInterval = 100000)
     {
         $aArr = $aResult = array();
@@ -420,5 +392,5 @@ class HttpRequest
         }
 
         return $aResult;
-    }
+    }*/
 }

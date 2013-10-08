@@ -74,7 +74,13 @@ class Model_Item implements \ArrayAccess
     public function save()
     {
         if (isset($this->aData[$this->Model->sPKName])) {
-            $bRS = $this->Model->update($this->aData[$this->Model->sPKName], $this->aData);
+            $bRS = $this->Model->update(
+                $this->aData[$this->Model->sPKName],
+                array_intersect_key($this->aData, $this->aOldData)
+            );
+            if ($bRS) {
+                $this->aOldData = array();
+            }
         } else {
             $iID = $this->Model->add($this->aData);
             if ($iID === null) {
@@ -83,9 +89,6 @@ class Model_Item implements \ArrayAccess
                 $this->aData[$this->Model->sPKName] = $iID;
                 $bRS                                = true;
             }
-        }
-        if ($bRS) {
-            $this->aOldData = array();
         }
         return $bRS;
     }

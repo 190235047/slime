@@ -1,69 +1,49 @@
 <?php
 namespace SlimeFramework\Component\Http;
 
-class HttpResponse
+class HttpResponse extends HttpCommon
 {
-    public $iStatus;
-    public $sProtocol;
-    public $sStatusMessage;
+    protected $iStatus;
+    protected $sProtocol;
+    protected $sStatusMessage;
 
-    public $Header;
-    public $sContent;
+    protected $Header;
+    protected $sContent;
 
-    public $aPreCookie = array();
+    protected $aPreCookie = array();
 
     public static function create()
     {
         return new self();
     }
 
-    public function __construct()
-    {
-        $this->Header = new Bag_Header();
-    }
 
-    public function getHeader($sKey)
+    public static function createFromResponseString($sStr)
     {
-        return $this->Header[$sKey];
-    }
+        $SELF = new self();
 
-    public function setHeader($mKeyOrKVMap, $sValue = null)
-    {
-        if (is_array($mKeyOrKVMap)) {
-            foreach ($mKeyOrKVMap as $sK => $sV) {
-                if ($sV === null) {
-                    unset($this->Header[$sK]);
-                } else {
-                    $this->Header[$sK] = $sV;
-                }
-            }
-        } else {
-            if ($sValue===null) {
-                unset($this->Header[$mKeyOrKVMap]);
-            } else {
-                $this->Header[$mKeyOrKVMap] = $sValue;
-            }
-        }
-
-        return $this;
-    }
-
-    public function initFromResponse($sStr)
-    {
-        list($sHeader, $sContent) = array_replace(array('', ''), explode("\r\n\r\n", $sStr, 2));
+        list($sHeader, $sContent) = array_replace(array('', ''), explode("\r\n\r\n", ltrim($sStr), 2));
         $aHeader = explode("\r\n", $sHeader);
 
         foreach ($aHeader as $iK => $sV) {
             if ($iK === 0) {
-                list($this->sProtocol, $this->iStatus, $this->sStatusMessage) =
-                    array_replace(array('', -1, ''), explode(' ', $aHeader, 3));
+                list($SELF->sProtocol, $SELF->iStatus, $SELF->sStatusMessage) =
+                    array_replace(array('', -1, ''), explode(' ', $sV, 3));
+                $SELF->iStatus = (int)$SELF->iStatus;
             } else {
                 list($sKey, $sValue) = array_replace(array('', ''), explode(':', $sV, 2));
-                $this->Header[$sKey] = ltrim($sValue);
+                $SELF->Header[$sKey] = ltrim($sValue);
             }
         }
 
-        $this->sContent = $sContent;
+        $SELF->sContent = $sContent;
+
+        return $SELF;
+    }
+
+    public function __construct()
+    {
+        $this->Header = new Bag_Header();
     }
 
     public function setCookie(
@@ -94,21 +74,9 @@ class HttpResponse
         return $this;
     }
 
-    public function setRedirect($sURL, $iCode = null)
+    public function setRedirect($sURL)
     {
         $this->setHeader('Location', $sURL);
-        return $this;
-    }
-
-    public function unsetRedirect()
-    {
-        $this->setHeader('Location', null);
-        return $this;
-    }
-
-    public function setContent($sContent)
-    {
-        $this->sContent = $sContent;
         return $this;
     }
 
@@ -117,7 +85,7 @@ class HttpResponse
      *
      * @return HttpResponse
      */
-    public function sendHeaders()
+    public function sendHeader()
     {
         // headers have already been sent by the developer
         if (headers_sent()) {
@@ -164,7 +132,7 @@ class HttpResponse
      */
     public function send()
     {
-        $this->sendHeaders()->sendContent();
+        $this->sendHeader()->sendContent();
 
         return $this;
     }
