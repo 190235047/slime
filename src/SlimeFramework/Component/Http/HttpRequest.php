@@ -72,9 +72,8 @@ class HttpRequest
         $aFile = array(),
         $sContent = null
     ) {
-        $aArr = parse_url($sURL);
+        $aArr = array_replace(array('port' => 80, 'path' => '/'), parse_url($sURL));
         if (!isset($aHeader['Host'])) {
-            $aArr['port'] = isset($aArr['port']) ? $aArr['port'] : 80;
             $aHeader['Host'] = $aArr['port'] == 80 ? $aArr['host'] : "{$aArr['host']}:{$aArr['port']}";
         }
         $Header = new Bag_Header($aHeader);
@@ -85,7 +84,7 @@ class HttpRequest
             $Get  = new Bag_Get();
             $Post = new Bag_Post($aParam);
         }
-        return new self(
+        $SELF = new self(
             $sProtocol,
             $sMethod,
             $aArr['path'],
@@ -96,6 +95,8 @@ class HttpRequest
             new Bag_Cookie($aCookie),
             new Bag_File($aFile)
         );
+        $SELF->tidyHeader();
+        return $SELF;
     }
 
     public function __construct(
@@ -224,19 +225,7 @@ class HttpRequest
         return strtolower($this->getHeader('X_REQUESTED_WITH')) == 'xmlhttprequest';
     }
 
-    //------------------- call logic -----------------------
-
-    public function call()
-    {
-        return self::read($this->_call());
-    }
-
-    public function callAsync()
-    {
-        return $this->_call(false);
-    }
-
-    private function _call($bBlock = true)
+    protected function tidyHeader()
     {
         # GET LOGIC
         if ($this->sRequestMethod === 'GET' && count($this->Get) > 0) {
@@ -249,10 +238,7 @@ class HttpRequest
             }
             $aArr['query']     = http_build_query($aQ);
             $this->sRequestURI = http_build_url($aArr);
-        }
-
-        # POST LOGIC
-        if ($this->sRequestMethod === 'POST' && count($this->Post) > 0) {
+        } elseif ($this->sRequestMethod === 'POST' && count($this->Post) > 0) {
             $this->sContent = http_build_query($this->Post->toArray());
             if ($this->Header['Content-Type'] === null) {
                 $this->Header['Content-Type'] = 'application/x-www-form-urlencoded';
@@ -266,28 +252,75 @@ class HttpRequest
         if ($this->Header['Content-Type'] === null) {
             $this->Header['Content-Type'] = 'text/html; charset=utf-8';
         }
+    }
 
-        # sock open
+    //------------------- call logic -----------------------
+
+    public function callByCurl()
+    {
+        $aArr = explode('/', $this->sProtocol, 2);
+        $rCurl = curl_init(sprintf('%s://%s', $aArr[0], $this->Header['Host'] . $this->sRequestURI));
+        curl_setopt($rCurl, CURLOPT_HEADER, 1);
+        curl_setopt($rCurl, CURLOPT_RETURNTRANSFER, 1);
+        if ($this->sRequestMethod==='POST') {
+            curl_setopt($rCurl, CURLOPT_POSTFIELDS, $this->sContent);
+        }
+        $aHeader = explode("\r\n", rtrim((string)$this->Header, "\r\n"));
+        if (!empty($aHeader)) {
+            curl_setopt($rCurl, CURLOPT_HTTPHEADER, $aHeader);
+        }
+        $mData = curl_exec($rCurl);
+
+        if ($mData === false) {
+            $mResult = null;
+            goto RET_callByCurl;
+        }
+
+        $aInfo = curl_getinfo($rCurl);
+        var_dump($mData, $aInfo);exit;
+        $mResult = new HttpResponse();
+        $mResult->sContent = $mData;
+
+        RET_callByCurl:
+            curl_close($rCurl);
+            return $mResult;
+    }
+
+    public function call($iTimeout = 3, &$iErrNum = 0, &$sErrMsg = '')
+    {
+        return self::read($this->_call(true, $iTimeout), $iErrNum, $sErrMsg);
+    }
+
+    public function callAsync()
+    {
+        return $this->_call(false, $iErrNum = 0, $sErrMsg = '');
+    }
+
+    private function _call($bBlock = true, $iTimeout = 3)
+    {
+        # first line
+        $sStr = sprintf("%s %s %s\r\n", $this->sRequestMethod, $this->sRequestURI, $this->sProtocol);
+
+        # header
+        $sStr .= (string)$this->Header;
+
+        # sp
+        $sStr .= "\r\n";
+
+        # body
+        $sStr .= (string)$this->sContent;
+
+        # open
         $aArr = explode(':', $this->Header['Host'], 2);
-
         $rSock = fsockopen($this->Header['Host'], isset($aArr[1]) ? $aArr[1] : 80);
         socket_set_blocking($rSock, $bBlock);
-        fwrite($rSock, sprintf("%s %s %s\r\n", $this->sRequestMethod, $this->sRequestURI, $this->sProtocol));
-
-        # 写 header
-        foreach ($this->Header as $sK => $mV) {
-            $sStr = (string)$mV;
-            if ($sStr!=='') {
-                fwrite($rSock, sprintf("%s: %s\r\n", $sK, $sStr));
-            }
+        if ($bBlock) {
+            //@todo 这里的延迟会影响fread时的速度. 不管怎么设置 fread 都要read多次, 延迟如果设置很小, 结果会快. 这里到底原因是什么???
+            stream_set_timeout($rSock, 0, 100000);
         }
-        fwrite($rSock, "\r\n");
 
-        # 写 body
-        $sContent = (string)$this->sContent;
-        if ($sContent !== '') {
-            fwrite($rSock, (string)$sContent);
-        }
+        # write
+        fwrite($rSock, $sStr);
 
         return $rSock;
     }
@@ -309,7 +342,7 @@ class HttpRequest
         }
         if (empty($sLine)) {
             $iErrCode = 1;
-            $sErrMsg  = 'none result';
+            $sErrMsg  = 'http response error in first line';
             return null;
         }
         $aArr                         = explode(' ', $sLine, 3);
@@ -320,12 +353,27 @@ class HttpRequest
         $iContentLen = null;
         while ($sLine = fgets($rSock)) {
             if ($sLine === "\r\n") {
-                if ($iContentLen === null) {
-                    $iErrCode = 2;
-                    $sErrMsg  = 'no content-length set!';
-                    return null;
+                $sContent = '';
+                $iReadBuf = $iContentLen===null ? 1024 * 1024 : $iContentLen * 1024;
+                $i = 0;
+                while (($sBuf=fread($rSock, $iReadBuf)) != '') {
+                    $i++;
+                    $sContent .= $sBuf;
                 }
-                $HttpResponse->setContent(fread($rSock, $iContentLen));
+                var_dump($i, $sContent);exit;
+
+                $HttpResponse->setContent($sContent);
+                /*
+                if ($iContentLen === null) {
+                    $sContent = '';
+                    while (($sLine = fgets($rSock))!==false) {
+                        $sContent .= $sLine;
+                    }
+                    $HttpResponse->setContent($sContent);
+                } else {
+                    //@todo chunked
+                    $HttpResponse->setContent(fread($rSock, $iContentLen * 1024));
+                }*/
                 break;
             } else {
                 $aArr    = explode(': ', $sLine, 2);
@@ -338,6 +386,8 @@ class HttpRequest
             }
         }
 
+        $iErrCode = 0;
+        $sErrMsg = '';
         return $HttpResponse;
     }
 

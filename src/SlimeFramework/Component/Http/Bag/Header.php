@@ -8,7 +8,10 @@ class Bag_Header extends Bag_Bag
         $sResult = '';
         $aArr = $this->toArray();
         foreach ($aArr as $sK => $mV) {
-            $sResult .= "$sK: " . (string)$mV . "\r\n";
+            $sV = (string)$mV;
+            if ($sV!=='') {
+                $sResult .= "$sK: $sV\r\n";
+            }
         }
         return $sResult;
     }
