@@ -1,7 +1,5 @@
 # MultiProcess Job Deal
 
-* Example In Test/Test.php
-
 ```php
 use Psr\Log\LoggerInterface;
 use Slime\Component\MultiProcess;
