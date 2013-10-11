@@ -1,34 +1,60 @@
-# MultiProcess
+# MultiProcess Job Deal
 
-* Example
+* Example In Test/Test.php
 
 ```php
-<?php
-class MyMP extends \Slime\Component\MultiProcess\MPPoolModel
+use Psr\Log\LoggerInterface;
+use Slime\Component\MultiProcess;
+use Slime\Component\Log;
+
+class Task implements MultiProcess\ITask
 {
     /**
-     * @return string|null
+     * @param LoggerInterface $Logger
+     *
+     * @return string|bool string as ok and false as fail
      */
-    protected function getMessage()
+    public function fetchMsgInMain(LoggerInterface $Logger)
     {
-        $i = rand(1, 100);
-        if ($i<=50) {
-            return null;
+        if (($i = rand(0, 100))>50) {
+            return json_encode(array($i, rand(100, 1000)));
+        } else {
+            return false;
         }
-        return json_encode(array(rand(1, 100), rand(1, 100)));
     }
-}
 
-class MyJob extends \Slime\Component\MultiProcess\Job
-{
-    public function run()
+    /**
+     * @param string          $sMessage
+     * @param LoggerInterface $Logger
+     *
+     * @return void
+     */
+    public function dealMsgInChild($sMessage, LoggerInterface $Logger)
     {
-        $aArr = json_decode($this->sMessage);
-        $this->Logger->debug('job run:' . ($aArr[0] + $aArr[1]));
-        return true;
+        $aArr = json_decode($sMessage);
+        if (count($aArr) == 2) {
+            $Logger->info('{a} + {b} = {c}', array('a' => $aArr[0], 'b' => $aArr[1], 'c' => $aArr[0] + $aArr[1]));
+        } else {
+            $Logger->warning('Message[{msg}] format error', array('msg' => $sMessage));
+        }
+    }
+
+    /**
+     * @param string          $sMessage
+     * @param LoggerInterface $Logger
+     *
+     * @return void
+     */
+    public function dealWhenException($sMessage, LoggerInterface $Logger)
+    {
+        $Logger->warning('Error occur with message[{msg}]', array('msg' => $sMessage));
     }
 }
 
-$MP = new MyMP(10, 'fifo', 'MyJob', 1000, new \Slime\Component\Log\Logger(array(new \Slime\Component\Log\Writer_STDFD())));
-$MP->run();
+$PoolManager = new MultiProcess\PoolManager(
+    '/tmp/fifo',
+    new Log\Logger(array(new Log\Writer_STDFD())),
+    new Task()
+);
+$PoolManager->run();
 ```

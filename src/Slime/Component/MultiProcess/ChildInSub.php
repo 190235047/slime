@@ -5,11 +5,11 @@ use Psr\Log\LoggerInterface;
 use Slime\Component\Log;
 
 /**
- *  构造函数:
- *     1. 以写方式打开子到父管道, 以读方式打开父到子管道
- *     2. 进入主Loop循环, 不断尝试读取主进程发来的消息
- *     3. 获取到消息后, 创建Job对象, 运行.
- *     4. 将结果(0:成功;else:失败)通过子到父的写管道写回主进程
+ * 1. 以写方式打开子到父管道, 以读方式打开父到子管道
+ * 2. 进入主Loop循环, 不断尝试读取主进程发来的消息
+ * 3. 读管道获得消息, 调用ITask.dealMsgInChild 处理消息.
+ * 4. 将结果(0:正常;else:异常)通过写管道发送给主进程
+ *
  * Class ChildSub
  *
  * @package Slime\Component\MultiProcess
@@ -71,6 +71,8 @@ class ChildInSub
     private function receiveLoop()
     {
         while (true) {
+            $iTStart = microtime(true);
+
             if (($sMessage = fgets($this->rFifoF2C)) === false) {
                 //管道已经断掉, 退出
                 if (!is_readable($this->sFifoF2C)) {
@@ -114,10 +116,10 @@ class ChildInSub
                 exit(0);
             }
 
-            unset($Job);
-
             NEXT_LOOP:
-            usleep(100000);
+            if (($iInterval = 1 - (microtime(true) - $iTStart)) > 0) {
+                usleep((int)($iInterval * 1000000));
+            }
         }
     }
 }

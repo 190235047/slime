@@ -20,7 +20,6 @@ class PoolManager
 
     private $aCanBeMod = array(
         'iPoolSize',
-        'iLoopSleepUS',
         'iMaxFinishCount',
         'iMaxExecuteTime'
     );
@@ -31,7 +30,6 @@ class PoolManager
         ITask $Task,
         $sConfigFile = null,
         $iPoolSize = 20,
-        $iLoopSleepMS = 100,
         $iMaxFinishCount = 100,
         $iMaxExecuteTime = 600
     ) {
@@ -56,7 +54,6 @@ class PoolManager
         # dy set
         $this->sConfigFile     = $sConfigFile;
         $this->iPoolSize       = $iPoolSize;
-        $this->iLoopSleepUS    = $iLoopSleepMS * 1000;
         $this->iMaxFinishCount = $iMaxFinishCount;
         $this->iMaxExecuteTime = $iMaxExecuteTime;
 
@@ -71,19 +68,22 @@ class PoolManager
 
         $i = 0;
         while (true) {
-            # debug log per 10s
+            $iTStart = microtime(true);
+
             if (++$i == 1000000) {
                 $i = 0;
             }
-            if ($i % (1000000 / $this->iLoopSleepUS * 10) === 0) {
+            if ($i % 3 === 0) {
                 $this->Log->debug(
-                    'Mem:{mem}, MemTop:{memTop}, Children:{children}',
+                    'Mem:{mem}, MemTop:{memTop}',
                     array(
                         'mem'      => memory_get_usage(true),
                         'memTop'   => memory_get_peak_usage(true),
-                        'children' => array_keys($this->aChildren)
                     )
                 );
+                $this->Log->debug('AllChildren:{c}',  array('c' => array_keys($this->aChildren)));
+                $this->Log->debug('IdleChildren:{c}', array('c' => array_keys($this->aIdleChildren)));
+                $this->Log->debug('BusyChildren:{c}', array('c' => array_keys($this->aBusyChildren)));
             }
 
             $Child = count($this->aIdleChildren) === 0 ? null : $this->aIdleChildren[array_rand($this->aIdleChildren)];
@@ -122,8 +122,8 @@ class PoolManager
                     $this->cleanUpChild($Child);
                 }
                 if (isset($this->aBusyChildren[$Child->iPID])) {
-                    # 是否超时
                     if (time() - $Child->iWorkStartTimestamp > $this->iMaxExecuteTime) {
+                        # 超时
                         $this->Log->debug(
                             'Child[{child}] exec timeout and process will exit',
                             array('child' => $Child->iPID)
@@ -131,7 +131,7 @@ class PoolManager
                         $this->cleanUpChild($Child);
                     } else {
                         # 消息
-                        if (($mResult = $Child->receive()) === false) {
+                        if (($mResult = $Child->receive()) !== false) {
                             if ((int)$mResult!==0) {
                                 $this->Task->dealWhenException($Child->sMessage, $this->Log);
                             }
@@ -142,7 +142,18 @@ class PoolManager
             }
 
             # wait
-            $this->doWait();
+            while (($iPID = pcntl_wait($iStatus, WNOHANG | WUNTRACED)) > 0) {
+                $this->Log->debug("Get SIGCHLD from child[{child}]", array('child' => $iPID));
+                self::generateFifo($iPID, $this->sFifoDir, $sF2C, $sC2F);
+                if (file_exists($sF2C)) {
+                    $b = unlink($sF2C);
+                    $this->Log->debug("Delete fifo[{fifo}] {st}", array('fifo' => $sF2C, 'st' => $b ? 'OK' : 'FAILED'));
+                }
+                if (file_exists($sC2F)) {
+                    $b = unlink($sC2F);
+                    $this->Log->debug("Delete fifo[{fifo}] {st}", array('fifo' => $sC2F, 'st' => $b ? 'OK' : 'FAILED'));
+                }
+            }
 
             # 创建新进程
             $iNeedCreate = $this->iPoolSize - count($this->aChildren);
@@ -151,8 +162,10 @@ class PoolManager
                 $this->createChildren($iNeedCreate);
             }
 
-            # go next
-            usleep($this->iLoopSleepUS);
+            # 如果此次 loop 不足1s, sleep to 1s . 不必十分精确
+            if (($iInterval = 1-(microtime(true) - $iTStart)) > 0) {
+                usleep((int)($iInterval * 1000000));
+            }
         }
     }
 
@@ -215,9 +228,6 @@ class PoolManager
             'Send SIGTERM to child[{child}] : {status}',
             array('child' => $iPID, 'status' => $b ? 'OK' : 'Fail')
         );
-        if ($b) {
-            $this->doWait();
-        }
         if (isset($this->aChildren[$iPID])) {
             unset($this->aChildren[$iPID]);
         }
@@ -261,22 +271,6 @@ class PoolManager
                 if (isset($aArr[$sStr])) {
                     $this->$sStr = $aArr[$sStr];
                 }
-            }
-        }
-    }
-
-    private function doWait()
-    {
-        while (($iPID = pcntl_wait($iStatus, WNOHANG | WUNTRACED)) > 0) {
-            $this->Log->debug("Get SIGCHLD from child[{child}]", array('child' => $iPID));
-            self::generateFifo($iPID, $this->sFifoDir, $sF2C, $sC2F);
-            if (file_exists($sF2C)) {
-                $b = unlink($sF2C);
-                $this->Log->debug("Delete fifo[{fifo}] {st}", array('fifo' => $sF2C, 'st' => $b ? 'OK' : 'FAILED'));
-            }
-            if (file_exists($sC2F)) {
-                $b = unlink($sC2F);
-                $this->Log->debug("Delete fifo[{fifo}] {st}", array('fifo' => $sC2F, 'st' => $b ? 'OK' : 'FAILED'));
             }
         }
     }
