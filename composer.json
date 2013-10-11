@@ -1,5 +1,5 @@
 {
-    "name": "smallslime/slime_framework",
+    "name": "slime/slime",
     "require": {
         "psr/log": "1.0.0"
     },
