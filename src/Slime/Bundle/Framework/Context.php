@@ -1,19 +1,17 @@
 <?php
-namespace Slime\Core;
+namespace Slime\Bundle\Framework;
 
 use Slime\Component\DataStructure\Stack;
 
 /**
  * Class Context
  * 运行时上下文类
- * 1. 调用 makeInst 静态方法
- *     1. 生成一个唯一ID $GLOBALS['__sf_guid__']
- *     2. 生成上下文对象, 置于 $GLOBALS['__sf_context__'][$GLOBALS['__sf_guid__']], 生命周期为Global
- * 2. 通过 getInst 静态方法获取当前请求中的上下文对象
- *     1. 调用 getInst 默认获取的是前一次生成的对象
- *     2. 通过改变 $GLOBALS['__sf_guid__'] 的值可以获取到到不同的上下文对象(一般普通逻辑中无需用到)
+ * 1. 调用 makeInst 静态方法, 生成 Context 对象, 压栈(后入先出的数据结构: Slime\Component\DataStructure\Stack)
+ * 2. 通过 getInst 静态方法获取当前请求中的上下文对象, 即栈顶 Context
  * 3. 通过 register 可以注册新的运行时对象
- * 4. 注册对象A, 可以以 Context::getInst()->A 取得
+ * 4. 注册对象A, 可以 Context::getInst()->A 取得
+ * 5. 通过 clone 可以深拷贝一个 Context 对象, 新 Context 中的所有对象均为副本(除无法clone的对象: private __clone)
+ * 6. 销毁对象需显式调用 destroy 方法, 即弹出栈顶 Context 对象, 并销毁此对象中 register 的所有对象
  *
  * @package Slime\Core
  * @property-read string                                     $sENV         当前环境(例如 publish:生产环境; development:开发环境)
@@ -21,12 +19,12 @@ use Slime\Component\DataStructure\Stack;
  * @property-read string                                     $sNS          当前应用的命名空间
  * @property-read \DateTime                                  $DateTime     框架初始化时的时间对象
  * @property-read Bootstrap                                  $Bootstrap    框架核心基础对象
- * @property-read \Slime\Component\Config\Configure $Config       配置对象
- * @property-read \Slime\Component\Log\Logger       $Log          日志对象
- * @property-read \Slime\Component\Route\Router     $Route        路由对象
- * @property-read \Slime\Component\Route\CallBack   $CallBack     路由结果回调对象
- * @property-read \Slime\Component\HTTP\HttpRequest     $HttpRequest  本次Http请求生成的HttpRequest对象
- * @property-read \Slime\Component\HTTP\HttpResponse    $HttpResponse 响应本次Http请求的HttpResponse对象
+ * @property-read \Slime\Component\Config\Configure          $Config       配置对象
+ * @property-read \Slime\Component\Log\Logger                $Log          日志对象
+ * @property-read \Slime\Component\Route\Router              $Route        路由对象
+ * @property-read \Slime\Component\Route\CallBack            $CallBack     路由结果回调对象
+ * @property-read \Slime\Component\HTTP\HttpRequest          $HttpRequest  本次Http请求生成的HttpRequest对象
+ * @property-read \Slime\Component\HTTP\HttpResponse         $HttpResponse 响应本次Http请求的HttpResponse对象
  */
 class Context
 {
@@ -34,7 +32,7 @@ class Context
 
     /**
      * 获取当前请求的上下文对象
-     * @return \Slime\Core\Context
+     * @return \Slime\Bundle\Framework\Context
      */
     public static function getInst()
     {
@@ -58,10 +56,6 @@ class Context
     }
 
     private function __construct()
-    {
-    }
-
-    private function __clone()
     {
     }
 
@@ -107,7 +101,7 @@ class Context
         return $this->aObject[$sVarName];
     }
 
-    public function copy()
+    public function __clone()
     {
         $OldContext = Context::getInst();
         Context::makeInst();
@@ -133,9 +127,12 @@ class Context
     {
         /** @var Stack\Stack $__SF_CONTEXT__ */
         global $__SF_CONTEXT__;
-        $SELF = $__SF_CONTEXT__->pop();
-        foreach (get_object_vars($SELF) as $sK => $mV) {
-            $this->$sK = null;
+        $SELF = $__SF_CONTEXT__->current();
+        if ($SELF === $this) {
+            $__SF_CONTEXT__->pop();
+            foreach (get_object_vars($SELF) as $sK => $mV) {
+                unset($this->$sK);
+            }
         }
     }
 }

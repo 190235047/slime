@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Core;
+namespace Slime\Bundle\Framework;
 
 use Slime\Component\Http;
 use Slime\Component\Route\CallBack;
@@ -135,7 +135,7 @@ abstract class Controller_Http
     public function outerCall(Http\HttpRequest $HttpRequest)
     {
         # 获取一个 Context 副本
-        $Context = $this->Context->copy();
+        $Context = clone $this->Context;
 
         # 复写原始 HttpRequest
         $HttpRequest = clone $HttpRequest;

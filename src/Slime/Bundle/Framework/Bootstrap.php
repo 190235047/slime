@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Core;
+namespace Slime\Bundle\Framework;
 
 use Slime\Component\Config;
 use Slime\Component\Log;
@@ -35,7 +35,7 @@ class Bootstrap
      * @param string $sRunMode    PHP运行方式, 当前支持 (cli||http)
      * @param array  $aLogConfig  Log初始化配置, 详见 Slime\Component\Log\ReadMe.md
      *
-     * @return \Slime\Core\Bootstrap
+     * @return \Slime\Bundle\Framework\Bootstrap
      */
     public static function factory($sENV, $sDirConfig, $sAppNs, $sRunMode, array $aLogConfig)
     {

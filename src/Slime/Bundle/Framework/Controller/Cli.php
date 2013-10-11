@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Core;
+namespace Slime\Bundle\Framework;
 
 use Slime\Component\Route\CallBack;
 
