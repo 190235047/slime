@@ -1,8 +1,0 @@
-{
-    "name": "SlimeFramework MultiProcess",
-    "description": "A PHP MultiProcess Library",
-    "require": {
-        "Psr/Log": "*",
-        "SlimeFramework/Component/Log": "*"
-    }
-}

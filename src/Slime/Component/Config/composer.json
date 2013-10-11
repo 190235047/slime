@@ -1,0 +1,7 @@
+{
+    "name": "Slime Configure",
+    "description": "Load runtime config class",
+    "require": {
+        "Psr/Log": "*"
+    }
+}

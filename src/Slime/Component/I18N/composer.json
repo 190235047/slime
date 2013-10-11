@@ -1,0 +1,7 @@
+{
+    "name": "Slime I18N",
+    "description": "A PHP I18N Library",
+    "require": {
+        "Slime/Component/Config": "*"
+    }
+}
