@@ -1,10 +1,15 @@
 <?php
 namespace Slime\Component\RDS;
 
+/**
+ * Class Model_Item
+ *
+ * @package SlimeFramework\Component\RDS
+ * @property-read array $aData
+ * @property-read array $aOldData
+ */
 class Model_Item implements \ArrayAccess
 {
-    private $aData;
-    private $aOldData = array();
     private $aRelation = array();
 
     /** @var Model_Model */
@@ -12,6 +17,12 @@ class Model_Item implements \ArrayAccess
 
     /** @var Model_Group|null */
     public $Group;
+
+    /** @var array */
+    public $aData;
+
+    /** @var array */
+    public $aOldData = array();
 
     public function __construct(array $aData, Model_Model $Model, $Group = null)
     {
@@ -22,27 +33,33 @@ class Model_Item implements \ArrayAccess
 
     public function __get($sKey)
     {
-        return $this->aData[$sKey];
+        return isset($this->aData[$sKey]) ? $this->aData[$sKey] : null;
     }
 
     public function __set($sKey, $mValue)
     {
-        $this->aOldData[$sKey] = $this->aData[$sKey];
-        $this->aData[$sKey]    = $mValue;
+        $this->_set($sKey, $mValue);
     }
 
     public function set($mKeyOrKVMap, $mValue = null)
     {
         if (!is_array($mKeyOrKVMap)) {
-            $this->aOldData[$mKeyOrKVMap] = $this->aData[$mKeyOrKVMap];
-            $this->aData[$mKeyOrKVMap]    = $mValue;
+            $this->_set($mKeyOrKVMap, $mValue);
         } else {
             foreach ($mKeyOrKVMap as $sKey => $mValue) {
-                $this->aOldData[$sKey] = $this->aData[$sKey];
-                $this->aData[$sKey]    = $mValue;
+                $this->_set($sKey, $mValue);
             }
         }
         return $this;
+    }
+
+    private function _set($sKey, $mValue)
+    {
+        if (isset($this->aData[$sKey]) && $this->aData[$sKey]==$mValue) {
+            return;
+        }
+        $this->aOldData[$sKey] = isset($this->aData[$sKey]) ? $this->aData[$sKey] : null;
+        $this->aData[$sKey]    = $mValue;
     }
 
     /**
@@ -74,15 +91,12 @@ class Model_Item implements \ArrayAccess
     public function save()
     {
         if (isset($this->aData[$this->Model->sPKName])) {
-            $bRS = $this->Model->update(
-                $this->aData[$this->Model->sPKName],
-                array_intersect_key($this->aData, $this->aOldData)
-            );
+            $bRS = $this->update();
             if ($bRS) {
                 $this->aOldData = array();
             }
         } else {
-            $iID = $this->Model->add($this->aData);
+            $iID = $this->add($this->aData);
             if ($iID === null) {
                 $bRS = false;
             } else {
@@ -93,9 +107,37 @@ class Model_Item implements \ArrayAccess
         return $bRS;
     }
 
+    private function add()
+    {
+        $M = $this->Model;
+        $iID = $M->CURD->insertSmarty($M->sTable, $this->aData);
+        if ($iID === null) {
+            $bRS = false;
+        } else {
+            $this->aData[$this->Model->sPKName] = $iID;
+            $bRS                                = true;
+        }
+        return $bRS;
+    }
+
+    private function update()
+    {
+        $M = $this->Model;
+        $bRS = $M->CURD->updateSmarty(
+            $M->sTable,
+            array_intersect_key($this->aData, $this->aOldData),
+            array($M->sPKName => $this->aData[$M->sPKName])
+        );
+        if ($bRS) {
+            $this->aOldData = array();
+        }
+        return $bRS;
+    }
+
     public function delete()
     {
-        return $this->Model->delete($this->aData[$this->Model->sPKName]);
+        $M = $this->Model;
+        return $M->CURD->deleteSmarty($M->sTable, array($M->sPKName => $this->aData[$M->sPKName]));
     }
 
     public function toArray()

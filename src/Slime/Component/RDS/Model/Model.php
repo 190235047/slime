@@ -17,6 +17,11 @@ class Model_Model
         $this->Log      = $Log;
     }
 
+    public function addUpdate($aKVMap, $aUpdateKey)
+    {
+        return $this->CURD->insertUpdateSmarty($this->sTable, $aKVMap, $aUpdateKey);
+    }
+
     public function createItem(array $aData = array())
     {
         return new Model_Item($aData, $this);
@@ -24,22 +29,26 @@ class Model_Model
 
     public function add($aKVMap)
     {
-        return $this->CURD->insertSmarty($this->sTable, $aKVMap);
-    }
-
-    public function addUpdate($aKVMap, $aUpdateKey)
-    {
-        return $this->CURD->insertUpdateSmarty($this->sTable, $aKVMap, $aUpdateKey);
+        return $this->createItem($aKVMap)->save();
     }
 
     public function delete($mPK)
     {
-        return $this->CURD->deleteSmarty($this->sTable, array($this->sPKName => $mPK));
+        $Model = $this->find($mPK);
+        if ($Model===null) {
+            return false;
+        }
+        return $Model->delete();
     }
 
     public function update($mPK, $aKVMap)
     {
-        return $this->CURD->updateSmarty($this->sTable, $aKVMap, array($this->sPKName => $mPK));
+        $Model = $this->find($mPK);
+        if ($Model===null) {
+            return false;
+        }
+        $Model->set($aKVMap);
+        return $Model->save();
     }
 
     /**
