@@ -33,10 +33,6 @@ class Child
      */
     public function receive()
     {
-        $mRS = fgets($this->rFifoC2F);
-        if (is_string($mRS)) {
-            $mRS = substr($mRS, 0, strlen($mRS) - 1);
-        }
-        return $mRS;
+        return fgets($this->rFifoC2F);
     }
 }

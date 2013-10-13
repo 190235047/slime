@@ -77,11 +77,11 @@ class PoolManager
                 $this->Log->debug(
                     'Mem:{mem}, MemTop:{memTop}',
                     array(
-                        'mem'      => memory_get_usage(true),
-                        'memTop'   => memory_get_peak_usage(true),
+                        'mem'    => memory_get_usage(true),
+                        'memTop' => memory_get_peak_usage(true),
                     )
                 );
-                $this->Log->debug('AllChildren:{c}',  array('c' => array_keys($this->aChildren)));
+                $this->Log->debug('AllChildren:{c}', array('c' => array_keys($this->aChildren)));
                 $this->Log->debug('IdleChildren:{c}', array('c' => array_keys($this->aIdleChildren)));
                 $this->Log->debug('BusyChildren:{c}', array('c' => array_keys($this->aBusyChildren)));
             }
@@ -101,25 +101,32 @@ class PoolManager
             # send message to child
             $this->changeChildStatus($Child, self::STATUS_BUSY);
             $Child->iWorkStartTimestamp = time();
-            $Child->sMessage = $sMessage;
-            if ($Child->send()===false) {
+            $Child->sMessage            = $sMessage;
+            if ($Child->send() === false) {
                 $this->Log->warning(
                     'Send message[{msg}] to child[{child}] failed',
                     array('msg' => $Child->sMessage, 'child' => $Child->iPID)
                 );
                 $this->cleanUpChild($Child);
+                $this->Task->dealWhenException($Child->sMessage, $this->Log);
             }
 
             # next loop
             NEXT_LOOP:
             foreach ($this->aChildren as $Child) {
                 # 检查管道通信是否正常
-                if (!is_readable($Child->sFifoC2F) || !is_writable($Child->sFifoF2C) || $Child->send('__NOOP__')===false) {
+                if (!is_readable($Child->sFifoC2F) || !is_writable($Child->sFifoF2C) || $Child->send(
+                        '__NOOP__'
+                    ) === false
+                ) {
                     $this->Log->debug(
                         'Child[{child}] fifo broken',
                         array('child' => $Child->iPID)
                     );
                     $this->cleanUpChild($Child);
+                    if (isset($this->aBusyChildren[$Child->iPID])) {
+                        $this->Task->dealWhenException($Child->sMessage, $this->Log);
+                    }
                 }
                 if (isset($this->aBusyChildren[$Child->iPID])) {
                     if (time() - $Child->iWorkStartTimestamp > $this->iMaxExecuteTime) {
@@ -129,12 +136,10 @@ class PoolManager
                             array('child' => $Child->iPID)
                         );
                         $this->cleanUpChild($Child);
+                        $this->Task->dealWhenException($Child->sMessage, $this->Log);
                     } else {
                         # 消息
-                        if (($mResult = $Child->receive()) !== false) {
-                            if ((int)$mResult!==0) {
-                                $this->Task->dealWhenException($Child->sMessage, $this->Log);
-                            }
+                        if ($Child->receive() !== false) {
                             $this->changeChildStatus($Child, self::STATUS_IDLE);
                         }
                     }
@@ -163,7 +168,7 @@ class PoolManager
             }
 
             # 如果此次 loop 不足1s, sleep to 1s . 不必十分精确
-            if (($iInterval = 1-(microtime(true) - $iTStart)) > 0) {
+            if (($iInterval = 1 - (microtime(true) - $iTStart)) > 0) {
                 usleep((int)($iInterval * 1000000));
             }
         }
@@ -182,8 +187,7 @@ class PoolManager
     {
         $iPID = pcntl_fork();
         if ($iPID < 0) {
-            $this->Log->error('Fork error');
-            exit(1);
+            $this->Log->critical('Fork error');
         } elseif ($iPID) {
             $this->Log->debug('Fork child[{child}]', array('child' => $iPID));
             # init var
@@ -223,7 +227,7 @@ class PoolManager
     private function cleanUpChild(Child $Child)
     {
         $iPID = $Child->iPID;
-        $b = posix_kill($iPID, SIGTERM);
+        $b    = posix_kill($iPID, SIGTERM);
         $this->Log->debug(
             'Send SIGTERM to child[{child}] : {status}',
             array('child' => $iPID, 'status' => $b ? 'OK' : 'Fail')
@@ -248,8 +252,8 @@ class PoolManager
             exit(1);
         }
         $Child->iWorkStartTimestamp = 0;
-        $Child->sMessage = '';
-        $iPID = $Child->iPID;
+        $Child->sMessage            = '';
+        $iPID                       = $Child->iPID;
         if ($iStatus == self::STATUS_BUSY) {
             $this->aBusyChildren[$iPID] = $Child;
             unset($this->aIdleChildren[$iPID]);

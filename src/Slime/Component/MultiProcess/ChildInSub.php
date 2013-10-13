@@ -92,14 +92,9 @@ class ChildInSub
                 goto NEXT_LOOP;
             }
 
-            $iRS = 0;
-            try {
-                $this->Task->dealMsgInChild($sMessage, $this->Log);
-            } catch (\Exception $E) {
-                $iRS = 1;
-            }
+            $this->Task->dealMsgInChild($sMessage, $this->Log);
 
-            if (fwrite($this->rFifoC2F, $iRS . "\n") === false) {
+            if (fwrite($this->rFifoC2F, "0\n") === false) {
                 //管道已经断掉, 退出
                 $this->Log->debug(
                     'Fifo[{fifo}] can not be write and process will exit',
