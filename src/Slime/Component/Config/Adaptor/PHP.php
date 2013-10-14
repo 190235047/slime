@@ -13,12 +13,20 @@ use Slime\Component\Log\Logger;
  */
 class Adaptor_PHP implements IAdaptor
 {
+    /** @var string */
     private $sBaseDir;
+
+    /** @var string */
     private $sDefaultBaseDir;
 
+    /** @var bool */
     private $bIsDefault;
 
+    /** @var array */
     private $aCachedData;
+
+    /** @var \Slime\Component\Log\Logger */
+    private $Log;
 
     public function __construct($sBaseDir, $sDefaultBaseDir, Logger $Log)
     {

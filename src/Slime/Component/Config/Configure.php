@@ -12,6 +12,7 @@ use Psr\Log\LoggerInterface;
  */
 final class Configure implements IAdaptor
 {
+    /** @var \Slime\Component\Config\IAdaptor */
     private $Object;
 
     public function __construct($sAdaptor, LoggerInterface $Log)

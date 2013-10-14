@@ -1,22 +1,34 @@
 <?php
 namespace Slime\Component\Http;
 
+/**
+ * Class HttpResponse
+ * @package Slime\Component\Http
+ */
 class HttpResponse extends HttpCommon
 {
-    protected $iStatus;
-    protected $sProtocol;
-    protected $sStatusMessage;
+    /** @var int */
+    public $iStatus;
 
+    /** @var string */
+    public $sProtocol;
+
+    /** @var string */
+    public $sStatusMessage;
+
+    /** @var \Slime\Component\Http\Bag_Header */
     protected $Header;
+
+    /** @var string */
     protected $sContent;
 
+    /** @var array */
     protected $aPreCookie = array();
 
     public static function create()
     {
         return new self();
     }
-
 
     public static function createFromResponseString($sStr)
     {

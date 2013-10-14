@@ -3,8 +3,22 @@ namespace Slime\Component\DataStructure\Queue;
 
 class Queue implements \Countable
 {
+    /**
+     * @var array
+     */
     protected $aData;
 
+    /**
+     * @param array $aData
+     */
+    public function __construct(array $aData = array())
+    {
+        $this->aData = $aData;
+    }
+
+    /**
+     * @param mixed $mV
+     */
     public function add($mV)
     {
         if (empty($this->aData)) {
@@ -15,11 +29,17 @@ class Queue implements \Countable
         }
     }
 
+    /**
+     * @return mixed
+     */
     public function get()
     {
         return array_shift($this->aData);
     }
 
+    /**
+     * @return mixed
+     */
     public function current()
     {
         return current($this->aData);

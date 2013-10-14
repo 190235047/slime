@@ -3,8 +3,22 @@ namespace Slime\Component\DataStructure\Stack;
 
 class Stack implements \Countable
 {
-    protected $aData = array();
+    /**
+     * @var array
+     */
+    protected $aData;
 
+    /**
+     * @param array $aData
+     */
+    public function __construct(array $aData = array())
+    {
+        $this->aData = $aData;
+    }
+
+    /**
+     * @param mixed $mV
+     */
     public function push($mV)
     {
         if (empty($this->aData)) {
@@ -16,11 +30,17 @@ class Stack implements \Countable
         }
     }
 
+    /**
+     * @return mixed
+     */
     public function pop()
     {
         return array_pop($this->aData);
     }
 
+    /**
+     * @return mixed
+     */
     public function current()
     {
         return current($this->aData);
