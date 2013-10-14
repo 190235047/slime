@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\JobQueue;
+namespace Slime\Component\MultiProcessJob;
 
 /**
  * Class JobQueue_Redis

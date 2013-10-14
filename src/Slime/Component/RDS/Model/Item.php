@@ -4,7 +4,7 @@ namespace Slime\Component\RDS;
 /**
  * Class Model_Item
  *
- * @package SlimeFramework\Component\RDS
+ * @package Slime\Component\RDS
  * @property-read array $aData
  * @property-read array $aOldData
  */

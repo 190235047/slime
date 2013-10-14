@@ -1,0 +1,8 @@
+{
+    "name": "Slime MultiProcessJob",
+    "description": "A PHP MultiProcessJob Library",
+    "require": {
+        "Psr/Log": "*",
+        "Slime/Component/Log": "*"
+    }
+}

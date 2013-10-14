@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\MultiProcess;
+namespace Slime\Component\MultiProcessJob;
 
 class Child
 {

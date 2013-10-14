@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\MultiProcess;
+namespace Slime\Component\MultiProcessJob;
 
 use Psr\Log\LoggerInterface;
 use Slime\Component\Log;

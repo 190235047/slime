@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\MultiProcess;
+namespace Slime\Component\MultiProcessJob;
 
 use Psr\Log\LoggerInterface;
 use Slime\Component\Log;
@@ -12,7 +12,7 @@ use Slime\Component\Log;
  *
  * Class ChildSub
  *
- * @package Slime\Component\MultiProcess
+ * @package Slime\Component\MultiProcessJob
  */
 class ChildInSub
 {

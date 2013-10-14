@@ -2,7 +2,7 @@
 
 ```php
 use Psr\Log\LoggerInterface;
-use Slime\Component\MultiProcess;
+use Slime\Component\MultiProcessJob;
 use Slime\Component\Log;
 
 class Task implements MultiProcess\ITask
