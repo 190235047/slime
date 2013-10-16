@@ -242,7 +242,11 @@ class HttpRequest extends HttpCommon
         }
 
         # preset header
-        if ($this->Header['Content-Length'] === null && $this->sContent !== null && strlen($this->sContent) > 0) {
+        if ($this->Header['Transfer-Encoding'] !== 'chunked'
+            && $this->Header['Content-Length'] === null
+            && $this->sContent !== null
+            && strlen($this->sContent) > 0
+        ) {
             $this->Header['Content-Length'] = strlen($this->sContent);
         }
         if ($this->Header['Content-Type'] === null) {
