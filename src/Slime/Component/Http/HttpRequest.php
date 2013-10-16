@@ -330,7 +330,6 @@ class HttpRequest extends HttpCommon
                 $sBuf .= fread($rSock, $iLeft);
             }
             $HttpResponse->setContent($HttpResponse->getContent() . $sBuf);
-        } else {
         }
 
         $iErrCode = 0;
