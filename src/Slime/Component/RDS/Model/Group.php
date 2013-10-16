@@ -1,14 +1,14 @@
 <?php
-namespace Slime\Component\RDS;
+namespace Slime\Component\RDS\Model;
 
 use Psr\Log\LoggerInterface;
 
-class Model_Group implements \ArrayAccess, \Iterator, \Countable
+class Group implements \ArrayAccess, \Iterator, \Countable
 {
-    /** @var Model_Item[] */
+    /** @var Item[] */
     public $aModelItem;
 
-    public function __construct(Model_Model $Model, LoggerInterface $Log)
+    public function __construct(Model $Model, LoggerInterface $Log)
     {
         $this->Model      = $Model;
         $this->Log        = $Log;
@@ -18,7 +18,7 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
         $this->aRelObj    = array();
     }
 
-    public function relation($sModelName, Model_Item $ModelItem = null)
+    public function relation($sModelName, Item $ModelItem = null)
     {
         $aRelConf = $this->Model->aRelConf;
         if (!isset($aRelConf[$sModelName])) {
@@ -31,11 +31,11 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
 
     /**
      * @param            $sModelName
-     * @param Model_Item $ModelItem
+     * @param Item       $ModelItem
      *
-     * @return Model_Group | Model_Item | null
+     * @return Group | Item | null
      */
-    public function hasOne($sModelName, Model_Item $ModelItem = null)
+    public function hasOne($sModelName, Item $ModelItem = null)
     {
         if ($ModelItem === null && isset($this->aRelation[$sModelName])) {
             return $this->aRelation[$sModelName];
@@ -47,7 +47,7 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
         }
 
         $aPK                          = array_keys($this->aModelItem);
-        $Model                        = $this->Model->Pool->get($sModelName);
+        $Model                        = $this->Model->Factory->get($sModelName);
         $this->aRelation[$sModelName] = $Group = $Model->findMulti(array($this->Model->sFKName . ' IN' => $aPK));
 
         if ($ModelItem === null) {
@@ -65,17 +65,17 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
-     * @param            $sModelName
-     * @param Model_Item $ModelItem
+     * @param string $sModelName
+     * @param Item   $ModelItem
      *
-     * @return Model_Group | Model_Item | null
+     * @return Group | Item | null
      */
-    public function belongsTo($sModelName, Model_Item $ModelItem = null)
+    public function belongsTo($sModelName, Item $ModelItem = null)
     {
         if ($ModelItem === null && isset($this->aRelation[$sModelName])) {
             return $this->aRelation[$sModelName];
         } else {
-            $Model = $this->Model->Pool->get($sModelName);
+            $Model = $this->Model->Factory->get($sModelName);
             $sFK   = $ModelItem[$Model->sFKName];
             if (isset($this->aRelation[$sModelName][$sFK])) {
                 return $this->aRelation[$sModelName][$sFK];
@@ -99,7 +99,7 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
      * Return the current element
      *
      * @link http://php.net/manual/en/iterator.current.php
-     * @return Model_Item Can return any type.
+     * @return Item Can return any type.
      */
     public function current()
     {
@@ -179,7 +179,7 @@ class Model_Group implements \ArrayAccess, \Iterator, \Countable
      *
      * @param mixed $offset The offset to retrieve.
      *
-     * @return Model_Item|null Can return all value types.
+     * @return Item|null Can return all value types.
      */
     public function offsetGet($offset)
     {

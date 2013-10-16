@@ -1,21 +1,22 @@
 <?php
-namespace Slime\Component\RDS;
+namespace Slime\Component\RDS\Model;
 
 /**
- * Class Model_Item
+ * Class Item
  *
  * @package Slime\Component\RDS
  * @property-read array $aData
  * @property-read array $aOldData
  */
-class Model_Item implements \ArrayAccess
+class Item implements \ArrayAccess
 {
     private $aRelation = array();
+    private $Log;
 
-    /** @var Model_Model */
+    /** @var Model */
     public $Model;
 
-    /** @var Model_Group|null */
+    /** @var Group|null */
     public $Group;
 
     /** @var array */
@@ -24,11 +25,12 @@ class Model_Item implements \ArrayAccess
     /** @var array */
     public $aOldData = array();
 
-    public function __construct(array $aData, Model_Model $Model, $Group = null)
+    public function __construct(array $aData, Model $Model, $Group = null)
     {
         $this->aData = $aData;
         $this->Model = $Model;
         $this->Group = $Group;
+        $this->Log   = $Model->Logger;
     }
 
     public function __get($sKey)
@@ -55,7 +57,7 @@ class Model_Item implements \ArrayAccess
 
     private function _set($sKey, $mValue)
     {
-        if (isset($this->aData[$sKey]) && $this->aData[$sKey]==$mValue) {
+        if (isset($this->aData[$sKey]) && $this->aData[$sKey] == $mValue) {
             return;
         }
         $this->aOldData[$sKey] = isset($this->aData[$sKey]) ? $this->aData[$sKey] : null;
@@ -71,7 +73,7 @@ class Model_Item implements \ArrayAccess
     public function __call($sModelName, $mValue = array())
     {
         if (!isset($this->Model->aRelConf[$sModelName])) {
-            $this->Model->Log->error('can not find ralation for [{model}]', array('model' => $sModelName));
+            $this->Model->Logger->error('can not find relation for [{model}]', array('model' => $sModelName));
             exit(1);
         }
         $sRelation = strtolower($this->Model->aRelConf[$sModelName]);
@@ -80,7 +82,7 @@ class Model_Item implements \ArrayAccess
             $this->Group === null || empty($mValue[0])
         ) {
             if (!isset($this->aRelation[$sModelName])) {
-                $this->aRelation[$sModelName] = $this->Model->relation($sModelName, $this);
+                $this->aRelation[$sModelName] = $this->relation($sModelName, $this);
             }
             return $this->aRelation[$sModelName];
         } else {
@@ -88,41 +90,28 @@ class Model_Item implements \ArrayAccess
         }
     }
 
-    public function save()
+    public function add()
     {
-        if (isset($this->aData[$this->Model->sPKName])) {
-            $bRS = $this->update();
-            if ($bRS) {
-                $this->aOldData = array();
-            }
-        } else {
-            $iID = $this->add($this->aData);
-            if ($iID === null) {
-                $bRS = false;
-            } else {
-                $this->aData[$this->Model->sPKName] = $iID;
-                $bRS                                = true;
-            }
-        }
-        return $bRS;
-    }
-
-    private function add()
-    {
-        $M = $this->Model;
+        $M   = $this->Model;
         $iID = $M->CURD->insertSmarty($M->sTable, $this->aData);
         if ($iID === null) {
             $bRS = false;
         } else {
-            $this->aData[$this->Model->sPKName] = $iID;
-            $bRS                                = true;
+            $this->aData[$M->sPKName] = $iID;
+            $bRS                      = true;
         }
         return $bRS;
     }
 
-    private function update()
+    public function delete()
     {
         $M = $this->Model;
+        return $M->CURD->deleteSmarty($M->sTable, array($M->sPKName => $this->aData[$M->sPKName]));
+    }
+
+    public function update()
+    {
+        $M   = $this->Model;
         $bRS = $M->CURD->updateSmarty(
             $M->sTable,
             array_intersect_key($this->aData, $this->aOldData),
@@ -134,10 +123,104 @@ class Model_Item implements \ArrayAccess
         return $bRS;
     }
 
-    public function delete()
+    public function deleteSafe(&$iErr, &$sErr)
     {
-        $M = $this->Model;
-        return $M->CURD->deleteSmarty($M->sTable, array($M->sPKName => $this->aData[$M->sPKName]));
+        $bRS = false;
+        $M   = $this->Model;
+        if (!empty($M->aRelConf['relation'])) {
+            foreach ($M->aRelConf['relation'] as $sModelName => $sMethod) {
+                $sMethod = strtolower($sMethod);
+                if ($sMethod === 'hasone' || $sMethod === 'hasmany' || $sMethod === 'hasmanythrough') {
+                    //@todo
+                }
+            }
+        }
+        if ($bRS) {
+            $bRS = $this->delete();
+        }
+        return $bRS;
+    }
+
+    /**
+     * @param string $sModelName
+     *
+     * @return Item|Item[]|null
+     */
+    public function relation($sModelName)
+    {
+        if (!isset($this->Model->aRelConf[$sModelName])) {
+            $this->Log->error('Relation model {model} is not exist', array('model' => $sModelName));
+        }
+        $sMethod = $this->Model->aRelConf[$sModelName];
+        return $this->$sMethod($sModelName);
+    }
+
+    /**
+     * @param string $sModelName
+     *
+     * @return Item|null
+     */
+    public function hasOne($sModelName)
+    {
+        $M     = $this->Model;
+        $Model = $M->Factory->get($sModelName);
+        return $Model->find(array($M->sFKName => $this->aData[$M->sPKName]));
+    }
+
+    /**
+     * @param string $sModelName
+     *
+     * @return Item|null
+     */
+    public function belongsTo($sModelName)
+    {
+        $Model = $this->Model->Factory->get($sModelName);
+        return $Model->find(array($Model->sPKName => $this->aData[$Model->sFKName]));
+    }
+
+    /**
+     * @param string $sModel
+     *
+     * @return Group
+     */
+    public function hasMany($sModel)
+    {
+        $M     = $this->Model;
+        $Model = $M->Factory->get($sModel);
+        return $Model->findMulti(array($M->sFKName => $this->aData[$Model->sPKName]));
+    }
+
+    /**
+     * @param string      $sModelTarget
+     * @param string|null $sModelRelated
+     *
+     * @return Group
+     */
+    public function hasManyThough($sModelTarget, $sModelRelated = null)
+    {
+        $ModelTarget = $this->Model->Factory->get($sModelTarget);
+        $ModelOrg    = $this->Model;
+        if ($sModelRelated === null) {
+            $sRelatedTableName = strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
+                $ModelTarget->sTable . '_' . $ModelOrg->sTable :
+                $ModelOrg->sTable . '_' . $ModelTarget->sTable;
+            $CURD              = $ModelOrg->CURD;
+        } else {
+            $ModelRelated      = $this->Model->Factory->get($sModelRelated);
+            $CURD              = $ModelRelated->CURD;
+            $sRelatedTableName = $ModelRelated->sTable;
+        }
+
+        $aIDS = $CURD->querySmarty(
+            $sRelatedTableName,
+            array($ModelOrg->sFKName => $this->aData[$ModelOrg->sFKName]),
+            '',
+            $ModelTarget->sFKName,
+            false,
+            \PDO::FETCH_COLUMN
+        );
+
+        return $ModelTarget->findMulti($aIDS);
     }
 
     public function toArray()

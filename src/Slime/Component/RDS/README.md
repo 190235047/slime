@@ -33,7 +33,7 @@ $aModelConfig = array(
     )
 );
 
-$Pool = new \Slime\Component\RDS\Model_Pool(
+$Pool = new \Slime\Component\RDS\Factory(
     $aDBConfig,
     $aModelConfig,
     new \Slime\Component\Log\Logger(array(new \Slime\Component\Log\Writer_STDFD()))

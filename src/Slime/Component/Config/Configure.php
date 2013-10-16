@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
  * @author  smallslime@gmail.com
  * @version 1.0
  */
-final class Configure implements IAdaptor
+final class Configure
 {
     /** @var \Slime\Component\Config\IAdaptor */
     private $Object;
@@ -31,13 +31,13 @@ final class Configure implements IAdaptor
 
     /**
      * @param string $sKey
-     * @param mixed  $sDefaultValue
+     * @param mixed  $mDefaultValue
      * @param int    $iErrorLevel
      *
      * @return mixed
      */
-    public function get($sKey, $sDefaultValue = null, $iErrorLevel = 0)
+    public function get($sKey, $mDefaultValue = null, $iErrorLevel = 0)
     {
-        return $this->Object->get($sKey, $sDefaultValue, $iErrorLevel);
+        return $this->Object->get($sKey, $mDefaultValue, $iErrorLevel);
     }
 }

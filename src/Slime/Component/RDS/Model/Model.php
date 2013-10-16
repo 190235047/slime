@@ -1,20 +1,28 @@
 <?php
-namespace Slime\Component\RDS;
+namespace Slime\Component\RDS\Model;
 
 use Psr\Log\LoggerInterface;
-use Slime\Component\RDS\Model_Pool;
+use Slime\Component\RDS\CURD;
 
-class Model_Model
+class Model
 {
-    public function __construct($sModelName, CURD $CURD, $aConfig, Model_Pool $Pool, LoggerInterface $Log)
+    public $CURD;
+    public $sTable;
+    public $sPKName;
+    public $sFKName;
+    public $aRelConf;
+    public $Factory;
+    public $Logger;
+
+    public function __construct($sModelName, CURD $CURD, $aConfig, Factory $Factory, LoggerInterface $Logger)
     {
         $this->CURD     = $CURD;
         $this->sTable   = isset($aConfig['table']) ? $aConfig['table'] : strtolower($sModelName);
         $this->sPKName  = isset($aConfig['pk']) ? $aConfig['pk'] : 'id';
         $this->sFKName  = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
         $this->aRelConf = isset($aConfig['relation']) ? $aConfig['relation'] : array();
-        $this->Pool     = $Pool;
-        $this->Log      = $Log;
+        $this->Factory  = $Factory;
+        $this->Logger   = $Logger;
     }
 
     public function addUpdate($aKVMap, $aUpdateKey)
@@ -24,37 +32,37 @@ class Model_Model
 
     public function createItem(array $aData = array())
     {
-        return new Model_Item($aData, $this);
+        return new Item($aData, $this);
     }
 
     public function add($aKVMap)
     {
-        return $this->createItem($aKVMap)->save();
+        return $this->createItem($aKVMap)->add();
     }
 
-    public function delete($mPK)
+    public function delete($mPKOrWhere)
     {
-        $Model = $this->find($mPK);
-        if ($Model===null) {
+        $Model = $this->find($mPKOrWhere);
+        if ($Model === null) {
             return false;
         }
         return $Model->delete();
     }
 
-    public function update($mPK, $aKVMap)
+    public function update($mPKOrWhere, $aKVMap)
     {
-        $Model = $this->find($mPK);
-        if ($Model===null) {
+        $Model = $this->find($mPKOrWhere);
+        if ($Model === null) {
             return false;
         }
         $Model->set($aKVMap);
-        return $Model->save();
+        return $Model->update();
     }
 
     /**
      * @param mixed $mPKOrWhere
      *
-     * @return Model_Item|null
+     * @return Item|null
      */
     public function find($mPKOrWhere)
     {
@@ -67,7 +75,7 @@ class Model_Model
             '',
             true
         );
-        return empty($aItem) ? null : new Model_Item($aItem, $this);
+        return empty($aItem) ? null : new Item($aItem, $this);
     }
 
     /**
@@ -77,7 +85,7 @@ class Model_Model
      * @param int    $iOffset
      * @param string $sAttr
      *
-     * @return Model_Group|null
+     * @return Group|null
      */
     public function findMulti($aWhere = array(), $sOrderBy = null, $iLimit = null, $iOffset = null, $sAttr = '')
     {
@@ -91,10 +99,10 @@ class Model_Model
             $sAttr
         );
 
-        $Group = new Model_Group($this, $this->Log);
+        $Group = new Group($this, $this->Logger);
         if (!empty($aaData)) {
             foreach ($aaData as $aRow) {
-                $Group[$aRow[$this->sPKName]] = new Model_Item($aRow, $this, $Group);
+                $Group[$aRow[$this->sPKName]] = new Item($aRow, $this, $Group);
             }
         }
         return $Group;
@@ -129,95 +137,5 @@ class Model_Model
         $mFetchArgs = null
     ) {
         return $this->CURD->querySmarty($this->sTable, $aWhere, $sAttr, $sSelect, $bOnlyOne, $iFetchStyle, $mFetchArgs);
-    }
-
-    /**
-     * @param string     $sModelName
-     * @param Model_Item $ModelItem
-     *
-     * @return Model_Item|Model_Item[]|null
-     */
-    public function relation($sModelName, Model_Item $ModelItem)
-    {
-        if (!isset($this->aRelConf[$sModelName])) {
-            $this->Log->error('Relation model {model} is not exist', array('model' => $sModelName));
-        }
-        $sMethod = $this->aRelConf[$sModelName];
-        return $this->$sMethod($sModelName, $ModelItem);
-    }
-
-    /**
-     * @param string     $sModelName
-     * @param Model_Item $ModelItem
-     *
-     * @return Model_Item|null
-     */
-    public function hasOne($sModelName, $ModelItem)
-    {
-        $Model = $this->Pool->get($sModelName);
-        return $Model->find(array($this->sFKName => $ModelItem[$this->sPKName]));
-    }
-
-    /**
-     * @param string     $sModelName
-     * @param Model_Item $ModelItem
-     *
-     * @return Model_Item|null
-     */
-    public function belongsTo($sModelName, $ModelItem)
-    {
-        $Model = $this->Pool->get($sModelName);
-        return $Model->find(array($Model->sPKName => $ModelItem[$Model->sFKName]));
-    }
-
-    /**
-     * @param string     $sModel
-     * @param Model_Item $ModelItem
-     *
-     * @return Model_Group
-     */
-    public function hasMany($sModel, $ModelItem)
-    {
-        $Model = $this->Pool->get($sModel);
-        return $Model->findMulti(array($this->sFKName => $ModelItem->{$Model->sPKName}));
-    }
-
-    /**
-     * @param string      $sModelTarget
-     * @param Model_Item  $ModelItem
-     * @param string|null $sModelRelated
-     *
-     * @return null|Model_Group
-     */
-    public function hasManyThough($sModelTarget, Model_Item $ModelItem, $sModelRelated = null)
-    {
-        $ModelTarget = $this->Pool->get($sModelTarget);
-        $ModelOrg    = $ModelItem->Model;
-        if ($sModelRelated === null) {
-            $sRelatedTableName = strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
-                $ModelTarget->sTable . '_' . $ModelOrg->sTable :
-                $ModelOrg->sTable . '_' . $ModelTarget->sTable;
-            $CURD              = $ModelOrg->CURD;
-        } else {
-            $ModelRelated      = $this->Pool->get($sModelRelated);
-            $CURD              = $ModelRelated->CURD;
-            $sRelatedTableName = $ModelRelated->sTable;
-        }
-
-        $aIDS = $CURD->querySmarty(
-            $sRelatedTableName,
-            array($ModelOrg->sFKName => $ModelItem->{$ModelOrg->sFKName}),
-            '',
-            $ModelTarget->sFKName,
-            false,
-            \PDO::FETCH_COLUMN
-        );
-
-        $Group = null;
-        if (!empty($aIDS)) {
-            $Group = $ModelTarget->findMulti($aIDS);
-        }
-
-        return $Group;
     }
 }

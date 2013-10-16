@@ -26,8 +26,9 @@ class CURD
 
     public $bCheckConnect = false;
 
-    public function __construct($sDSN, $sUsername, $sPassword, $aOptions = array())
+    public function __construct($sKey, $sDSN, $sUsername, $sPassword, $aOptions = array())
     {
+        $this->sKey      = $sKey;
         $this->sDSN      = $sDSN;
         $this->sUsername = $sUsername;
         $this->sPassword = $sPassword;
@@ -54,11 +55,6 @@ class CURD
             }
         }
         return $this->Instance;
-    }
-
-    public function closeInstance()
-    {
-        $this->Instance = null;
     }
 
     public function querySmarty(
@@ -191,7 +187,7 @@ class CURD
     }
 
     /**
-     * @example : [-1:OR, 'username like':'%abc%', 'last_login >':'2013', ['rank >' : 3, 'vip' : 1]]
+     * @example   : [-1:OR, 'username like':'%abc%', 'last_login >':'2013', ['rank >' : 3, 'vip' : 1]]
      *            result: username like ? OR last_login = ? OR (rank > ? AND vip = ?)
      *            $aArgs: array('%abc%', '2013', 3, 1)
      *
@@ -224,7 +220,7 @@ class CURD
             } else {
                 # 如果不是子条件, 解析
                 list($sKey, $sOP) = array_replace(array('', '='), explode(' ', $sK, 2));
-                $sOP = trim(strtoupper($sOP));
+                $sOP         = trim(strtoupper($sOP));
                 $sKeyWrapper = '`';
                 if ($sKey[0] === ':') {
                     $sKey        = substr($sKey, 1);

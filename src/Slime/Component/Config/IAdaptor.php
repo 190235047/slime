@@ -5,10 +5,10 @@ interface IAdaptor
 {
     /**
      * @param string $sKey
-     * @param mixed  $sDefaultValue
-     * @param int    $iErrorLevel
+     * @param mixed  $mDefaultValue
+     * @param bool   $bForce
      *
      * @return mixed
      */
-    public function get($sKey, $sDefaultValue = null, $iErrorLevel = 0);
+    public function get($sKey, $mDefaultValue = null, $bForce = false);
 }

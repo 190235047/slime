@@ -1,21 +1,21 @@
 <?php
-namespace Slime\Component\RDS;
+namespace Slime\Component\RDS\Model;
 
 use Psr\Log\LoggerInterface;
 use Slime\Component\RDS\CURD;
-use Slime\Component\RDS\Model_Model;
 
-class Model_Pool
+class Factory
 {
     public $bAutoCreate = true;
 
-    /** @var Model_Model[] */
+    /** @var Model[] */
     protected $aModel = array();
 
     public function __construct($aDBConfigAll, $aModelConfig, LoggerInterface $Log)
     {
         foreach ($aDBConfigAll as $sK => $aDBConfig) {
             $this->aCURD[$sK] = new CURD(
+                $sK,
                 $aDBConfig['dsn'],
                 $aDBConfig['username'],
                 $aDBConfig['password'],
@@ -29,7 +29,7 @@ class Model_Pool
     /**
      * @param $sModel
      *
-     * @return Model_Model
+     * @return Model
      */
     public function get($sModel)
     {
@@ -45,7 +45,7 @@ class Model_Pool
                 $this->Log->error('there is no database config [{db}] exist', array('db' => $sDB));
                 exit(1);
             }
-            $this->aModel[$sModel] = new Model_Model(
+            $this->aModel[$sModel] = new Model(
                 $sModel,
                 $this->aCURD[$sDB],
                 $this->aModelConf[$sModel],

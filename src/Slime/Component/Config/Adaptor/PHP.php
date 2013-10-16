@@ -26,25 +26,25 @@ class Adaptor_PHP implements IAdaptor
     private $aCachedData;
 
     /** @var \Slime\Component\Log\Logger */
-    private $Log;
+    private $Logger;
 
-    public function __construct($sBaseDir, $sDefaultBaseDir, Logger $Log)
+    public function __construct($sBaseDir, $sDefaultBaseDir, Logger $Logger)
     {
         $this->sBaseDir        = $sBaseDir;
         $this->sDefaultBaseDir = $sDefaultBaseDir;
 
         $this->bIsDefault = $this->sBaseDir === $this->sDefaultBaseDir;
-        $this->Log        = $Log;
+        $this->Logger        = $Logger;
     }
 
     /**
      * @param string $sKey
-     * @param mixed  $sDefaultValue
+     * @param mixed  $mDefaultValue
      * @param bool   $bForce
      *
      * @return mixed
      */
-    public function get($sKey, $sDefaultValue = null, $bForce = false)
+    public function get($sKey, $mDefaultValue = null, $bForce = false)
     {
         if ($this->bIsDefault) {
             $mResult = $this->_get($sKey, $this->sDefaultBaseDir);
@@ -60,7 +60,7 @@ class Adaptor_PHP implements IAdaptor
                 );
         }
         if ($mResult === null && $bForce) {
-            $this->Log->error('config {key} is not found', array('key' => $sKey));
+            $this->Logger->error('config {key} is not found', array('key' => $sKey));
             exit(1);
         }
         return $mResult;
@@ -68,7 +68,7 @@ class Adaptor_PHP implements IAdaptor
 
     private function _get($sKey, $sBaseDir)
     {
-        if (!strpos($sKey, '.')) {
+        if (strpos($sKey, '.')===false) {
             if (!isset($this->aCachedData[$sBaseDir][$sKey])) {
                 $sConfigFile                         = $sBaseDir . '/' . str_replace(':', '/', $sKey) . '.php';
                 $this->aCachedData[$sBaseDir][$sKey] = file_exists($sConfigFile) ? require $sConfigFile : null;

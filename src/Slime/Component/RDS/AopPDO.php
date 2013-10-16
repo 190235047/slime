@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\RDS;
 
-use Slime\Core\Context;
+use Slime\Bundle\Framework\Context;
 
 
 /**
