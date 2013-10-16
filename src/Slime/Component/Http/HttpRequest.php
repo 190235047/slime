@@ -331,9 +331,6 @@ class HttpRequest extends HttpCommon
             }
             $HttpResponse->setContent($HttpResponse->getContent() . $sBuf);
         } else {
-            $iErrCode = 2;
-            $sErrMsg  = 'Error http response format that could not be read';
-            return null;
         }
 
         $iErrCode = 0;
