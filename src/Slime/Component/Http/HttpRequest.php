@@ -252,6 +252,95 @@ class HttpRequest extends HttpCommon
 
     //------------------- call logic -----------------------
 
+    public function call($iTimeout = 3, &$iErrNum = 0, &$sErrMsg = '')
+    {
+        return self::read($this->_call(true, $iTimeout), $iErrNum, $sErrMsg);
+    }
+
+
+    private function _call($bBlock = true, $iTimeout = 3)
+    {
+        # first line
+        $sStr = sprintf("%s %s %s\r\n", $this->sRequestMethod, $this->sRequestURI, $this->sProtocol);
+
+        # header
+        $sStr .= (string)$this->Header;
+
+        # sp
+        $sStr .= "\r\n";
+
+        # body
+        $sStr .= (string)$this->sContent;
+
+        # open
+        $aArr = explode(':', $this->Header['Host'], 2);
+        $rSock = fsockopen($this->Header['Host'], isset($aArr[1]) ? $aArr[1] : 80);
+        socket_set_blocking($rSock, $bBlock);
+
+        # write
+        fwrite($rSock, $sStr);
+
+        return $rSock;
+    }
+
+    public static function read($rSock, &$iErrCode = 0, &$sErrMsg = '')
+    {
+        $HttpResponse = new HttpResponse();
+        while (($sLine = fgets($rSock)) !== false) {
+            if (trim($sLine) !== '') {
+                break;
+            }
+        }
+        if (empty($sLine)) {
+            $iErrCode = 1;
+            $sErrMsg  = 'http response error in first line';
+            return null;
+        }
+        $aArr                         = explode(' ', $sLine, 3);
+        $HttpResponse->iStatus        = (int)$aArr[0];
+        $HttpResponse->sProtocol      = (string)$aArr[1];
+        $HttpResponse->sStatusMessage = (string)$aArr[2];
+
+        while ($sLine = fgets($rSock, 1024)) {
+            $sLine = substr($sLine, 0, strlen($sLine) - 2);
+            if ($sLine === '') {
+                break;
+            }
+            $aArr = explode(':', $sLine);
+            $HttpResponse->setHeader($aArr[0], isset($aArr[1]) ? ltrim($aArr[1]) : '');
+        }
+        # read body
+        if ($HttpResponse->getHeader('Transfer-Encoding') === 'chunked') {
+            while (true) {
+                $iLen = hexdec(fgets($rSock));
+                if ($iLen === 0) {
+                    break;
+                }
+                $sBuf = '';
+                while (strlen($sBuf) < $iLen) {
+                    $iLeft = $iLen - strlen($sBuf);
+                    $sBuf .= fread($rSock, $iLeft);
+                }
+                $HttpResponse->setContent($HttpResponse->getContent() . $sBuf);
+            }
+        } elseif (($iLen = $HttpResponse->getHeader('Content-Length'))!==null) {
+            $sBuf = '';
+            while (strlen($sBuf) < $iLen) {
+                $iLeft = $iLen - strlen($sBuf);
+                $sBuf .= fread($rSock, $iLeft);
+            }
+            $HttpResponse->setContent($HttpResponse->getContent() . $sBuf);
+        } else {
+            $iErrCode = 2;
+            $sErrMsg  = 'Error http response format';
+            return null;
+        }
+
+        $iErrCode = 0;
+        $sErrMsg = '';
+        return $HttpResponse;
+    }
+
     public function callByCurl()
     {
         $aArr = explode('/', $this->sProtocol, 2);

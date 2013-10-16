@@ -8,17 +8,16 @@ final class Cache
     /** @var IAdaptor */
     private $Obj;
 
-    public function __construct($sAdaptor, array $aConfig, LoggerInterface $Logger)
+    public function __construct($sAdaptor, $mConfig, LoggerInterface $Logger)
     {
         if ($sAdaptor[0] === '@') {
             $sAdaptor = '\\Slime\\Component\\Cache\\Adaptor_' . substr($sAdaptor, 1);
         }
-        $Obj = new $sAdaptor($aConfig, $Logger);
-        if (!$Obj instanceof IAdaptor) {
+        $this->Obj = new $sAdaptor($mConfig, $Logger);
+        if (!$this->Obj instanceof IAdaptor) {
             $Logger->error('{adaptor} must impl Slime.Component.Cache.IAdaptor', array('adaptor' => $sAdaptor));
             exit(1);
         }
-        return $Obj;
     }
 
     /**

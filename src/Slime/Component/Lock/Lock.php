@@ -3,19 +3,19 @@ namespace Slime\Component\Lock;
 
 use Psr\Log\LoggerInterface;
 
-class Lock
+final class Lock
 {
     /** @var IAdaptor */
-    public $Obj;
+    private $Obj;
 
-    public function __construct($sAdaptor, $aConfig, LoggerInterface $Logger)
+    public function __construct($sAdaptor, $mConfig, LoggerInterface $Logger)
     {
         if ($sAdaptor[0] === '@') {
             $sAdaptor = '\\Slime\\Component\\Lock\\Adaptor_' . substr($sAdaptor, 1);
         }
-        $this->Obj = new $sAdaptor($aConfig, $Logger);
+        $this->Obj = new $sAdaptor($mConfig, $Logger);
         if (!$this->Obj instanceof IAdaptor) {
-            $Logger->error('{adaptor} must impl Slime.Component.Cache.IAdaptor', array('adaptor' => $sAdaptor));
+            $Logger->error('{adaptor} must impl Slime.Component.Lock.IAdaptor', array('adaptor' => $sAdaptor));
             exit(1);
         }
     }
@@ -40,5 +40,13 @@ class Lock
     public function release($sKey)
     {
         return $this->Obj->release($sKey);
+    }
+
+    /**
+     * @return IAdaptor
+     */
+    public function getAdaptor()
+    {
+        return $this->Obj;
     }
 }
