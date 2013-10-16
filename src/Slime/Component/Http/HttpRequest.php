@@ -283,7 +283,7 @@ class HttpRequest extends HttpCommon
         return $rSock;
     }
 
-    public static function read($rSock, &$iErrCode = 0, &$sErrMsg = '')
+    public static function read($rSock, &$iErrCode, &$sErrMsg)
     {
         $HttpResponse = new HttpResponse();
         while (($sLine = fgets($rSock)) !== false) {
@@ -293,7 +293,7 @@ class HttpRequest extends HttpCommon
         }
         if (empty($sLine)) {
             $iErrCode = 1;
-            $sErrMsg  = 'http response error in first line';
+            $sErrMsg  = 'Error http response in first line';
             return null;
         }
         $aArr                         = explode(' ', $sLine, 3);
@@ -332,7 +332,7 @@ class HttpRequest extends HttpCommon
             $HttpResponse->setContent($HttpResponse->getContent() . $sBuf);
         } else {
             $iErrCode = 2;
-            $sErrMsg  = 'Error http response format';
+            $sErrMsg  = 'Error http response format that could not be read';
             return null;
         }
 
