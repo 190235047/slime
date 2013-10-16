@@ -18,7 +18,7 @@ use Slime\Component\Http;
  *    1. 路由, 获取回调对象
  *    2. 执行回调
  *
- * @package Slime\Core
+ * @package Slime\Bundle\Framework
  * @author  smallslime@gmail.com
  */
 class Bootstrap

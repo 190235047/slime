@@ -13,7 +13,9 @@ use Slime\Component\DataStructure\Stack;
  * 5. 通过 clone 可以深拷贝一个 Context 对象, 新 Context 中的所有对象均为副本(除无法clone的对象: private __clone)
  * 6. 销毁对象需显式调用 destroy 方法, 即弹出栈顶 Context 对象, 并销毁此对象中 register 的所有对象. 若栈顶并非 $this , 不做弹出
  *
- * @package Slime\Core
+ * @package Slime\Bundle\Framework
+ * @author  smallslime@gmail.com
+ *
  * @property-read string                                     $sENV         当前环境(例如 publish:生产环境; development:开发环境)
  * @property-read string                                     $sRunMode     PHP运行方式, 当前支持 (cli||http)
  * @property-read string                                     $sNS          当前应用的命名空间
