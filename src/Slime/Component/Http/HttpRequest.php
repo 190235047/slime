@@ -314,6 +314,7 @@ class HttpRequest extends HttpCommon
             $HttpResponse->setHeader($aArr[0], isset($aArr[1]) ? ltrim($aArr[1]) : '');
         }
         # read body
+        $sContent = '';
         if ($HttpResponse->getHeader('Transfer-Encoding') === 'chunked') {
             while (true) {
                 $iLen = hexdec(fgets($rSock));
@@ -325,7 +326,7 @@ class HttpRequest extends HttpCommon
                     $iLeft = $iLen - strlen($sBuf);
                     $sBuf .= fread($rSock, $iLeft);
                 }
-                $HttpResponse->setContent($HttpResponse->getContent() . $sBuf);
+                $sContent .= $sBuf;
             }
         } elseif (($iLen = $HttpResponse->getHeader('Content-Length'))!==null) {
             $sBuf = '';
@@ -333,7 +334,10 @@ class HttpRequest extends HttpCommon
                 $iLeft = $iLen - strlen($sBuf);
                 $sBuf .= fread($rSock, $iLeft);
             }
-            $HttpResponse->setContent($HttpResponse->getContent() . $sBuf);
+            $sContent .= $sBuf;
+        }
+        if ($sContent!=='') {
+            $HttpResponse->setContent($sContent);
         }
 
         $iErrCode = 0;
