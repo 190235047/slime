@@ -60,4 +60,12 @@ final class Cache
     {
         return $this->Obj->flush();
     }
+
+    /**
+     * @return IAdaptor
+     */
+    public function getAdaptor()
+    {
+        return $this->Obj;
+    }
 }

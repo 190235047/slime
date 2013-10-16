@@ -2,22 +2,24 @@
 namespace Slime\Component\Cache;
 
 use Psr\Log\LoggerInterface;
+use Slime\Component\Redis\Redis;
 
 class Adaptor_Redis implements IAdaptor
 {
     /** @var array */
     public $aConfig;
 
+    # this is a hack for code auto complete
     /** @var \Redis */
     private $Redis;
 
     /**
-     * @param array           $aConfig
+     * @param Redis           $Redis
      * @param LoggerInterface $Logger
      */
-    public function __construct(array $aConfig, LoggerInterface $Logger)
+    public function __construct(Redis $Redis, LoggerInterface $Logger)
     {
-        $this->aConfig = $aConfig;
+        $this->Redis   = $Redis;
         $this->Logger  = $Logger;
     }
 
@@ -28,7 +30,7 @@ class Adaptor_Redis implements IAdaptor
      */
     public function get($sKey)
     {
-        return $this->getInstance()->get($sKey);
+        return $this->Redis->get($sKey);
     }
 
     /**
@@ -40,7 +42,7 @@ class Adaptor_Redis implements IAdaptor
      */
     public function set($sKey, $mValue, $iExpire)
     {
-        return $this->getInstance()->set($sKey, $mValue, $iExpire);
+        return $this->Redis->set($sKey, $mValue, $iExpire);
     }
 
     /**
@@ -50,7 +52,7 @@ class Adaptor_Redis implements IAdaptor
      */
     public function delete($sKey)
     {
-        return $this->getInstance()->delete($sKey);
+        return $this->Redis->delete($sKey);
     }
 
     /**
@@ -58,31 +60,6 @@ class Adaptor_Redis implements IAdaptor
      */
     public function flush()
     {
-        return $this->getInstance()->flush();
-    }
-
-    /**
-     * @return $this
-     */
-    public function getInstance()
-    {
-        if (!$this->Redis) {
-            if ($this->aConfig['type'] == 'single') {
-                $this->Redis = new \Redis();
-                call_user_func_array(
-                    array($this->Redis, $this->aConfig['pconnect'] ? 'pconnect' : 'connect'),
-                    $this->aConfig['config']
-                );
-            } else {
-                $Ref         = new \ReflectionClass('\Redis');
-                $this->Redis = $Ref->newInstanceArgs($this->aConfig['config']);
-            }
-            if (!empty($this->aConfig['option'])) {
-                foreach ($this->aConfig['option'] as $mK => $mV) {
-                    $this->Redis->setOption($mK, $mV);
-                }
-            }
-        }
-        return $this->Redis;
+        return $this->Redis->flushDB();
     }
 }

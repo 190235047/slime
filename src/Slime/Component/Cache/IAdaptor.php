@@ -30,9 +30,4 @@ interface IAdaptor
      * @return bool
      */
     public function flush();
-
-    /**
-     * @return $this
-     */
-    public function getInstance();
 }
