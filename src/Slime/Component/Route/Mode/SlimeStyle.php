@@ -48,14 +48,15 @@ class Mode_SlimeStyle implements IMode
     public function runCli($aArg, CallBack $CallBack)
     {
         if (strpos($aArg[1], '.') === false) {
-            $aArr = array($aArg[1], 'Default');
+            $aBlock = array($aArg[1], 'Default');
         } else {
-            $aArr = explode('.', $aArg[1], 2);
+            $aBlock = explode('.', $aArg[1], 2);
         }
         $aParam = empty($aArg[2]) ?
             array() :
-            array(json_decode($aArg[2], true));//控制器构造函数第0个参数 aParam => $aParam
-        $CallBack->setCBObject("ControllerCli_{$aArr[0]}", "action{$aArr[1]}", $aParam);
+            json_decode($aArg[2], true);
+
+        $CallBack->setCBObject("ControllerCli_{$aBlock[0]}", "action{$aBlock[1]}", array($aParam));
 
         return $CallBack;
     }

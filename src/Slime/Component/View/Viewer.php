@@ -18,10 +18,9 @@ class Viewer
         }
         $Obj = new $sAdaptor($Log);
         if (!$Obj instanceof IAdaptor) {
-            $Log->error('{adaptor} must impl Slime.Component.IAdaptor', array('adaptor' => $sAdaptor));
+            $Log->error('{adaptor} must impl Slime.Component.View.IAdaptor', array('adaptor' => $sAdaptor));
             exit(1);
         }
         return $Obj;
     }
 }
-
