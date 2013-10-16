@@ -2,17 +2,16 @@
 namespace Slime\Bundle\Framework;
 
 use Slime\Component\Http;
-use Slime\Component\Route\CallBack;
-use Slime\Component\View\Viewer;
+use Slime\Component\View;
 
 /**
  * Class Controller_Http
  * Slime 内置Http控制器基类
  *
- * @package Slime\Core
+ * @package Slime\Bundle\Framework
  * @author  smallslime@gmail.com
  */
-abstract class Controller_Http
+abstract class Controller_Http extends Controller_ABS
 {
     protected $Context;
 
@@ -63,7 +62,7 @@ abstract class Controller_Http
         $this->HttpRequest   = $Context->HttpRequest;
         $this->HttpResponse  = $Context->HttpResponse;
         $this->aParam        = $aParam;
-        $this->View          = Viewer::factory('@PHP', $this->Log);
+        $this->View          = View\Viewer::factory('@PHP', $this->Log);
         $this->bGet          = $this->HttpRequest->getRequestMethod() === 'GET';
         $this->bAutoRender   = $this->bGet;
         $this->bAjax         = $this->HttpRequest->isAjax();
@@ -78,11 +77,6 @@ abstract class Controller_Http
      */
     public function __after__()
     {
-        # has bean outer call
-        if (count($GLOBALS['__SF_CONTEXT__']) > 1) {
-            return;
-        }
-
         # header
         if ($this->HttpResponse->getHeader('Content-Type') === null) {
             if ($this->bAjax) {
@@ -103,7 +97,6 @@ abstract class Controller_Http
                 if ($this->sTPL === null) {
                     $this->sTPL = $this->getDefaultTPL();
                 }
-                $this->Log->debug('Use template[{tpl}]', array('tpl' => $this->sTPL));
 
                 $this->HttpResponse->setContent(
                     ltrim(
@@ -115,38 +108,6 @@ abstract class Controller_Http
                 );
             }
         }
-    }
-
-    public function innerCall($sController, $sMethod, $aParam = null)
-    {
-        if ($aParam === null) {
-            $aParam = $this->aParam;
-        }
-        $CallBack = new CallBack($this->Context->sNS, $this->Log);
-        $CallBack->setCBObject(
-            $sController,
-            $sMethod,
-            $aParam
-        );
-        $CallBack->call();
-        return $CallBack->mCallable->aData;
-    }
-
-    public function outerCall(Http\HttpRequest $HttpRequest)
-    {
-        # 获取一个 Context 副本
-        $Context = clone $this->Context;
-
-        # 复写原始 HttpRequest
-        $HttpRequest = clone $HttpRequest;
-        $Context->register('HttpRequest', $HttpRequest);
-
-        # 运行
-        Bootstrap::factoryWithContext($Context)->run();
-        $aResult = $Context->CallBack->mCallable->aData;
-        $Context->destroy();
-
-        return $aResult;
     }
 
     protected function getDefaultTPL()
