@@ -300,7 +300,7 @@ class HttpRequest extends HttpCommon
             $sErrMsg  = 'Error http response in first line';
             return null;
         }
-        $aArr                         = explode(' ', $sLine, 3);
+        $aArr                         = array_replace(array('', '', ''), explode(' ', $sLine, 3));
         $HttpResponse->iStatus        = (int)$aArr[0];
         $HttpResponse->sProtocol      = (string)$aArr[1];
         $HttpResponse->sStatusMessage = (string)$aArr[2];
