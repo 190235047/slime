@@ -12,7 +12,7 @@ use Slime\Component\Http;
  * 框架核心运行类
  * 1. 调用静态方法 factory
  *    1. 生成上下文对象;
- *    2. 注册各种变量/对象到上下文对象 详见 Slime\Core\Context;
+ *    2. 注册各种变量/对象到上下文对象 详见 Slime\Bundle\Framework\Context;
  *    3. 注册 ErrorHandle 方法
  * 2. 调用 run 方法运行
  *    1. 路由, 获取回调对象

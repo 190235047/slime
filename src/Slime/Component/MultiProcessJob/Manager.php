@@ -16,7 +16,6 @@ class Manager
     );
 
     public function __construct(
-        $sFifoDir,
         LoggerInterface $Log,
         ITask $Task,
         $sConfigFile = null,
@@ -27,18 +26,8 @@ class Manager
             $Log->sGUID = 'Main:' . posix_getpid() . '';
         }
 
-        $this->sFifoDir = $sFifoDir;
         $this->Log      = $Log;
         $this->Task     = $Task;
-
-        # check fifo dir
-        if (!file_exists($sFifoDir)) {
-            mkdir($sFifoDir);
-        }
-        if (!is_writeable($sFifoDir)) {
-            $Log->error('Fifo base dir[{fifo}] can not writeable', array('fifo' => $sFifoDir));
-            exit(1);
-        }
 
         # dy set
         $this->sConfigFile     = $sConfigFile;

@@ -6,7 +6,7 @@ namespace Slime\Component\MultiProcessJob;
  *
  * @package Slime\Component\BackGroundJob
  */
-class Redis implements IJobQueue
+class JobQueue_Redis implements IJobQueue
 {
     /**
      * @param \Redis $Redis      Redis instance

@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\Log;
 
-use Slime\Core\Context;
+use Slime\Bundle\Framework\Context;
 
 class Writer_WebPage implements IWriter
 {
