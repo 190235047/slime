@@ -76,18 +76,19 @@ class Item implements \ArrayAccess
             $this->Model->Logger->error('can not find relation for [{model}]', array('model' => $sModelName));
             exit(1);
         }
-        $sRelation = strtolower($this->Model->aRelConf[$sModelName]);
-        if (
-            ($sRelation !== 'hasone' && $sRelation !== 'belongsto') ||
-            $this->Group === null || empty($mValue[0])
-        ) {
-            if (!isset($this->aRelation[$sModelName])) {
-                $this->aRelation[$sModelName] = $this->relation($sModelName, $this);
+
+        if (!isset($this->aRelation[$sModelName])) {
+            $sMethod = $this->Model->aRelConf[$sModelName];
+            $sRelation = strtolower($this->Model->aRelConf[$sModelName]);
+            if ($sRelation === 'hasone' || $sRelation == 'belongsto') {
+                $this->aRelation[$sModelName] = $this->Group===null ?
+                    $this->$sMethod($sModelName) :
+                    $this->Group->relation($sModelName, $this);
+            } else {
+                $this->aRelation[$sModelName] = $this->$sMethod($sModelName, (isset($mValue[0]) ? $mValue[0] : null));
             }
-            return $this->aRelation[$sModelName];
-        } else {
-            return $this->Group->relation($sModelName, $this);
         }
+        return $this->aRelation[$sModelName];
     }
 
     public function add()
@@ -144,20 +145,6 @@ class Item implements \ArrayAccess
     /**
      * @param string $sModelName
      *
-     * @return Item|Item[]|null
-     */
-    public function relation($sModelName)
-    {
-        if (!isset($this->Model->aRelConf[$sModelName])) {
-            $this->Log->error('Relation model {model} is not exist', array('model' => $sModelName));
-        }
-        $sMethod = $this->Model->aRelConf[$sModelName];
-        return $this->$sMethod($sModelName);
-    }
-
-    /**
-     * @param string $sModelName
-     *
      * @return Item|null
      */
     public function hasOne($sModelName)
@@ -179,48 +166,59 @@ class Item implements \ArrayAccess
     }
 
     /**
-     * @param string $sModel
+     * @param string     $sModel
+     * @param array|null $aParam
      *
      * @return Group
      */
-    public function hasMany($sModel)
+    public function hasMany($sModel, $aParam = null)
     {
         $M     = $this->Model;
         $Model = $M->Factory->get($sModel);
-        return $Model->findMulti(array($M->sFKName => $this->aData[$Model->sPKName]));
+        return $Model->findMulti(
+            (empty($aParam) ?
+                array($M->sFKName => $this->aData[$Model->sPKName]) :
+                array_merge(array($M->sFKName => $this->aData[$Model->sPKName]), $aParam)
+            )
+        );
     }
 
     /**
      * @param string      $sModelTarget
-     * @param string|null $sModelRelated
+     * @param array|null  $aParam
      *
      * @return Group
      */
-    public function hasManyThough($sModelTarget, $sModelRelated = null)
+    public function hasManyThrough($sModelTarget, $aParam = null)
     {
         $ModelTarget = $this->Model->Factory->get($sModelTarget);
         $ModelOrg    = $this->Model;
-        if ($sModelRelated === null) {
-            $sRelatedTableName = strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
-                $ModelTarget->sTable . '_' . $ModelOrg->sTable :
-                $ModelOrg->sTable . '_' . $ModelTarget->sTable;
-            $CURD              = $ModelOrg->CURD;
-        } else {
-            $ModelRelated      = $this->Model->Factory->get($sModelRelated);
-            $CURD              = $ModelRelated->CURD;
-            $sRelatedTableName = $ModelRelated->sTable;
-        }
+        //if ($sModelRelated === null) {
+        $sRelatedTableName = 'rel__' . (strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
+                $ModelTarget->sTable . '__' . $ModelOrg->sTable :
+                $ModelOrg->sTable . '__' . $ModelTarget->sTable);
+        $CURD              = $ModelOrg->CURD;
+        //} else {
+        //    $ModelRelated      = $this->Model->Factory->get($sModelRelated);
+        //    $CURD              = $ModelRelated->CURD;
+        //    $sRelatedTableName = $ModelRelated->sTable;
+        //}
+
 
         $aIDS = $CURD->querySmarty(
             $sRelatedTableName,
-            array($ModelOrg->sFKName => $this->aData[$ModelOrg->sFKName]),
+            (empty($aParam) ?
+                array($ModelOrg->sFKName => $this->aData[$ModelOrg->sPKName]) :
+                array_merge(array($ModelOrg->sFKName => $this->aData[$ModelOrg->sPKName]), $aParam)
+            ),
             '',
             $ModelTarget->sFKName,
             false,
-            \PDO::FETCH_COLUMN
+            \PDO::FETCH_COLUMN,
+            0
         );
 
-        return $ModelTarget->findMulti($aIDS);
+        return empty($aIDS) ? null : $ModelTarget->findMulti(array($ModelTarget->sPKName . ' IN' => $aIDS));
     }
 
     public function toArray()

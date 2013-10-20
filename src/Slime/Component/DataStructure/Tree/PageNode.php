@@ -24,7 +24,7 @@ class PageNode extends Node
         }
     }
 
-    public function buildA($sAttr = '', callable $CBUrl = null)
+    public function buildA($sAttr = '', $CBUrl = null)
     {
         $sName = $this->getAttr('name');
         $sUrl  = $this->getAttr('url');

@@ -98,12 +98,13 @@ class Model
             $aWhere,
             $sAttr
         );
+        if (empty($aaData)) {
+            return null;
+        }
 
         $Group = new Group($this, $this->Logger);
-        if (!empty($aaData)) {
-            foreach ($aaData as $aRow) {
-                $Group[$aRow[$this->sPKName]] = new Item($aRow, $this, $Group);
-            }
+        foreach ($aaData as $aRow) {
+            $Group[$aRow[$this->sPKName]] = new Item($aRow, $this, $Group);
         }
         return $Group;
     }
