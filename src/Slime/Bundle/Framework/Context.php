@@ -10,8 +10,7 @@ use Slime\Component\DataStructure\Stack;
  * 2. 通过 getInst 静态方法获取当前请求中的上下文对象, 即栈顶 Context
  * 3. 通过 register 可以注册新的运行时对象
  * 4. 注册对象A, 可以 Context::getInst()->A 取得
- * 5. 通过 clone 可以深拷贝一个 Context 对象, 新 Context 中的所有对象均为副本(除无法clone的对象: private __clone)
- * 6. 销毁对象需显式调用 destroy 方法, 即弹出栈顶 Context 对象, 并销毁此对象中 register 的所有对象. 若栈顶并非 $this , 不做弹出
+ * 5. 销毁对象需显式调用 destroy 方法, 即弹出栈顶 Context 对象, 并销毁此对象中 register 的所有对象. 若栈顶并非 $this , 不做弹出
  *
  * @package Slime\Bundle\Framework
  * @author  smallslime@gmail.com
@@ -61,6 +60,10 @@ class Context
     {
     }
 
+    private function __clone()
+    {
+    }
+
     /**
      * @param string $sVarName    对象标志(唯一, 作为调用时的Key)
      * @param mixed  $Object      对象
@@ -101,28 +104,6 @@ class Context
             exit(1);
         }
         return $this->aObject[$sVarName];
-    }
-
-    public function __clone()
-    {
-        $OldContext = Context::getInst();
-        Context::makeInst();
-        $Context = Context::getInst();
-        foreach ($OldContext->aObject as $sK => $mV) {
-            if (is_object($mV)) {
-                $Ref = new \ReflectionObject($mV);
-                try {
-                    $Method = $Ref->getMethod('__clone');
-                    if ($Method->isPublic()) {
-                        $mV = clone $mV;
-                    }
-                } catch (\ReflectionException $E) {
-                    $mV = clone $mV;
-                }
-            }
-            $Context->register($sK, $mV);
-        }
-        return $Context;
     }
 
     public function destroy()

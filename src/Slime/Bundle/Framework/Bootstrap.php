@@ -98,19 +98,6 @@ class Bootstrap
         return $Context->Bootstrap;
     }
 
-    public static function factoryWithContext(Context $Context)
-    {
-        # register self
-        $SELF = new self();
-
-        # set error handle
-        set_error_handler(array($SELF, 'handleError'));
-
-        $SELF->Context = $Context;
-        $SELF->Context->register('Bootstrap', $SELF);
-        return $SELF;
-    }
-
     private function __construct()
     {
     }

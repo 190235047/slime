@@ -1,6 +1,7 @@
 <?php
 namespace Slime\Bundle\Framework;
 
+use Slime\Component\Log\Logger;
 use Slime\Component\Route;
 use Slime\Component\Http;
 
@@ -50,36 +51,49 @@ abstract class Controller_ABS
 
     /**
      * @param array $aArgs
-     * @param array $aNeedContextVarList //@todo
+     * @param array $aToRegContext //@todo
      *
      * @return mixed
      */
-    public function outerCallAsCli($aArgs, array &$aNeedContextVarList = array())
+    public function outerCallAsCli($aArgs, array &$aToRegContext = array())
     {
-        $mArgvBak        = $GLOBALS['argv'];
+        if (isset($GLOBALS['argv'])) {
+            $mArgvBak = $GLOBALS['argv'];
+        }
         $GLOBALS['argv'] = $aArgs;
 
-        # 获取一个 Context 副本
-        $Context = clone $this->Context;
-
         # 运行
-        Bootstrap::factoryWithContext($Context)->run();
-        $aResult = $Context->CallBack->mCallable->aData;
-        $Context->destroy();
+        Bootstrap::factory(
+            $this->Context->sENV,
+            DIR_CONFIG,
+            $this->Context->sNS,
+            'cli',
+            array(
+                'cli'  => array(
+                    'writer' => array('@ECHO'),
+                    'level'  => Logger::LEVEL_ALL
+                ),
+            )
+        )->run();
 
-        $GLOBALS['argv'] = $mArgvBak;
+        Context::getInst()->destroy();
 
-        return $aResult;
+        if (isset($mArgvBak)) {
+            $GLOBALS['argv'] = $mArgvBak;
+        }
+
+        return ;
     }
 
     /**
      * @param Http\HttpRequest $HttpRequest
-     * @param array            $aNeedContextVarList //@todo
+     * @param array            $aToRegContext //@todo
      *
      * @return mixed
      */
-    public function outerCallAsHttp(Http\HttpRequest $HttpRequest, array &$aNeedContextVarList = array())
+    public function outerCallAsHttp(Http\HttpRequest $HttpRequest, array &$aToRegContext = array())
     {
+        /*
         # 获取一个 Context 副本
         $Context = clone $this->Context;
 
@@ -93,5 +107,6 @@ abstract class Controller_ABS
         $Context->destroy();
 
         return $aResult;
+        */
     }
 }

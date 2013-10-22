@@ -85,7 +85,7 @@ class Model
      * @param int    $iOffset
      * @param string $sAttr
      *
-     * @return Group|null
+     * @return Group|null|Item[]
      */
     public function findMulti($aWhere = array(), $sOrderBy = null, $iLimit = null, $iOffset = null, $sAttr = '')
     {
