@@ -1,17 +1,15 @@
 <?php
 namespace Slime\Component\RDS\Model;
 
-use Psr\Log\LoggerInterface;
-
 class Group implements \ArrayAccess, \Iterator, \Countable
 {
     /** @var Item[] */
     public $aModelItem;
 
-    public function __construct(Model $Model, LoggerInterface $Log)
+    public function __construct(Model $Model)
     {
         $this->Model      = $Model;
-        $this->Log        = $Log;
+        $this->Logger     = $Model->Logger;
         $this->aModelItem = array();
         $this->aMapPK2PK  = array();
         $this->aRelation  = array();
@@ -22,7 +20,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
     {
         $aRelConf = $this->Model->aRelConf;
         if (!isset($aRelConf[$sModelName])) {
-            $this->Log->error('Relation model {model} is not exist', array('model' => $sModelName));
+            $this->Logger->error('Relation model {model} is not exist', array('model' => $sModelName));
             exit(1);
         }
         $sMethod = $aRelConf[$sModelName];
@@ -184,7 +182,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
     public function offsetGet($offset)
     {
         if (!isset($this->aModelItem[$offset])) {
-            $this->Log->warning(
+            $this->Logger->warning(
                 '{offset} is not exist in group[{group}]',
                 array('offset' => $offset, 'group' => (string)$this)
             );

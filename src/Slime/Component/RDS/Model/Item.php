@@ -110,12 +110,20 @@ class Item implements \ArrayAccess
         return $M->CURD->deleteSmarty($M->sTable, array($M->sPKName => $this->aData[$M->sPKName]));
     }
 
+    /**
+     * 
+     * @return null|bool [int:非pdo错误; true:更新成功; false:更新失败]
+     */
     public function update()
     {
+        $aUpdate = array_intersect_key($this->aData, $this->aOldData);
+        if (empty($aUpdate)) {
+            return 99;
+        }
         $M   = $this->Model;
         $bRS = $M->CURD->updateSmarty(
             $M->sTable,
-            array_intersect_key($this->aData, $this->aOldData),
+            $aUpdate,
             array($M->sPKName => $this->aData[$M->sPKName])
         );
         if ($bRS) {

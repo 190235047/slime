@@ -102,7 +102,7 @@ class Model
             return null;
         }
 
-        $Group = new Group($this, $this->Logger);
+        $Group = new Group($this);
         foreach ($aaData as $aRow) {
             $Group[$aRow[$this->sPKName]] = new Item($aRow, $this, $Group);
         }

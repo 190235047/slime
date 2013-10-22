@@ -2,7 +2,7 @@
 namespace Slime\Component\Lock;
 
 use Psr\Log\LoggerInterface;
-use Slime\Component\Redis\Redis;
+use Slime\Component\Redis;
 
 class Adaptor_Redis implements IAdaptor
 {
@@ -13,10 +13,10 @@ class Adaptor_Redis implements IAdaptor
     private $Redis;
 
     /**
-     * @param Redis           $Redis
+     * @param Redis\Redis     $Redis
      * @param LoggerInterface $Logger
      */
-    public function __construct(Redis $Redis, LoggerInterface $Logger)
+    public function __construct(Redis\Redis $Redis, LoggerInterface $Logger)
     {
         $this->Redis   = $Redis;
         $this->Logger  = $Logger;
@@ -43,7 +43,7 @@ class Adaptor_Redis implements IAdaptor
                 usleep(10000);
             } while (true);
         }
-        if ($bRS) {
+        if ($iExpire!==0 && $bRS) {
             $this->Redis->expire($sKey, $iExpire);
         }
         return $bRS;
