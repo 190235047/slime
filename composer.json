@@ -9,5 +9,10 @@
             "name": "SmallSlime",
             "email": "smallslime@gmail.com"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-0": {
+            "Slime": "src\/"
+        }
+    }
 }
