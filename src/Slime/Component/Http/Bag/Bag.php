@@ -11,6 +11,12 @@ class Bag_Bag implements \ArrayAccess, \Iterator, \Countable
         $this->iCursor = 0;
     }
 
+    public function set($sKey, $mVaule)
+    {
+        $this->offsetSet($sKey, $mVaule);
+        return $this;
+    }
+
     /**
      * (PHP 5 >= 5.0.0)
      * Return the current element

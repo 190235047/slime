@@ -85,7 +85,7 @@ class Model
      * @param int    $iOffset
      * @param string $sAttr
      *
-     * @return Group|null|Item[]
+     * @return Group|Item[]
      */
     public function findMulti($aWhere = array(), $sOrderBy = null, $iLimit = null, $iOffset = null, $sAttr = '')
     {
@@ -98,11 +98,12 @@ class Model
             $aWhere,
             $sAttr
         );
-        if (empty($aaData)) {
-            return null;
-        }
 
         $Group = new Group($this);
+        
+        if (empty($aaData)) {
+            return $Group;
+        }
         foreach ($aaData as $aRow) {
             $Group[$aRow[$this->sPKName]] = new Item($aRow, $this, $Group);
         }
