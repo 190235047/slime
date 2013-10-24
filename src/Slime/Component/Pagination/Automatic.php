@@ -57,7 +57,7 @@ class Automatic
             $sPlaceHolder                 = chr(0);
             $aParseBlock['query']['page'] = $sPlaceHolder;
 
-            $sPage            = '';
+            $sPage            = '<div class="pagination"></div>';
             $aResult['first'] = 1;
             foreach (array(
                          'first' => '首页',
@@ -91,6 +91,7 @@ class Automatic
                 }
                 $sPage .= "</span>";
             }
+            $sPage .= '</div>';
         }
 
         return array($aList, $sPage);
