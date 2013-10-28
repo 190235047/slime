@@ -14,14 +14,16 @@ class Test_CallBack extends \PHPUnit_Framework_TestCase
     {
         $CallBack = new CallBack('Slime\Component\Route');
         $CallBack->setCBFunc('cbFunction2');
-        $this->_doTest($CallBack);
+        $CallBack->setParam(array('a' => 'a111', 'b' => 'b222'));
+        $this->_doTest($CallBack, 'hello world!a111');
     }
 
     public function testCallBackClass1()
     {
         $CallBack = new CallBack('Slime\Component\Route');
         $CallBack->setCBClass('TestCB', 'call1');
-        $this->_doTest($CallBack);
+        $CallBack->setParam(array('a' => 'a1234', 'b'=>'b5678'));
+        $this->_doTest($CallBack, 'hello world!a1234');
     }
 
     public function testCallBackClass2_Error()
@@ -93,9 +95,9 @@ class Test_CallBack extends \PHPUnit_Framework_TestCase
     }
 }
 
-function cbFunction2()
+function cbFunction2($aParam)
 {
-    echo "hello world!";
+    echo "hello world!" . $aParam['a'];
 }
 
 class TestCB
@@ -105,9 +107,12 @@ class TestCB
         echo $a . $b;
     }
 
-    public static function call1()
+    public static function call1($aArr = array())
     {
         echo "hello world!";
+        if (isset($aArr['a'])) {
+            echo $aArr['a'];
+        }
     }
 
     public function call2()

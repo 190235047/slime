@@ -15,6 +15,7 @@ class Test_Router extends \PHPUnit_Framework_TestCase
 
     public function testHttpCallAble1()
     {
+        $this->Router = new Router('Slime\Component\Route'); // for code coverage
         $aCallBack = $this->Router->generateFromHttp($this->HttpRequest, $this->HttpResponse,
             array(
                 function(Http\HttpRequest $Req, Http\HttpResponse $Rep, &$bContinue, $sAppNs){
@@ -39,7 +40,7 @@ class Test_Router extends \PHPUnit_Framework_TestCase
             )
         );
         $this->assertEquals('hello world!', $this->HttpResponse->getContent());
-        $this->assertArrayHasKey(0, $aCallBack);
+        $this->assertEquals(1, count($aCallBack));
         $this->assertEquals(array('Slime\Component\Route\ControllerHttp_Tv_Tvb', 'actionHk'), $aCallBack[0]->mCallable);
     }
 
@@ -47,6 +48,9 @@ class Test_Router extends \PHPUnit_Framework_TestCase
     {
         $aCallBack = $this->Router->generateFromHttp($this->HttpRequest, $this->HttpResponse,
             array(
+                '#^/abc/def#' => function(Http\HttpRequest $Req, Http\HttpResponse $Rep, $aParam, &$bContinue, $sAppNs){
+                    $Rep->setHeader('Xxx', 'YYY');
+                },
                 '#^/tv/(.*?)/([^/]*)$#' => function(Http\HttpRequest $Req, Http\HttpResponse $Rep, $aParam, &$bContinue, $sAppNs){
                     $Rep->setContent("1:{$aParam[1]};2:{$aParam[2]};");
                     $bContinue = true;
@@ -62,12 +66,13 @@ class Test_Router extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($aCallBack);
     }
 
-    public function testHttpCallAble4()
+    public function testHttpCallArray()
     {
         $aCallBack = $this->Router->generateFromHttp($this->HttpRequest, $this->HttpResponse,
             array(
                 '#^/tv/(.*?)/([^/]*)$#' => array('_continue' => true, 'object' => 'TestCBClass', 'method' => 'run'),
                 '#^/(.*?)/tvb/([^/]*)$#' => array('_continue' => true, 'func' => 'call_$1', 'param' => array('a' => 't1', 'b' => 't2:$1_$2')),
+                '#^/tv/tvb/([^/]*)$#' => array('_continue' => true, 'class' => 'call_$1', 'method' => 'run'),
                 '#^/(.*?)/(.*?)/[^/]*$#' => function(Http\HttpRequest $Req, Http\HttpResponse $Rep, $aParam, &$bContinue, $sAppNs){
                     $Rep->setHeader('Xxx', 'ZZZ');
                     $bContinue = true;
@@ -76,11 +81,54 @@ class Test_Router extends \PHPUnit_Framework_TestCase
             )
         );
         $this->assertEquals('ZZZ', $this->HttpResponse->getHeader('Xxx'));
-        $this->assertEquals(3, count($aCallBack));
+        $this->assertEquals(4, count($aCallBack));
+
         $this->assertEquals(array('Slime\Component\Route\TestCBClass', 'run'), $aCallBack[0]->mCallable);
+
         $this->assertEquals('Slime\Component\Route\call_tv', $aCallBack[1]->mCallable);
         $this->assertEquals(array('a' => 't1', 'b' => 't2:tv_hk'), $aCallBack[1]->aParam);
-        $this->assertEquals(array('Slime\Component\Route\ControllerHttp_Tv_Tvb', 'actionHk'), $aCallBack[2]->mCallable);
+
+        $this->assertEquals(array('Slime\Component\Route\call_hk', 'run'), $aCallBack[2]->mCallable);
+
+        $this->assertEquals(array('Slime\Component\Route\ControllerHttp_Tv_Tvb', 'actionHk'), $aCallBack[3]->mCallable);
+    }
+
+    public function testHttpCallAbleError()
+    {
+        $sStr = '';
+        try {
+            $aCallBack = $this->Router->generateFromHttp($this->HttpRequest, $this->HttpResponse,
+                array(
+                    '#^/tv/(.*?)/([^/]*)$#' => array('_continue' => true),
+                )
+            );
+        } catch (\Exception $E) {
+            $sStr = $E->getMessage();
+        }
+        $this->assertEquals('Route rule error. one of [object, class, func] must be used for array key', $sStr);
+    }
+
+    public function testHttpCallAble5()
+    {
+        $aCallBack = $this->Router->generateFromHttp($this->HttpRequest, $this->HttpResponse,
+            array(
+                '#^/(.*?)/(.*?)/[^/]*$#' => function(Http\HttpRequest $Req, Http\HttpResponse $Rep, $aParam, &$bContinue, $sAppNs){
+                    $CallBack = new CallBack($sAppNs);
+                    $CallBack->setCBFunc('runCB');
+                    $bContinue = true;
+                    return $CallBack;
+                },
+                '#^/tv/(.*?)/[^/]*$#' => function(Http\HttpRequest $Req, Http\HttpResponse $Rep, $aParam, &$bContinue, $sAppNs){
+                    $CallBack = new CallBack($sAppNs);
+                    $CallBack->setCBClass('runCbTv', 'run');
+                    $bContinue = true;
+                    return $CallBack;
+                },
+            )
+        );
+        $this->assertEquals(2, count($aCallBack));
+        $this->assertEquals('Slime\Component\Route\runCB', $aCallBack[0]->mCallable);
+        $this->assertEquals(array('Slime\Component\Route\runCbTv', 'run'), $aCallBack[1]->mCallable);
     }
 
     public function testCliCallAble1()

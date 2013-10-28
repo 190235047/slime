@@ -67,18 +67,15 @@ class Router
                             $aSearch[$iK] = '$' . $iK;
                             $aReplace[$iK] = $sV;
                         }
-                        $mV = $this->replaceRecursive($mV, $aSearch, $aReplace);
-                        if (isset($mV['object'])) {
+                        $mV = self::replaceRecursive($mV, $aSearch, $aReplace);
+                        if (isset($mV['object']) && isset($mV['method'])) {
                             $CallBack->setCBObject($mV['object'], $mV['method']);
-                        } elseif (isset($mV['class'])) {
+                        } elseif (isset($mV['class']) && $mV['method']) {
                             $CallBack->setCBClass($mV['class'], $mV['method']);
                         } elseif (isset($mV['func'])) {
                             $CallBack->setCBFunc($mV['func']);
                         } else {
-                            trigger_error(
-                                'Route rule error. one of [object, class, func] must be used for array key',
-                                E_WARNING
-                            );
+                            throw new \Exception('Route rule error. one of [object, class, func] must be used for array key');
                         }
                         if (isset($mV['param'])) {
                             $CallBack->setParam($mV['param']);
@@ -136,16 +133,12 @@ class Router
         return $aCallBack;
     }
 
-    private function replaceRecursive($aArr, $aSearch, $aReplace)
+    public static function replaceRecursive($aArr, $aSearch, $aReplace)
     {
         foreach ($aArr as $mK => $mRow) {
             $aArr[$mK] = is_array($mRow) ?
-                $this->replaceRecursive($mRow, $aSearch, $aReplace) :
-                (
-                is_string($mRow) ?
-                    str_replace($aSearch, $aReplace, $mRow) :
-                    $mRow
-                );
+                self::replaceRecursive($mRow, $aSearch, $aReplace) :
+                str_replace($aSearch, $aReplace, $mRow);
         }
         return $aArr;
     }
