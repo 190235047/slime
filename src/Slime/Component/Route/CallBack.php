@@ -1,8 +1,6 @@
 <?php
 namespace Slime\Component\Route;
 
-use Psr\Log\LoggerInterface;
-
 class CallBack
 {
     public $mCallable;
@@ -11,10 +9,9 @@ class CallBack
     public $aObjInitParam = null;
     public $bAsFunc = false;
 
-    public function __construct($sNSPre, LoggerInterface $Log)
+    public function __construct($sNSPre)
     {
         $this->sNSPre = $sNSPre;
-        $this->Log    = $Log;
     }
 
     public function setCBObject($mClassNameOrObject, $sMethod, $aObjInitParam = null)
@@ -23,8 +20,10 @@ class CallBack
             $this->aObjInitParam = $aObjInitParam === null ?
                 array() :
                 (is_array($aObjInitParam) ? $aObjInitParam : array($aObjInitParam));
+            $this->mCallable = array($this->sNSPre . '\\' . $mClassNameOrObject, $sMethod);
+        } else {
+            $this->mCallable = array($mClassNameOrObject, $sMethod);
         }
-        $this->mCallable = array($this->sNSPre . '\\' . $mClassNameOrObject, $sMethod);
     }
 
     public function setCBClass($sClassName, $sMethod)
@@ -57,17 +56,6 @@ class CallBack
         } else {
             $mClassOrObj = $this->mCallable[0];
 
-            if (!is_callable($this->mCallable)) {
-                $this->Log->error(
-                    'callback [{cb}:{method}] is not callable',
-                    array(
-                        'cb'     => $mClassOrObj,
-                        'method' => isset($this->mCallable[1]) ? $this->mCallable[1] : ''
-                    )
-                );
-                exit(1);
-            }
-
             # reflection need cache @todo
             if (is_array($this->aObjInitParam)) {
                 $Ref                = new \ReflectionClass($mClassOrObj);
@@ -87,11 +75,9 @@ class CallBack
             # find method
             $sMid = $this->mCallable[1];
             if (!isset($aMethod[$sMid])) {
-                $this->Log->error(
-                    'There is no method[{method}] in class[{cb}]',
-                    array('method' => $sMid, 'cb' => $mClassOrObj)
+                throw new \RuntimeException(
+                    sprintf('There is no method[%s] in class[%s]', $sMid, $mClassOrObj)
                 );
-                exit(1);
             }
 
             # before and after

@@ -29,6 +29,11 @@ class Bootstrap
     protected $Context;
 
     /**
+     * @var array
+     */
+    private $aSysConfig;
+
+    /**
      * @param string $sENV        当前环境(例如 publish:生产环境; development:开发环境)
      * @param string $sDirConfig  配置文件目录
      * @param string $sAppNs      应用的命名空间
@@ -43,7 +48,7 @@ class Bootstrap
         $SELF = new self();
 
         # set error handle
-        set_error_handler(array($SELF, 'handleError'));
+        set_error_handler(array('Slime\Bundle\Framework\Bootstrap', 'handleError'));
 
         # get context object from current request
         Context::makeInst();
@@ -92,10 +97,12 @@ class Bootstrap
         # register router
         $Context->register('Route', new Route\Router($sAppNs, $Log));
 
+        $SELF->aSysConfig = $Config->get('system', null, true);
+
         $Context->register('Bootstrap', $SELF);
         $SELF->Context = $Context;
 
-        return $Context->Bootstrap;
+        return $SELF;
     }
 
     private function __construct()
@@ -106,13 +113,18 @@ class Bootstrap
     {
     }
 
-    /**
-     *
-     */
     public function run()
     {
         $sMethod = 'run' . $this->Context->sRunMode;
-        $this->$sMethod();
+        try {
+            $this->$sMethod();
+        } catch (\Exception $E) {
+            if (isset($this->aSysConfig['exception_handle'])) {
+                call_user_func($this->aSysConfig['exception_handle'], $E);
+            } else {
+                throw $E;
+            }
+        }
     }
 
     protected function runHttp()
@@ -128,16 +140,17 @@ class Bootstrap
         $this->Context->register('HttpResponse', $HttpResponse);
 
         # run route
-        if ($this->Context->isRegister('CallBack')) {
-            $CallBack = $this->Context->CallBack;
-        } else {
-            $CallBack = $this->Context->Route->generateFromHttp(
-                $HttpRequest,
-                $this->Context->Config->get('system.route_http')
-            );
-            $this->Context->register('CallBack', $CallBack);
+        $aCallBack = $this->Context->Route->generateFromHttp(
+            $HttpRequest,
+            $HttpResponse,
+            $this->aSysConfig['route_http']
+        );
+        if (!empty($aCallBack)) {
+            foreach ($aCallBack as $CallBack) {
+                $this->Context->register('CallBack', $CallBack);
+                $CallBack->call();
+            }
         }
-        $CallBack->call();
 
         # response
         $HttpResponse->send();
@@ -145,11 +158,16 @@ class Bootstrap
 
     protected function runCli()
     {
-        $CallBack = $this->Context->Route->generateFromCli(
+        $aCallBack = $this->Context->Route->generateFromCli(
             $GLOBALS['argv'],
-            $this->Context->Config->get('system.route_cli')
+            $this->aSysConfig['route_cli']
         );
-        $CallBack->call();
+        if (!empty($aCallBack)) {
+            foreach ($aCallBack as $CallBack) {
+                $this->Context->register('CallBack', $CallBack);
+                $CallBack->call();
+            }
+        }
     }
 
     /**
@@ -159,21 +177,28 @@ class Bootstrap
      * @param int    $iErrLine    错误发生行
      * @param string $sErrContext 错误发生上下文
      */
-    public function handleError($iErrNum, $sErrStr, $sErrFile, $iErrLine, $sErrContext)
+    public static function handleError($iErrNum, $sErrStr, $sErrFile, $iErrLine, $sErrContext)
     {
         $sStr = $iErrNum . ':' . $sErrStr . "\nIn File[$sErrFile]:Line[$iErrLine]";
-        switch ($iErrNum) {
-            case E_NOTICE:
-            case E_USER_NOTICE:
-                Context::getInst()->Log->notice($sStr);
-                break;
-            case E_USER_ERROR:
-                Context::getInst()->Log->error($sStr);
-                exit(1);
-                break;
-            default:
-                Context::getInst()->Log->warning($sStr);
-                break;
+
+        $Context = Context::getInst();
+        # 在某些对象, 在PHP全局回收时调用析构函数. 此时 Context 已经销毁, 如果析构函数中发生错误, 会拿不到 Context. 尽量避免!
+        if ($Context===null) {
+            trigger_error($sStr, $iErrNum);
+        } else {
+            switch ($iErrNum) {
+                case E_NOTICE:
+                case E_USER_NOTICE:
+                    $Context->Log->notice($sStr);
+                    break;
+                case E_USER_ERROR:
+                    $Context->Log->error($sStr);
+                    exit(1);
+                    break;
+                default:
+                    $Context->Log->warning($sStr);
+                    break;
+            }
         }
     }
 }

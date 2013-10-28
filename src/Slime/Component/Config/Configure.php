@@ -32,12 +32,12 @@ final class Configure
     /**
      * @param string $sKey
      * @param mixed  $mDefaultValue
-     * @param int    $iErrorLevel
+     * @param bool   $bForce
      *
      * @return mixed
      */
-    public function get($sKey, $mDefaultValue = null, $iErrorLevel = 0)
+    public function get($sKey, $mDefaultValue = null, $bForce = false)
     {
-        return $this->Object->get($sKey, $mDefaultValue, $iErrorLevel);
+        return $this->Object->get($sKey, $mDefaultValue, $bForce);
     }
 }

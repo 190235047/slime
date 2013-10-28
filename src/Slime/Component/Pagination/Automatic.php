@@ -17,7 +17,7 @@ class Automatic
         $this->Context   = $Context;
         $this->iPerPage  = (int)$iPerPage;
         $this->sVarPage  = (string)$sVarPage;
-        $this->mRenderCB = null;
+        $this->mRenderCB = $mRenderCB;
     }
 
     public function getStandardList(
@@ -42,15 +42,19 @@ class Automatic
         $HttpRequest = $this->Context->HttpRequest;
 
         $iTotal  = $Model->findCount($aWhere);
-        $iPage   = min(max(1, (int)$HttpRequest->getGet($this->sVarPage)), $iTotal);
-        $iOffset = ($iPage - 1) * $iPerPage;
-
-        $aList = $Model->findMulti($aWhere, $sOrderBy, $iPerPage, $iOffset);
+        $iPage   = max(1, (int)$HttpRequest->getGet($this->sVarPage));
 
         $aResult = Core::run($Logger, $iTotal, $iPerPage, $iPage);
+        if (empty($aResult)) {
+            return array(new Model\Group($Model), '');
+        }
+
+        $Group = $Model->findMulti($aWhere, $sOrderBy, $iPerPage, ($iPage - 1) * $iPerPage);
+
         if ($mRenderCB !== null) {
             $sPage = call_user_func($mRenderCB, $aResult);
         } else {
+
             $sURI = strstr($HttpRequest->getRequestURI(), '?', true);
             $Get  = $HttpRequest->Get;
 
@@ -94,6 +98,6 @@ class Automatic
             $sPage .= '</div>';
         }
 
-        return array($aList, $sPage);
+        return array($Group, $sPage);
     }
 }
