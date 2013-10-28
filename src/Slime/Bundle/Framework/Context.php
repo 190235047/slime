@@ -29,11 +29,11 @@ use Slime\Component\DataStructure\Stack;
  */
 class Context
 {
-    protected $aObject = array();
+    protected $aStorage = array();
 
     /**
      * 获取当前请求的上下文对象
-     * @return \Slime\Bundle\Framework\Context
+     * @return \Slime\Bundle\Framework\Context|bool
      */
     public static function getInst()
     {
@@ -65,45 +65,43 @@ class Context
     }
 
     /**
-     * @param string $sVarName    对象标志(唯一, 作为调用时的Key)
-     * @param mixed  $Object      对象
+     * @param string $sVarName    标志(唯一, 作为调用时的Key)
+     * @param mixed  $mEveryThing 值
      * @param bool   $bOverWrite  是否自动覆盖已存在的同标志对象
      * @param bool   $bAllowExist 是否允许存在同标志对象(若此值为假, 并且存在相同标志对象, 则将抛错, 程序退出)
+     *
+     * @throws \Exception
      */
-    public function register($sVarName, $Object, $bOverWrite = true, $bAllowExist = true)
+    public function register($sVarName, $mEveryThing, $bOverWrite = true, $bAllowExist = true)
     {
-        if (isset($this->aObject[$sVarName])) {
+        if (isset($this->aStorage[$sVarName])) {
             if ($bOverWrite) {
-                $this->aObject[$sVarName] = $Object;
+                $this->aStorage[$sVarName] = $mEveryThing;
             } else {
                 if (!$bAllowExist) {
-                    $this->Log->error(
-                        'Object register failed. {key} has exist{object}',
-                        array('key' => $sVarName, 'object' => $Object)
+                    throw new \Exception(
+                        "Object register failed. {$sVarName} has exist"
                     );
-                    exit(1);
                 }
             }
         } else {
-            $this->aObject[$sVarName] = $Object;
+            $this->aStorage[$sVarName] = $mEveryThing;
         }
     }
 
     public function isRegister($sVarName)
     {
-        return array_key_exists($sVarName, $this->aObject);
+        return array_key_exists($sVarName, $this->aStorage);
     }
 
     public function __get($sVarName)
     {
-        if (!isset($this->aObject[$sVarName])) {
-            $this->Log->error(
-                'Object fetch failed. {key} has not exist',
-                array('key' => $sVarName)
+        if (!isset($this->aStorage[$sVarName])) {
+            throw new \Exception(
+                "Object register failed. {$sVarName} has not exist"
             );
-            exit(1);
         }
-        return $this->aObject[$sVarName];
+        return $this->aStorage[$sVarName];
     }
 
     public function destroy()

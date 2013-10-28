@@ -35,7 +35,9 @@ class Stack implements \Countable
      */
     public function pop()
     {
-        return array_pop($this->aData);
+        $mItem = array_pop($this->aData);
+        end($this->aData);
+        return $mItem;
     }
 
     /**
