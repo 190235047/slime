@@ -40,6 +40,8 @@ class Bootstrap
      * @param string $sRunMode    PHP运行方式, 当前支持 (cli||http)
      * @param array  $aLogConfig  Log初始化配置, 详见 Slime\Component\Log\ReadMe.md
      *
+     * @throws \Exception
+     *
      * @return \Slime\Bundle\Framework\Bootstrap
      */
     public static function factory($sENV, $sDirConfig, $sAppNs, $sRunMode, array $aLogConfig)
@@ -68,8 +70,7 @@ class Bootstrap
 
         # register logger
         if (!isset($aLogConfig[$sRunMode])) {
-            trigger_error('There is no log config to match current runtime:[' . $sRunMode . ']', E_USER_ERROR);
-            exit(1);
+            throw new \Exception('There is no log config to match current runtime:[' . $sRunMode . ']');
         }
         $aWriter = array();
         foreach ($aLogConfig[$sRunMode]['writer'] as $mKey => $mV) {
