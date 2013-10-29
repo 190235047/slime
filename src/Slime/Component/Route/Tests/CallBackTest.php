@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\Route;
 
-class Test_CallBack extends \PHPUnit_Framework_TestCase
+class Test_CallBackTest extends \PHPUnit_Framework_TestCase
 {
     public function testCallBackFunction1()
     {
