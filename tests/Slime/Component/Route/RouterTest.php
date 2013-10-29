@@ -3,7 +3,7 @@ namespace Slime\Component\Route;
 
 use Slime\Component\Http;
 
-class Test_RouterTest extends \PHPUnit_Framework_TestCase
+class RouterTest extends \PHPUnit_Framework_TestCase
 {
     public function __construct()
     {
@@ -149,53 +149,6 @@ class Test_RouterTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('hello world!', $sStr);
         $this->assertEquals(1, count($aCallBack));
         $this->assertEquals(array('Slime\Component\Route\ControllerCli_Call1', 'actionMethod1'), $aCallBack[0]->mCallable);
-        $this->assertEquals(array('xxx'=>'zzz', 'xx' => array('a', 'b', 'c')), $aCallBack[0]->aObjInitParam[0]);
-    }
-
-    public function testModeSlimeRest()
-    {
-        $HttpRequest = Http\HttpRequest::create('GET', '/', array(), array('Host' => 'www.google.com'));
-        $aCallBack = $this->Router->generateFromHttp($HttpRequest, $this->HttpResponse,
-            array(
-                array('Slime\Component\Route\Mode', 'slimeHttp')
-            )
-        );
-
-        $this->assertCount(1, $aCallBack);
-        $this->assertEquals(array('Slime\Component\Route\ControllerHttp_Main', 'actionDefault'), $aCallBack[0]->mCallable);
-    }
-
-    public function testModeSlimeRest1()
-    {
-        $HttpRequest = Http\HttpRequest::create('POST', '/post/Hk.html', array(), array('Host' => 'www.google.com'));
-        $aCallBack = $this->Router->generateFromHttp($HttpRequest, $this->HttpResponse,
-            array(
-                array('Slime\Component\Route\Mode', 'slimeHttp')
-            )
-        );
-
-        $this->assertCount(1, $aCallBack);
-        $this->assertEquals(array('Slime\Component\Route\ControllerHttp_Post', 'actionHk_POST'), $aCallBack[0]->mCallable);
-    }
-
-    public function testModeSlimeRest2()
-    {
-        ob_start();
-        $aCallBack = $this->Router->generateFromCli(
-            array('index.php', 'Call1', '{"xxx":"zzz", "xx":["a","b","c"]}'),
-            array(
-                function($aArg, &$bContinue, $sAppNs) {
-                    echo 'hello world!';
-                    $bContinue = true;
-                },
-                array('Slime\Component\Route\Mode', 'slimeCli')
-            )
-        );
-        $sStr = ob_get_contents();
-        ob_end_clean();
-        $this->assertEquals('hello world!', $sStr);
-        $this->assertEquals(1, count($aCallBack));
-        $this->assertEquals(array('Slime\Component\Route\ControllerCli_Call1', 'actionDefault'), $aCallBack[0]->mCallable);
         $this->assertEquals(array('xxx'=>'zzz', 'xx' => array('a', 'b', 'c')), $aCallBack[0]->aObjInitParam[0]);
     }
 }
