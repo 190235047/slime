@@ -63,4 +63,17 @@ class ContextTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(Context::getInst()->isRegister('a'));
         $this->assertFalse(Context::getInst()->isRegister('b'));
     }
+
+    public function testClone()
+    {
+        $sStr = '';
+        try {
+            Context::makeInst();
+            $C = Context::getInst();
+            $B = clone $C;
+        } catch (\Exception $E) {
+            $sStr = $E->getMessage();
+        }
+        $this->assertEquals('Can not clone', $sStr);
+    }
 }
