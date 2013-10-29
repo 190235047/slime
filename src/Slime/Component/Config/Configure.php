@@ -15,16 +15,14 @@ final class Configure
     /** @var \Slime\Component\Config\IAdaptor */
     private $Object;
 
-    public function __construct($sAdaptor, LoggerInterface $Log)
+    public function __construct($sAdaptor)
     {
         $sAdaptor = $sAdaptor[0] === '@' ? __NAMESPACE__ . '\\Adaptor_' . substr($sAdaptor, 1) : $sAdaptor;
         $Class    = new \ReflectionClass($sAdaptor);
-        $aParam   = array_slice(func_get_args(), 2);
-        $aParam[] = $Log;
+        $aParam   = array_slice(func_get_args(), 1);
         $Object   = $Class->newInstanceArgs($aParam);
         if (!$Object instanceof IAdaptor) {
-            $Log->error('Configure is not instance of Slime.IAdaptor');
-            exit(1);
+            throw new \Exception('Configure is not instance of \Slime\Component\Config\IAdaptor');
         }
         $this->Object = $Object;
     }

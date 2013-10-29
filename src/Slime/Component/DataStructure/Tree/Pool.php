@@ -1,8 +1,6 @@
 <?php
 namespace Slime\Component\DataStructure\Tree;
 
-use Psr\Log\LoggerInterface;
-
 class Pool
 {
     /**
@@ -12,19 +10,19 @@ class Pool
 
     public $aaPoolLevel = array();
 
-    public static function initFromArrayRecursion($aArr, LoggerInterface $Log)
+    public static function initFromArrayRecursion($aArr)
     {
         if (count($aArr) !== 1) {
-            $Log->error('Tree array data must own and only can own one root node');
+            throw new \Exception('Tree array data must own and only can own one root node');
         }
         $sKey  = key($aArr);
         $aData = current($aArr);
         if (empty($aData[0])) {
-            $RootNode = new Node(new self($Log), $sKey, $aData);
+            $RootNode = new Node(new self(), $sKey, $aData);
         } else {
             $aChildren = $aData[0];
             unset($aData[0]);
-            $RootNode = new Node(new self($Log), $sKey, $aData);
+            $RootNode = new Node(new self(), $sKey, $aData);
             self::_initFromArrayRecursion($aChildren, $RootNode);
         }
         return $RootNode;
@@ -48,16 +46,11 @@ class Pool
         }
     }
 
-    public function __construct(LoggerInterface $Log)
-    {
-        $this->Log = $Log;
-    }
-
     public function addNode(Node $Node)
     {
         $sKey = $Node->sKey;
         if (isset($this->aPool[$sKey])) {
-            $this->Log->warning('Pool has node with key[{key}]', array('key' => $sKey));
+            trigger_error("Pool has node with key[{$sKey}]", E_USER_WARNING);
         } else {
             $this->aPool[$sKey]                      = $Node;
             $this->aaPoolLevel[$Node->iLevel][$sKey] = $Node;
@@ -82,7 +75,7 @@ class Pool
     public function findNode($sKey)
     {
         if (!isset($this->aPool[$sKey])) {
-            $this->Log->warning('There is no key[{key}] in pool', array('key' => $sKey));
+            trigger_error("There is no key[{$sKey}] in pool", E_USER_WARNING);
             return null;
         }
         return $this->aPool[$sKey];

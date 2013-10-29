@@ -1,9 +1,9 @@
 <?php
 namespace Slime\Bundle\Framework;
 
-class Test_Context extends \PHPUnit_Framework_TestCase
+class ContextTest extends \PHPUnit_Framework_TestCase
 {
-    public function test1()
+    public function testCreateRegisterGetDestroy()
     {
         Context::makeInst();
         Context::getInst()->register('a', 'test');
@@ -29,7 +29,7 @@ class Test_Context extends \PHPUnit_Framework_TestCase
         $this->assertFalse(Context::getInst());
     }
 
-    public function test2()
+    public function testRegisterError()
     {
         $sStr = '';
         try {
@@ -42,7 +42,7 @@ class Test_Context extends \PHPUnit_Framework_TestCase
         $this->assertEquals("Object register failed. a has exist", $sStr);
     }
 
-    public function test3()
+    public function testGetError()
     {
         $sStr = '';
         try {
@@ -53,5 +53,14 @@ class Test_Context extends \PHPUnit_Framework_TestCase
             $sStr = $E->getMessage();
         }
         $this->assertEquals("Object register failed. b has not exist", $sStr);
+    }
+
+    public function testIsRegister()
+    {
+        Context::makeInst();
+        Context::getInst()->register('a', 'test');
+
+        $this->assertTrue(Context::getInst()->isRegister('a'));
+        $this->assertFalse(Context::getInst()->isRegister('b'));
     }
 }

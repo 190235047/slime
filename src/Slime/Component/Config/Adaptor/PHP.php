@@ -2,7 +2,6 @@
 namespace Slime\Component\Config;
 
 use Slime\Component\Config\IAdaptor;
-use Slime\Component\Log\Logger;
 
 /**
  * Class Configure
@@ -25,22 +24,20 @@ class Adaptor_PHP implements IAdaptor
     /** @var array */
     private $aCachedData;
 
-    /** @var \Slime\Component\Log\Logger */
-    private $Logger;
-
-    public function __construct($sBaseDir, $sDefaultBaseDir, Logger $Logger)
+    public function __construct($sBaseDir, $sDefaultBaseDir)
     {
         $this->sBaseDir        = $sBaseDir;
         $this->sDefaultBaseDir = $sDefaultBaseDir;
 
         $this->bIsDefault = $this->sBaseDir === $this->sDefaultBaseDir;
-        $this->Logger        = $Logger;
     }
 
     /**
      * @param string $sKey
      * @param mixed  $mDefaultValue
      * @param bool   $bForce
+     *
+     * @throws \Exception
      *
      * @return mixed
      */
@@ -60,8 +57,7 @@ class Adaptor_PHP implements IAdaptor
                 );
         }
         if ($mResult === null && $bForce) {
-            $this->Logger->error('config {key} is not found', array('key' => $sKey));
-            exit(1);
+            throw new \Exception("config {$sKey} is not found");
         }
         return $mResult;
     }

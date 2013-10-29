@@ -26,6 +26,7 @@ use Slime\Component\DataStructure\Stack;
  * @property-read \Slime\Component\Route\CallBack            $CallBack     路由结果回调对象
  * @property-read \Slime\Component\HTTP\HttpRequest          $HttpRequest  本次Http请求生成的HttpRequest对象
  * @property-read \Slime\Component\HTTP\HttpResponse         $HttpResponse 响应本次Http请求的HttpResponse对象
+ * @property-read \Slime\Component\I18N\I18N                 $I18N         多语言对象
  */
 class Context
 {

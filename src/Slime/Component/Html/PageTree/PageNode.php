@@ -1,7 +1,9 @@
 <?php
-namespace Slime\Component\DataStructure\Tree;
+namespace Slime\Component\Html\PageTree;
 
-class PageNode extends Node
+use Slime\Component\DataStructure\Tree;
+
+class PageNode extends Tree\Node
 {
     /**
      * @var PageNode[]

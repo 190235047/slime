@@ -87,7 +87,7 @@ class HttpRequest extends HttpCommon
         $SELF = new self(
             $sProtocol,
             $sMethod,
-            $aArr['path'],
+            $sURL,
             $Header,
             $sContent,
             $Get,
@@ -225,16 +225,19 @@ class HttpRequest extends HttpCommon
     protected function tidyHeader()
     {
         # GET LOGIC
-        if ($this->sRequestMethod === 'GET' && count($this->Get) > 0) {
-            $aArr = parse_url($this->sRequestURI);
-            if (empty($aArr['query'])) {
-                $aQ = $this->Get->toArray();
-            } else {
-                parse_str($aArr['query'], $aQ);
-                $aQ = array_merge($aArr['query'], $aQ);
-            }
-            $this->sRequestURI = $aArr['path'] . '?' . http_build_query($aQ);
-        } elseif ($this->sRequestMethod === 'POST' && count($this->Post) > 0) {
+        $aArr = parse_url($this->sRequestURI);
+        if (empty($aArr['path'])) {
+            $aArr['path'] = '/';
+        }
+        if (empty($aArr['query'])) {
+            $aQ = $this->Get->toArray();
+        } else {
+            parse_str($aArr['query'], $aQ);
+            $aQ = array_merge($aQ, $this->Get->toArray());
+        }
+        $this->sRequestURI = empty($aQ) ? $aArr['path'] : ($aArr['path'] . '?' . http_build_query($aQ));
+
+        if ($this->sRequestMethod === 'POST' && count($this->Post) > 0) {
             $this->sContent = http_build_query($this->Post->toArray());
             if ($this->Header['Content-Type'] === null) {
                 $this->Header['Content-Type'] = 'application/x-www-form-urlencoded';
@@ -256,96 +259,7 @@ class HttpRequest extends HttpCommon
 
     //------------------- call logic -----------------------
 
-    public function call($iTimeout = 3, &$iErrNum = 0, &$sErrMsg = '')
-    {
-        return self::read($this->_call(true, $iTimeout), $iErrNum, $sErrMsg);
-    }
-
-
-    private function _call($bBlock = true, $iTimeout = 3)
-    {
-        # first line
-        $sStr = sprintf("%s %s %s\r\n", $this->sRequestMethod, $this->sRequestURI, $this->sProtocol);
-
-        # header
-        $sStr .= (string)$this->Header;
-
-        # sp
-        $sStr .= "\r\n";
-
-        # body
-        $sStr .= (string)$this->sContent;
-
-        # open
-        $aArr = explode(':', $this->Header['Host'], 2);
-        $rSock = fsockopen($this->Header['Host'], isset($aArr[1]) ? $aArr[1] : 80);
-        socket_set_blocking($rSock, $bBlock);
-
-        # write
-        fwrite($rSock, $sStr);
-
-        return $rSock;
-    }
-
-    public static function read($rSock, &$iErrCode, &$sErrMsg)
-    {
-        $HttpResponse = new HttpResponse();
-        while (($sLine = fgets($rSock)) !== false) {
-            if (trim($sLine) !== '') {
-                break;
-            }
-        }
-        if (empty($sLine)) {
-            $iErrCode = 1;
-            $sErrMsg  = 'Error http response in first line';
-            return null;
-        }
-        $aArr                         = array_replace(array('', '', ''), explode(' ', $sLine, 3));
-        $HttpResponse->iStatus        = (int)$aArr[0];
-        $HttpResponse->sProtocol      = (string)$aArr[1];
-        $HttpResponse->sStatusMessage = (string)$aArr[2];
-
-        while ($sLine = fgets($rSock, 1024)) {
-            $sLine = substr($sLine, 0, strlen($sLine) - 2);
-            if ($sLine === '') {
-                break;
-            }
-            $aArr = explode(':', $sLine);
-            $HttpResponse->setHeader($aArr[0], isset($aArr[1]) ? ltrim($aArr[1]) : '');
-        }
-        # read body
-        $sContent = '';
-        if ($HttpResponse->getHeader('Transfer-Encoding') === 'chunked') {
-            while (true) {
-                $iLen = hexdec(fgets($rSock));
-                if ($iLen === 0) {
-                    break;
-                }
-                $sBuf = '';
-                while (strlen($sBuf) < $iLen) {
-                    $iLeft = $iLen - strlen($sBuf);
-                    $sBuf .= fread($rSock, $iLeft);
-                }
-                $sContent .= $sBuf;
-            }
-        } elseif (($iLen = $HttpResponse->getHeader('Content-Length'))!==null) {
-            $sBuf = '';
-            while (strlen($sBuf) < $iLen) {
-                $iLeft = $iLen - strlen($sBuf);
-                $sBuf .= fread($rSock, $iLeft);
-            }
-            $sContent .= $sBuf;
-        }
-        if ($sContent!=='') {
-            $HttpResponse->setContent($sContent);
-        }
-
-        $iErrCode = 0;
-        $sErrMsg = '';
-        return $HttpResponse;
-    }
-
-    public function callByCurl()
+    public function call()
     {
         $aArr = explode('/', $this->sProtocol, 2);
         $rCurl = curl_init(sprintf('%s://%s', $aArr[0], $this->Header['Host'] . $this->sRequestURI));

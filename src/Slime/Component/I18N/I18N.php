@@ -30,13 +30,13 @@ class I18N
         }
         $this->sLangDir  = $sLangDir === null ? self::$sDefaultLangDir : $sLangDir;
         $this->Configure = new Config\Configure(
-            'PHP',
+            '@PHP',
             $sBaseDir . DIRECTORY_SEPARATOR . $sLangDir,
             $sBaseDir . DIRECTORY_SEPARATOR . self::$sDefaultLangDir
         );
     }
 
-    public function _($sString)
+    public function get($sString)
     {
         return $this->Configure->get($sString);
     }

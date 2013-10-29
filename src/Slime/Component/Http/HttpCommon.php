@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\Http;
 
-class HttpCommon
+abstract class HttpCommon
 {
     protected $sRequestMethod;
     protected $Header;

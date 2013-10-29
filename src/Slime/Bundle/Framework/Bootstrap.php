@@ -2,6 +2,7 @@
 namespace Slime\Bundle\Framework;
 
 use Slime\Component\Config;
+use Slime\Component\I18N\I18N;
 use Slime\Component\Log;
 use Slime\Component\Route;
 use Slime\Component\Http;
@@ -36,6 +37,7 @@ class Bootstrap
     /**
      * @param string $sENV        当前环境(例如 publish:生产环境; development:开发环境)
      * @param string $sDirConfig  配置文件目录
+     * @param string $sDirLang    语言文件目录
      * @param string $sAppNs      应用的命名空间
      * @param string $sRunMode    PHP运行方式, 当前支持 (cli||http)
      * @param array  $aLogConfig  Log初始化配置, 详见 Slime\Component\Log\ReadMe.md
@@ -44,7 +46,7 @@ class Bootstrap
      *
      * @return \Slime\Bundle\Framework\Bootstrap
      */
-    public static function factory($sENV, $sDirConfig, $sAppNs, $sRunMode, array $aLogConfig)
+    public static function factory($sENV, $sDirConfig, $sDirLang, $sAppNs, $sRunMode, array $aLogConfig)
     {
         # register self
         $SELF = new self();
@@ -89,16 +91,19 @@ class Bootstrap
         # register configure
         $Config = new Config\Configure(
             '@PHP',
-            $Log,
             $sDirConfig . '/' . $sENV,
             $sDirConfig . '/publish'
         );
         $Context->register('Config', $Config);
 
+        # get system config
+        $SELF->aSysConfig = $Config->get('system', null, true);
+
         # register router
         $Context->register('Route', new Route\Router($sAppNs, $Log));
 
-        $SELF->aSysConfig = $Config->get('system', null, true);
+        # register i18N
+        $Context->register('I18N', new I18N($sDirLang));
 
         $Context->register('Bootstrap', $SELF);
         $SELF->Context = $Context;

@@ -1,23 +1,23 @@
 <?php
-namespace Slime\Component\DataStructure\Tree;
+namespace Slime\Component\Html\PageTree;
 
-use Psr\Log\LoggerInterface;
+use Slime\Component\DataStructure\Tree;
 
-class PagePool extends Pool
+class PagePool extends Tree\Pool
 {
-    public static function initFromArrayRecursion($aArr, LoggerInterface $Log)
+    public static function initFromArrayRecursion($aArr)
     {
         if (count($aArr) !== 1) {
-            $Log->error('Tree array data must own and only can own one root node');
+            throw new \Exception('Tree array data must own and only can own one root node');
         }
         $sKey  = key($aArr);
         $aData = current($aArr);
         if (empty($aData[0])) {
-            $RootNode = new PageNode(new self($Log), $sKey, $aData);
+            $RootNode = new PageNode(new self(), $sKey, $aData);
         } else {
             $aChildren = $aData[0];
             unset($aData[0]);
-            $Pool     = new self($Log);
+            $Pool     = new self();
             $RootNode = new PageNode($Pool, $sKey, $aData);
             $Pool->addNode($RootNode);
             self::_initFromArrayRecursion($aChildren, $RootNode);
