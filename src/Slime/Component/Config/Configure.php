@@ -32,24 +32,4 @@ final class Configure
         }
         return $Obj;
     }
-
-    /**
-     * @param string $sKey
-     * @param mixed  $mDefaultValue
-     * @param bool   $bForce
-     *
-     * @return mixed
-     */
-    public function get($sKey, $mDefaultValue = null, $bForce = false)
-    {
-        return $this->Obj->get($sKey, $mDefaultValue, $bForce);
-    }
-
-    /**
-     * @return IAdaptor
-     */
-    public function getAdaptor()
-    {
-        return $this->Obj;
-    }
 }

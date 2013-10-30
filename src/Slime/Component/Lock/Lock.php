@@ -1,52 +1,35 @@
 <?php
 namespace Slime\Component\Lock;
 
-use Psr\Log\LoggerInterface;
-
+/**
+ * Class Lock
+ *
+ * @package Slime\Component\Lock
+ * @author  smallslime@gmail.com
+ */
 final class Lock
 {
-    /** @var IAdaptor */
-    private $Obj;
-
-    public function __construct($sAdaptor, $mConfig, LoggerInterface $Logger)
-    {
-        if ($sAdaptor[0] === '@') {
-            $sAdaptor = '\\Slime\\Component\\Lock\\Adaptor_' . substr($sAdaptor, 1);
-        }
-        $this->Obj = new $sAdaptor($mConfig, $Logger);
-        if (!$this->Obj instanceof IAdaptor) {
-            $Logger->error('{adaptor} must impl Slime.Component.Lock.IAdaptor', array('adaptor' => $sAdaptor));
-            exit(1);
-        }
-    }
-
     /**
-     * @param string $sKey
-     * @param int    $iExpire   0:永不过期
-     * @param int    $iTimeout  0:永不超时(一直阻塞); -1:异步(发现阻塞不等待立刻返回false)
+     * @param string $sAdaptor
      *
-     * @return bool
-     */
-    public function acquire($sKey, $iExpire, $iTimeout = -1)
-    {
-        return $this->Obj->acquire($sKey, $iExpire, $iTimeout);
-    }
-
-    /**
-     * @param string $sKey
-     *
-     * @return bool
-     */
-    public function release($sKey)
-    {
-        return $this->Obj->release($sKey);
-    }
-
-    /**
+     * @throws \Exception
      * @return IAdaptor
      */
-    public function getAdaptor()
+    public static function factory($sAdaptor)
     {
-        return $this->Obj;
+        if ($sAdaptor[0] === '@') {
+            $sAdaptor = __NAMESPACE__ . '\\Adaptor_' . substr($sAdaptor, 1);
+        }
+        $aParam = array_slice(func_get_args(), 1);
+        if (empty($aParam)) {
+            $Obj = new $sAdaptor();
+        } else {
+            $Ref = new \ReflectionClass($sAdaptor);
+            $Obj = $Ref->newInstanceArgs($aParam);
+        }
+        if (!$Obj instanceof IAdaptor) {
+            throw new \Exception("{$sAdaptor} must implements Slime\\Component\\Lock\\IAdaptor");
+        }
+        return $Obj;
     }
 }

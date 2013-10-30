@@ -14,12 +14,10 @@ class Adaptor_Redis implements IAdaptor
 
     /**
      * @param Redis\Redis     $Redis
-     * @param LoggerInterface $Logger
      */
-    public function __construct(Redis\Redis $Redis, LoggerInterface $Logger)
+    public function __construct(Redis\Redis $Redis)
     {
         $this->Redis   = $Redis;
-        $this->Logger  = $Logger;
     }
 
     /**
