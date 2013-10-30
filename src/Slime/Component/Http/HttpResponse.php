@@ -16,7 +16,7 @@ class HttpResponse extends HttpCommon
     /** @var string */
     public $sStatusMessage;
 
-    /** @var \Slime\Component\Http\Bag_Header */
+    /** @var Bag_Header */
     protected $Header;
 
     /** @var string */
@@ -30,6 +30,11 @@ class HttpResponse extends HttpCommon
         return new self();
     }
 
+    /**
+     * @param string $sStr
+     *
+     * @return HttpResponse
+     */
     public static function createFromResponseString($sStr)
     {
         $SELF = new self();
@@ -58,6 +63,17 @@ class HttpResponse extends HttpCommon
         $this->Header = new Bag_Header();
     }
 
+    /**
+     * @param string      $sName
+     * @param string      $sValue
+     * @param int|null    $iExpire
+     * @param string|null $sPath
+     * @param string|null $sDomain
+     * @param bool|null   $bSecure
+     * @param bool|null   $bHttpOnly
+     *
+     * @return HttpResponse
+     */
     public function setCookie(
         $sName,
         $sValue,
@@ -68,16 +84,19 @@ class HttpResponse extends HttpCommon
         $bHttpOnly = null
     ) {
         $this->aPreCookie[$sName] = array(
-            'value'       => $sValue,
-            'expire'      => $iExpire,
-            'path'        => $sPath,
-            'domain'      => $sDomain,
-            'is_secure'   => $bSecure,
+            'value' => $sValue,
+            'expire' => $iExpire,
+            'path' => $sPath,
+            'domain' => $sDomain,
+            'is_secure' => $bSecure,
             'is_httponly' => $bHttpOnly
         );
         return $this;
     }
 
+    /**
+     * @return HttpResponse
+     */
     public function setNoCache()
     {
         $this->setHeader('Cache-Control', 'no-cache, must-revalidate');
@@ -86,6 +105,11 @@ class HttpResponse extends HttpCommon
         return $this;
     }
 
+    /**
+     * @param string $sURL
+     *
+     * @return HttpResponse
+     */
     public function setRedirect($sURL)
     {
         $this->setHeader('Location', $sURL);
@@ -128,7 +152,7 @@ class HttpResponse extends HttpCommon
     /**
      * Sends content for the current web response.
      *
-     * @return $this
+     * @return HttpResponse
      */
     public function sendContent()
     {
@@ -140,7 +164,7 @@ class HttpResponse extends HttpCommon
     /**
      * Sends HTTP headers and content.
      *
-     * @return $this
+     * @return HttpResponse
      */
     public function send()
     {

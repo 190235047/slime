@@ -3,20 +3,8 @@ namespace Slime\Component\Http;
 
 abstract class HttpCommon
 {
-    protected $sRequestMethod;
     protected $Header;
     protected $sContent;
-
-    public function getRequestMethod()
-    {
-        return $this->sRequestMethod;
-    }
-
-    public function setRequestMethod($sRequestMethod)
-    {
-        $this->sRequestMethod = $sRequestMethod;
-        return $this;
-    }
 
     public function getHeader($sKey)
     {

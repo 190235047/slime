@@ -115,8 +115,9 @@ class Bootstrap
     {
     }
 
-    private function __clone()
+    public function __clone()
     {
+        throw new \Exception('Can not clone');
     }
 
     public function run()

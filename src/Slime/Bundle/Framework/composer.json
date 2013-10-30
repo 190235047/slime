@@ -7,9 +7,9 @@
         "slime/route": ">=1.0.0",
         "slime/http": ">=1.0.0",
         "slime/data_structure": ">=1.0.0",
-        "slime/rds": ">=1.0.0"
+        "slime/rds": ">=1.0.0",
         "slime/view": ">=1.0.0",
-        "slime/i18n": ">=1.0.0",
+        "slime/i18n": ">=1.0.0"
     },
     "license": "GNU GENERAL PUBLIC LICENSE V2.0",
     "authors": [

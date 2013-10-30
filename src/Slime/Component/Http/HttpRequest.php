@@ -123,6 +123,19 @@ class HttpRequest extends HttpCommon
         $this->Header['Cookie'] = $Cookie;
     }
 
+
+    protected $sRequestMethod;
+    public function getRequestMethod()
+    {
+        return $this->sRequestMethod;
+    }
+
+    public function setRequestMethod($sRequestMethod)
+    {
+        $this->sRequestMethod = $sRequestMethod;
+        return $this;
+    }
+
     public function preDealXss($sXSSCharset = 'UTF-8')
     {
         $XSS = $this->getXSSLib();

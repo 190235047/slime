@@ -1,26 +1,13 @@
 <?php
 namespace Slime\Component\Cache;
 
-final class Cache
+class Adaptor_Memcached implements IAdaptor
 {
-    /** @var IAdaptor */
-    private $Obj;
+    public $Obj;
 
-    /**
-     * @param string $sAdaptor
-     *
-     * @throws \Exception
-     */
-    public function __construct($sAdaptor)
+    public function __construct(\Memcached $Memcached)
     {
-        if ($sAdaptor[0] === '@') {
-            $sAdaptor = __NAMESPACE__ . '\\Adaptor_' . substr($sAdaptor, 1);
-        }
-        $Ref = new \ReflectionClass($sAdaptor);
-        $this->Obj = $Ref->newInstanceArgs(array_slice(func_get_args(), 1));
-        if (!$this->Obj instanceof IAdaptor) {
-            throw new \Exception("{$sAdaptor} must impl Slime\\Component\\Cache\\IAdaptor");
-        }
+        $this->Obj = $Memcached;
     }
 
     /**
@@ -61,13 +48,5 @@ final class Cache
     public function flush()
     {
         return $this->Obj->flush();
-    }
-
-    /**
-     * @return IAdaptor
-     */
-    public function getAdaptor()
-    {
-        return $this->Obj;
     }
 }

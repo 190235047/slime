@@ -1,7 +1,6 @@
 <?php
 namespace Slime\Component\Cache;
 
-use Psr\Log\LoggerInterface;
 use Slime\Component\Redis\Redis;
 
 class Adaptor_Redis implements IAdaptor
@@ -15,12 +14,10 @@ class Adaptor_Redis implements IAdaptor
 
     /**
      * @param Redis           $Redis
-     * @param LoggerInterface $Logger
      */
-    public function __construct(Redis $Redis, LoggerInterface $Logger)
+    public function __construct(Redis $Redis)
     {
         $this->Redis   = $Redis;
-        $this->Logger  = $Logger;
     }
 
     /**
