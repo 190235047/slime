@@ -6,7 +6,7 @@ class Adaptor_FileTest extends \PHPUnit_Framework_TestCase
     public function testFileGetSetDeleteFlush()
     {
         @rmdir('/tmp/test');
-        $Cache = new Cache('@File', '/tmp/test');
+        $Cache = Cache::factory('@File', '/tmp/test');
         $this->assertNull($Cache->get('key1'));
         $Cache->set('key1', 'value1', 900);
         $this->assertEquals('value1', $Cache->get('key1'));
@@ -18,28 +18,28 @@ class Adaptor_FileTest extends \PHPUnit_Framework_TestCase
         $Cache->flush();
         $this->assertFalse(file_exists('/tmp/test/cache.php'));
 
-        $this->assertTrue(get_class($Cache->getAdaptor())==='Slime\Component\Cache\Adaptor_File');
+        $this->assertTrue(get_class($Cache)==='Slime\Component\Cache\Adaptor_File');
 
         $Cache->set('key1', 'vvv', 3600);
     }
 
     public function testDelete()
     {
-        $Cache = new Cache('@File', '/tmp/test');
+        $Cache = Cache::factory('@File', '/tmp/test');
         $Cache->delete('key1');
         $this->assertNull($Cache->get('key1'));
     }
 
     public function testFileExpire()
     {
-        $Cache = new Cache('@File', '/tmp/test');
+        $Cache = Cache::factory('@File', '/tmp/test');
         $Cache->set('key1', 'value1', -1);
         $this->assertEquals(null, $Cache->get('key1'));
     }
 
     public function testFileCacheFileCallBack()
     {
-        $Cache = new Cache('@File', '/tmp/test',
+        $Cache = Cache::factory('@File', '/tmp/test',
             function($sKey){
                 return 'cache_' . (crc32($sKey) % 3) . '.php';
             }
@@ -57,7 +57,7 @@ class Adaptor_FileTest extends \PHPUnit_Framework_TestCase
     {
         $sStr = '';
         try {
-            new Cache('@File', '/bin/createFailed');
+            Cache::factory('@File', '/bin/createFailed');
         } catch (\Exception $E) {
             $sStr = $E->getMessage();
         }
@@ -66,7 +66,7 @@ class Adaptor_FileTest extends \PHPUnit_Framework_TestCase
 
     public function testFileCreateFileException()
     {
-        $Cache = new Cache('@File', '/tmp/test_no_permit', null, 0000);
+        $Cache = Cache::factory('@File', '/tmp/test_no_permit', null, 0000);
         $sStr = '';
         try {
             $Cache->set('aaa', 'bbb', 900);

@@ -1,9 +1,14 @@
 <?php
 namespace Slime\Component\RDS\Model;
 
-use Psr\Log\LoggerInterface;
 use Slime\Component\RDS\CURD;
 
+/**
+ * Class Factory
+ *
+ * @package Slime\Component\RDS\Model
+ * @author  smallslime@gmail.com
+ */
 class Factory
 {
     public $bAutoCreate = true;
@@ -11,7 +16,7 @@ class Factory
     /** @var Model[] */
     protected $aModel = array();
 
-    public function __construct($aDBConfigAll, $aModelConfig, LoggerInterface $Log)
+    public function __construct($aDBConfigAll, $aModelConfig)
     {
         foreach ($aDBConfigAll as $sK => $aDBConfig) {
             $this->aCURD[$sK] = new CURD(
@@ -23,13 +28,13 @@ class Factory
             );
         }
         $this->aModelConf = $aModelConfig;
-        $this->Log        = $Log;
     }
 
     /**
-     * @param $sModel
+     * @param string $sModel
      *
      * @return Model
+     * @throws \Exception
      */
     public function get($sModel)
     {
@@ -42,15 +47,13 @@ class Factory
             }
             $sDB = $this->aModelConf[$sModel]['db'];
             if (!isset($this->aCURD[$sDB])) {
-                $this->Log->error('there is no database config [{db}] exist', array('db' => $sDB));
-                exit(1);
+                throw new \Exception("here is no database config [$sDB] exist");
             }
             $this->aModel[$sModel] = new Model(
                 $sModel,
                 $this->aCURD[$sDB],
                 $this->aModelConf[$sModel],
-                $this,
-                $this->Log
+                $this
             );
         }
 

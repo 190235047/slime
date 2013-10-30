@@ -1,15 +1,18 @@
 <?php
 namespace Slime\Component\Pagination;
 
-use Psr\Log\LoggerInterface;
-
-class Core
+/**
+ * Class Core
+ *
+ * @package Slime\Component\Pagination
+ * @author  smallslime@gmail.com
+ */
+class Pagination
 {
-    public static function run(LoggerInterface $Log, $iTotalItem, $iNumPerPage, $iCurrentPage, $iDisplayBefore = 3, $iDisplayAfter = null)
+    public static function run($iTotalItem, $iNumPerPage, $iCurrentPage, $iDisplayBefore = 3, $iDisplayAfter = null)
     {
         if ($iCurrentPage < 1) {
-            $Log->error('Offset can not be less than 1');
-            exit(1);
+            throw new \Exception('Offset can not be less than 1');
         }
         if ($iTotalItem == 0) {
             return array();
@@ -21,8 +24,7 @@ class Core
 
         $iTotalPage = (int)ceil($iTotalItem / $iNumPerPage);
         if ($iCurrentPage > $iTotalPage) {
-            $Log->error('Offset can not be more than total page');
-            exit(1);
+            throw new \Exception('Offset can not be more than total page');
         }
 
         # count start

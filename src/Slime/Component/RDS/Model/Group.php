@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\RDS\Model;
 
+/**
+ * Class Group
+ * @package Slime\Component\RDS\Model
+ *
+ * @author  smallslime@gmail.com
+ */
 class Group implements \ArrayAccess, \Iterator, \Countable
 {
     /** @var Item[] */
@@ -9,7 +15,6 @@ class Group implements \ArrayAccess, \Iterator, \Countable
     public function __construct(Model $Model)
     {
         $this->Model      = $Model;
-        $this->Logger     = $Model->Logger;
         $this->aModelItem = array();
         $this->aMapPK2PK  = array();
         $this->aRelation  = array();
@@ -20,8 +25,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
     {
         $aRelConf = $this->Model->aRelConf;
         if (!isset($aRelConf[$sModelName])) {
-            $this->Logger->error('Relation model {model} is not exist', array('model' => $sModelName));
-            exit(1);
+            throw new \Exception("Relation model $sModelName is not exist");
         }
         $sMethod = $aRelConf[$sModelName];
         return $this->$sMethod($sModelName, $ModelItem);
@@ -182,10 +186,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
     public function offsetGet($offset)
     {
         if (!isset($this->aModelItem[$offset])) {
-            $this->Logger->warning(
-                '{offset} is not exist in group[{group}]',
-                array('offset' => $offset, 'group' => (string)$this)
-            );
+            trigger_error(sprintf('[%s] is not exist in group[%s]', $offset, (string)$this), E_USER_WARNING);
             return null;
         }
         return $this->aModelItem[$offset];

@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Redis;
 
+/**
+ * Class Redis
+ *
+ * @package Slime\Component\Redis
+ * @author  smallslime@gmail.com
+ */
 class Redis
 {
     /**

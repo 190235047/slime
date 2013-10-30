@@ -8,8 +8,9 @@ use Slime\Bundle\Framework\Context;
  * Class AopPDO
  *
  * @package Slime\Component\RDS
+ * @author  smallslime@gmail.com
  */
-class AopPDO
+class AopDebug
 {
     public static function register()
     {

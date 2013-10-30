@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\DataStructure\Stack;
 
+/**
+ * Class Stack
+ *
+ * @package Slime\Component\DataStructure\Stack
+ * @author  smallslime@gmail.com
+ */
 class Stack implements \Countable
 {
     /**

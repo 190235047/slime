@@ -3,6 +3,12 @@ namespace Slime\Component\Route;
 
 use Slime\Component\Http;
 
+/**
+ * Class Mode
+ *
+ * @package Slime\Component\Route
+ * @author  smallslime@gmail.com
+ */
 class Mode
 {
     public static function slimeHttp(Http\HttpRequest $Request, Http\HttpResponse $Response, &$bContinue, $sAppNs)

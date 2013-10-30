@@ -1,9 +1,14 @@
 <?php
 namespace Slime\Component\RDS\Model;
 
-use Psr\Log\LoggerInterface;
 use Slime\Component\RDS\CURD;
 
+/**
+ * Class Model
+ *
+ * @package Slime\Component\RDS\Model
+ * @author  smallslime@gmail.com
+ */
 class Model
 {
     public $CURD;
@@ -12,9 +17,8 @@ class Model
     public $sFKName;
     public $aRelConf;
     public $Factory;
-    public $Logger;
 
-    public function __construct($sModelName, CURD $CURD, $aConfig, Factory $Factory, LoggerInterface $Logger)
+    public function __construct($sModelName, CURD $CURD, $aConfig, Factory $Factory)
     {
         $this->CURD     = $CURD;
         $this->sTable   = isset($aConfig['table']) ? $aConfig['table'] : strtolower($sModelName);
@@ -22,7 +26,6 @@ class Model
         $this->sFKName  = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
         $this->aRelConf = isset($aConfig['relation']) ? $aConfig['relation'] : array();
         $this->Factory  = $Factory;
-        $this->Logger   = $Logger;
     }
 
     public function addUpdate($aKVMap, $aUpdateKey)
@@ -125,8 +128,8 @@ class Model
      * @param string $sAttr
      * @param string $sSelect
      * @param bool   $bOnlyOne
-     * @param        $iFetchStyle
-     * @param null   $mFetchArgs
+     * @param int    $iFetchStyle
+     * @param mixed  $mFetchArgs
      *
      * @return array|bool|mixed
      */

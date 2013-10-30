@@ -1,25 +1,34 @@
 <?php
 namespace Slime\Component\View;
 
-use Psr\Log\LoggerInterface;
-
 /**
  * Class View
  *
  * @package Slime\Component\View
  * @author  smallslime@gmail.com
  */
-class Viewer
+final class Viewer
 {
-    public static function factory($sAdaptor, LoggerInterface $Log)
+    /**
+     * @param string $sAdaptor
+     *
+     * @return IAdaptor
+     * @throws \Exception
+     */
+    public static function factory($sAdaptor)
     {
         if ($sAdaptor[0] === '@') {
-            $sAdaptor = '\\Slime\\Component\\View\\Adaptor_' . substr($sAdaptor, 1);
+            $sAdaptor = __NAMESPACE__ . '\\Adaptor_' . substr($sAdaptor, 1);
         }
-        $Obj = new $sAdaptor($Log);
+        $aParam = array_slice(func_get_args(), 1);
+        if (empty($aParam)) {
+            $Obj = new $sAdaptor();
+        } else {
+            $Ref = new \ReflectionClass($sAdaptor);
+            $Obj = $Ref->newInstanceArgs($aParam);
+        }
         if (!$Obj instanceof IAdaptor) {
-            $Log->error('{adaptor} must impl Slime.Component.View.IAdaptor', array('adaptor' => $sAdaptor));
-            exit(1);
+            throw new \Exception("{$sAdaptor} must implements Slime\\Component\\View\\IAdaptor");
         }
         return $Obj;
     }

@@ -7,10 +7,10 @@ class CacheTest extends \PHPUnit_Framework_TestCase
     {
         $sStr = '';
         try {
-            new Cache('\\StdClass');
+            Cache::factory('\\StdClass');
         } catch (\Exception $E) {
             $sStr = $E->getMessage();
         }
-        $this->assertEquals("\\StdClass must impl Slime\\Component\\Cache\\IAdaptor", $sStr);
+        $this->assertEquals("\\StdClass must implements Slime\\Component\\Cache\\IAdaptor", $sStr);
     }
 }

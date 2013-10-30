@@ -11,9 +11,9 @@ class Bag_Bag implements \ArrayAccess, \Iterator, \Countable
         $this->iCursor = 0;
     }
 
-    public function set($sKey, $mVaule)
+    public function set($sKey, $mValue)
     {
-        $this->offsetSet($sKey, $mVaule);
+        $this->offsetSet($sKey, $mValue);
         return $this;
     }
 

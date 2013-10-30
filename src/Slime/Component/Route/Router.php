@@ -6,9 +6,8 @@ use Slime\Component\Http;
 /**
  * Class Route
  *
- * @package Slime
+ * @package Slime\Component\Http
  * @author  smallslime@gmail.com
- * @version 1.0
  */
 class Router
 {

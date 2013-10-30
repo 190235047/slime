@@ -39,14 +39,14 @@ class Bootstrap
      * @param string $sDirConfig  配置文件目录
      * @param string $sDirLang    语言文件目录
      * @param string $sAppNs      应用的命名空间
-     * @param string $sRunMode    PHP运行方式, 当前支持 (cli||http)
+     * @param string $sAPI        PHP运行方式, 当前支持 (cli||http)
      * @param array  $aLogConfig  Log初始化配置, 详见 Slime\Component\Log\ReadMe.md
      *
      * @throws \Exception
      *
      * @return \Slime\Bundle\Framework\Bootstrap
      */
-    public static function factory($sENV, $sDirConfig, $sDirLang, $sAppNs, $sRunMode, array $aLogConfig)
+    public static function factory($sENV, $sDirConfig, $sDirLang, $sAppNs, $sAPI, array $aLogConfig)
     {
         # register self
         $SELF = new self();
@@ -62,7 +62,7 @@ class Bootstrap
         $Context->register('DateTime', new \DateTime());
 
         # register s_api
-        $Context->register('sRunMode', $sRunMode);
+        $Context->register('sRunMode', $sRunMode = (strtolower($sAPI) === 'cli' ? 'cli' : 'http'));
 
         #register env
         $Context->register('sENV', $sENV);
@@ -89,7 +89,7 @@ class Bootstrap
         $Context->register('Log', $Log);
 
         # register configure
-        $Config = new Config\Configure(
+        $Config = Config\Configure::factory(
             '@PHP',
             $sDirConfig . '/' . $sENV,
             $sDirConfig . '/publish'

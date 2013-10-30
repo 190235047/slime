@@ -11,11 +11,21 @@ interface IAdaptor
     public function setBaseDir($sBaseDir);
 
     /**
+     * @return string
+     */
+    public function getBaseDir();
+
+    /**
      * @param string $sTpl
      *
      * @return $this
      */
     public function setTpl($sTpl);
+
+    /**
+     * @return string
+     */
+    public function getTpl();
 
     /**
      * @param string $sK
@@ -50,5 +60,5 @@ interface IAdaptor
      *
      * @return string
      */
-    public function  subRender($sTpl, array $aData = array());
+    public function subRender($sTpl, array $aData = array());
 }

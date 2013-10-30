@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\Cache;
 
-use Slime\Component\Redis\Redis;
+use Slime\Component\Redis;
 
 class Adaptor_Redis implements IAdaptor
 {
@@ -13,11 +13,11 @@ class Adaptor_Redis implements IAdaptor
     private $Redis;
 
     /**
-     * @param Redis           $Redis
+     * @param Redis\Redis $Redis
      */
-    public function __construct(Redis $Redis)
+    public function __construct(Redis\Redis $Redis)
     {
-        $this->Redis   = $Redis;
+        $this->Redis = $Redis;
     }
 
     /**

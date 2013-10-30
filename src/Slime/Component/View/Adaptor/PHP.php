@@ -1,8 +1,6 @@
 <?php
 namespace Slime\Component\View;
 
-use Psr\Log\LoggerInterface;
-
 /**
  * Class Adaptor_PHP
  *
@@ -16,9 +14,11 @@ class Adaptor_PHP implements IAdaptor
 
     private $aData = array();
 
-    public function __construct(LoggerInterface $Log)
+    public function __construct($sBaseDir = null)
     {
-        $this->Log = $Log;
+        if ($sBaseDir!==null) {
+            $this->sBaseDir = $sBaseDir;
+        }
     }
 
     /**
@@ -29,7 +29,6 @@ class Adaptor_PHP implements IAdaptor
     public function setBaseDir($sBaseDir)
     {
         $this->sBaseDir = $sBaseDir;
-        $this->Log->debug('Tpl base dir[{dir}]', array('dir' => $sBaseDir));
         return $this;
     }
 
@@ -88,18 +87,14 @@ class Adaptor_PHP implements IAdaptor
     }
 
     /**
-     * @param bool $bIsSub
+     * @throws \Exception
      * @return string
      */
-    public function renderAsResult($bIsSub = false)
+    public function renderAsResult()
     {
         $sFile = $this->sBaseDir . DIRECTORY_SEPARATOR . $this->sTpl;
         if (!file_exists($sFile)) {
-            $this->Log->error('Template file[{file}] is not exist', array('file' => $this->sTpl));
-            exit(1);
-        }
-        if (!$bIsSub) {
-            $this->Log->debug('TPL[{tpl}]', array('tpl' => $this->sTpl));
+            throw new \Exception("Template file[{$this->sTpl}] is not exist");
         }
         extract($this->aData);
         ob_start();
@@ -113,10 +108,25 @@ class Adaptor_PHP implements IAdaptor
     {
         $View = clone $this;
         $View->setTpl($sTpl);
-        $this->Log->debug('Sub TPL[{tpl}]', array('tpl' => $sTpl));
         if (!empty($aData)) {
             $View->assignMulti($aData);
         }
         return $View->renderAsResult(true);
+    }
+
+    /**
+     * @return string
+     */
+    public function getBaseDir()
+    {
+        return $this->sBaseDir;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTpl()
+    {
+        return $this->sTpl;
     }
 }

@@ -7,17 +7,17 @@ use Slime\Component\Http;
 
 class Automatic
 {
-    protected $Context;
+    protected $HttpRequest;
     protected $iPerPage;
     protected $sVarPage;
     protected $mRenderCB;
 
-    public function __construct(Context $Context, $iPerPage = 10, $sVarPage = 'page', $mRenderCB = null)
+    public function __construct(Http\HttpRequest $HttpRequest, $iPerPage = 10, $sVarPage = 'page', $mRenderCB = null)
     {
-        $this->Context   = $Context;
-        $this->iPerPage  = (int)$iPerPage;
-        $this->sVarPage  = (string)$sVarPage;
-        $this->mRenderCB = $mRenderCB;
+        $this->HttpRequest = $HttpRequest;
+        $this->iPerPage    = (int)$iPerPage;
+        $this->sVarPage    = (string)$sVarPage;
+        $this->mRenderCB   = $mRenderCB;
     }
 
     public function getStandardList(
@@ -27,24 +27,19 @@ class Automatic
         $iPerPage = null,
         $mRenderCB = null
     ) {
-        $Logger   = $this->Context->Log;
         $iPerPage = $iPerPage === null ? (int)$this->iPerPage : (int)$iPerPage;
         if ($iPerPage === 0) {
-            $Logger->error('Number per page must gt than 0');
-            exit(1);
+            throw new \Exception('Number per page must gt than 0');
         }
         if ($this->sVarPage==='') {
-            $Logger->error('page var must be a string');
-            exit(1);
+            throw new \Exception('Page var must be a string');
         }
         $mRenderCB = $mRenderCB === null ? $this->mRenderCB : $mRenderCB;
 
-        $HttpRequest = $this->Context->HttpRequest;
-
         $iTotal  = $Model->findCount($aWhere);
-        $iPage   = max(1, (int)$HttpRequest->getGet($this->sVarPage));
+        $iPage   = max(1, (int)$this->HttpRequest->getGet($this->sVarPage));
 
-        $aResult = Core::run($Logger, $iTotal, $iPerPage, $iPage);
+        $aResult = Pagination::run($iTotal, $iPerPage, $iPage);
         if (empty($aResult)) {
             return array(new Model\Group($Model), '');
         }
@@ -55,8 +50,8 @@ class Automatic
             $sPage = call_user_func($mRenderCB, $aResult);
         } else {
 
-            $sURI = strstr($HttpRequest->getRequestURI(), '?', true);
-            $Get  = $HttpRequest->Get;
+            $sURI = strstr($this->HttpRequest->getRequestURI(), '?', true);
+            $Get  = $this->HttpRequest->Get;
 
             $sPlaceHolder                 = chr(0);
             $aParseBlock['query']['page'] = $sPlaceHolder;

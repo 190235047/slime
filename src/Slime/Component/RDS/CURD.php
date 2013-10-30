@@ -5,6 +5,8 @@ namespace Slime\Component\RDS;
  * Class CURD
  *
  * @package Slime\Component\RDS
+ * @author  smallslime@gmail.com
+ *
  * @property-read string $sDSN
  * @property-read string $sUsername
  * @property-read string $sPassword
@@ -247,8 +249,4 @@ class CURD
     {
         return array('sDSN', 'sUsername', 'sPassword', 'aOptions', 'bCheckConnect');
     }
-}
-
-if (defined('Slime.RDS:AOP')) {
-    AopPDO::register();
 }

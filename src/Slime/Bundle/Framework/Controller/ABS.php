@@ -66,6 +66,7 @@ abstract class Controller_ABS
         Bootstrap::factory(
             $this->Context->sENV,
             DIR_CONFIG,
+            DIR_LANGUAGE,
             $this->Context->sNS,
             'cli',
             array(

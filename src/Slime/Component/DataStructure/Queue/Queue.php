@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\DataStructure\Queue;
 
+/**
+ * Class Queue
+ *
+ * @package Slime\Component\DataStructure\Queue
+ * @author  smallslime@gmail.com
+ */
 class Queue implements \Countable
 {
     /**

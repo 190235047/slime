@@ -5,13 +5,14 @@ namespace Slime\Component\RDS\Model;
  * Class Item
  *
  * @package Slime\Component\RDS
+ * @author  smallslime@gmail.com
+ *
  * @property-read array $aData
  * @property-read array $aOldData
  */
 class Item implements \ArrayAccess
 {
     private $aRelation = array();
-    private $Log;
 
     /** @var Model */
     public $Model;
@@ -30,7 +31,6 @@ class Item implements \ArrayAccess
         $this->aData = $aData;
         $this->Model = $Model;
         $this->Group = $Group;
-        $this->Log   = $Model->Logger;
     }
 
     public function __get($sKey)
@@ -68,13 +68,13 @@ class Item implements \ArrayAccess
      * @param string $sModelName
      * @param array  $mValue
      *
+     * @throws \Exception
      * @return $this|null
      */
     public function __call($sModelName, $mValue = array())
     {
         if (!isset($this->Model->aRelConf[$sModelName])) {
-            $this->Model->Logger->error('can not find relation for [{model}]', array('model' => $sModelName));
-            exit(1);
+            throw new \Exception("Can not find relation for [$sModelName]");
         }
 
         if (!isset($this->aRelation[$sModelName])) {
@@ -205,7 +205,7 @@ class Item implements \ArrayAccess
         $sRelatedTableName = 'rel__' . (strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
                 $ModelTarget->sTable . '__' . $ModelOrg->sTable :
                 $ModelOrg->sTable . '__' . $ModelTarget->sTable);
-        $CURD              = $ModelOrg->CURD;
+        $CURD        = $ModelOrg->CURD;
         //} else {
         //    $ModelRelated      = $this->Model->Factory->get($sModelRelated);
         //    $CURD              = $ModelRelated->CURD;
