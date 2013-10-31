@@ -150,8 +150,8 @@ class HttpRequestTest extends \PHPUnit_Framework_TestCase
 
     public function testCallFalse()
     {
-        $REQ = HttpRequest::create('POST', 'http://www.bai1111xxxxxxxx11111111du.com', array('uid' => 5));
-        $REP = $REQ->call();
+        $REQ = HttpRequest::create('POST', 'http://0.0.0.0/', array('uid' => 5));
+        $REP = $REQ->call(1);
         $this->assertNull($REP);
     }
 

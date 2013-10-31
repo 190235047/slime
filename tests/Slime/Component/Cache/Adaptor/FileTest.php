@@ -5,14 +5,14 @@ class Adaptor_FileTest extends \PHPUnit_Framework_TestCase
 {
     public function testFileGetSetDeleteFlush()
     {
-        @rmdir('/tmp/test');
+        @exec('rm -rf /tmp/test');
         $Cache = Cache::factory('@File', '/tmp/test');
-        $this->assertNull($Cache->get('key1'));
+        $this->assertFalse($Cache->get('key1'));
         $Cache->set('key1', 'value1', 900);
         $this->assertEquals('value1', $Cache->get('key1'));
 
         $Cache->delete('key1');
-        $this->assertNull($Cache->get('key1'));
+        $this->assertFalse($Cache->get('key1'));
 
         $this->assertTrue(file_exists('/tmp/test/cache.php'));
         $Cache->flush();
@@ -27,7 +27,7 @@ class Adaptor_FileTest extends \PHPUnit_Framework_TestCase
     {
         $Cache = Cache::factory('@File', '/tmp/test');
         $Cache->delete('key1');
-        $this->assertNull($Cache->get('key1'));
+        $this->assertFalse($Cache->get('key1'));
     }
 
     public function testFileExpire()

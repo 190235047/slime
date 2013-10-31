@@ -272,7 +272,7 @@ class HttpRequest extends HttpCommon
 
     //------------------- call logic -----------------------
 
-    public function call()
+    public function call($iTimeout = null)
     {
         $aArr = explode('/', $this->sProtocol, 2);
         $rCurl = curl_init(sprintf('%s://%s', $aArr[0], $this->Header['Host'] . $this->sRequestURI));
@@ -284,6 +284,9 @@ class HttpRequest extends HttpCommon
         $aHeader = explode("\r\n", rtrim((string)$this->Header, "\r\n"));
         if (!empty($aHeader)) {
             curl_setopt($rCurl, CURLOPT_HTTPHEADER, $aHeader);
+        }
+        if ($iTimeout!==null) {
+            curl_setopt($rCurl, CURLOPT_TIMEOUT, (int)$iTimeout);;
         }
         $mData = curl_exec($rCurl);
 

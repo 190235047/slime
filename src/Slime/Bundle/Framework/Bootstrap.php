@@ -129,7 +129,8 @@ class Bootstrap
             if (isset($this->aSysConfig['exception_handle'])) {
                 call_user_func($this->aSysConfig['exception_handle'], $E);
             } else {
-                throw $E;
+                $this->Context->Log->error($E->getMessage());
+                exit(1);
             }
         }
     }

@@ -39,14 +39,14 @@ class Redis
                 $this->Redis = new \Redis();
                 call_user_func_array(
                     array($this->Redis, !empty($this->aConfig['pconnect']) ? 'pconnect' : 'connect'),
-                    $this->aConfig['config']
+                    $this->aConfig['server']
                 );
             } else {
                 $Ref         = new \ReflectionClass('\RedisArray');
-                $this->Redis = $Ref->newInstanceArgs($this->aConfig['config']);
+                $this->Redis = $Ref->newInstance($this->aConfig['servers']);
             }
-            if (!empty($this->aConfig['option'])) {
-                foreach ($this->aConfig['option'] as $mK => $mV) {
+            if (!empty($this->aConfig['options'])) {
+                foreach ($this->aConfig['options'] as $mK => $mV) {
                     $this->Redis->setOption($mK, $mV);
                 }
             }

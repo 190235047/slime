@@ -27,12 +27,8 @@ class Queue implements \Countable
      */
     public function add($mV)
     {
-        if (empty($this->aData)) {
-            $this->aData[] = $mV;
-            reset($this->aData);
-        } else {
-            $this->aData[] = $mV;
-        }
+        $this->aData[] = $mV;
+        reset($this->aData);
     }
 
     /**

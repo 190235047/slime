@@ -1,11 +1,14 @@
 <?php
 namespace Slime\Component\Cache;
 
+use Slime\Component\Memcached;
+
 class Adaptor_Memcached implements IAdaptor
 {
+    /** @var \Memcached */
     public $Obj;
 
-    public function __construct(\Memcached $Memcached)
+    public function __construct(Memcached\PHPMemcached $Memcached)
     {
         $this->Obj = $Memcached;
     }

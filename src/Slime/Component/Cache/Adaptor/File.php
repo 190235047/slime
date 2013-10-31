@@ -3,8 +3,6 @@ namespace Slime\Component\Cache;
 
 class Adaptor_File implements IAdaptor
 {
-    protected $aData;
-
     protected $sCacheDir;
     protected $mCBKey2File;
 
@@ -28,19 +26,17 @@ class Adaptor_File implements IAdaptor
     {
         $sFile = $this->getFileFromKey($sKey);
 
-        if (!isset($this->aData[$sFile])) {
-            $mData = require $sFile;
-            $this->aData[$sFile] = is_array($mData) ? $mData : array();
-        }
-        if (!isset($this->aData[$sFile][$sKey])) {
-            return null;
+        $mData = require $sFile;
+        $aData = is_array($mData) ? $mData : array();
+        if (!isset($aData[$sKey])) {
+            return false;
         }
 
-        if (time() - $this->aData[$sFile][$sKey]['expire'] > 0) {
+        if (time() - $aData[$sKey]['expire'] > 0) {
             $this->delete($sKey);
-            return null;
+            return false;
         }
-        return json_decode($this->aData[$sFile][$sKey]['data']);
+        return json_decode($aData[$sKey]['data']);
     }
 
     /**
@@ -56,16 +52,14 @@ class Adaptor_File implements IAdaptor
 
         $sFile = $this->getFileFromKey($sKey);
 
-        if (!isset($this->aData[$sFile])) {
-            $mData = require $sFile;
-            $this->aData[$sFile] = is_array($mData) ? $mData : array();
-        }
-        $this->aData[$sFile][$sKey] = array(
+        $mData = require $sFile;
+        $aData = is_array($mData) ? $mData : array();
+        $aData[$sKey] = array(
             'expire' => time() + $iExpire,
             'data'   => $mValue
         );
 
-        return file_put_contents($sFile, '<?php return ' . var_export($this->aData[$sFile], true) . ';?>') !== false;
+        return file_put_contents($sFile, '<?php return ' . var_export($aData, true) . ';?>') !== false;
     }
 
     /**
@@ -77,13 +71,11 @@ class Adaptor_File implements IAdaptor
     {
         $sFile = $this->getFileFromKey($sKey);
 
-        if (!isset($this->aData[$sFile])) {
-            $mData = require $sFile;
-            $this->aData[$sFile] = is_array($mData) ? $mData : array();
-        }
+        $mData = require $sFile;
+        $aData = is_array($mData) ? $mData : array();
 
-        unset($this->aData[$sFile][$sKey]);
-        $sStr = empty($this->aData[$sFile]) ? 'array()' : var_export($this->aData[$sFile], true);
+        unset($aData[$sKey]);
+        $sStr = empty($aData) ? 'array()' : var_export($aData, true);
         return file_put_contents($sFile, '<?php return ' . $sStr . ';?>') !== false;
     }
 

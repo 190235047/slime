@@ -1,8 +1,6 @@
 <?php
 namespace Slime\Component\Config;
 
-use Slime\Component\Config\IAdaptor;
-
 /**
  * Class Configure
  *
@@ -57,7 +55,7 @@ class Adaptor_PHP implements IAdaptor
                 );
         }
         if ($mResult === null && $bForce) {
-            throw new \Exception("config {$sKey} is not found");
+            throw new \Exception("Config [{$sKey}] is not found");
         }
         return $mResult;
     }

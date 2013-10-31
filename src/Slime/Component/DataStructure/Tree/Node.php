@@ -38,11 +38,8 @@ class Node
 
     public function bornChild($sKey, $aAttr = array())
     {
+        /** @var Node $Node */
         $Node = new static($this->Pool, $sKey, $aAttr, $this);
-        if (!$Node instanceof Node) {
-            $this->Pool->Log->warning('Node[{node}] is not impl {class}', array('node' => $sKey, 'class' => __CLASS__));
-            return null;
-        }
         $this->Pool->addNode($Node);
         $this->aChildren[$Node->sKey] = $Node;
         return $Node;
