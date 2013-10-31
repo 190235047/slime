@@ -39,7 +39,7 @@ abstract class Controller_ABS
         if ($aParam === null) {
             $aParam = $this->aParam;
         }
-        $CallBack = new Route\CallBack($this->Context->sNS, $this->Log);
+        $CallBack = new Route\CallBack($this->Context->sNS);
         $CallBack->setCBObject(
             $sController,
             $sMethod,
