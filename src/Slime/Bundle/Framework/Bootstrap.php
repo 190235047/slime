@@ -1,7 +1,6 @@
 <?php
 namespace Slime\Bundle\Framework;
 
-use BlueRay\Logic\Context;
 use Slime\Component\Config;
 use Slime\Component\I18N;
 use Slime\Component\Log;
