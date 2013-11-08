@@ -10,11 +10,4 @@ namespace Slime\Bundle\Framework;
  */
 abstract class Controller_Cli extends Controller_ABS
 {
-    public function __construct(array $aParam = array())
-    {
-        $this->Context = $Context = Context::getInst();
-        $this->Log     = $Context->Log;
-        $this->Config  = $Context->Config;
-        $this->aParam  = $aParam;
-    }
 }

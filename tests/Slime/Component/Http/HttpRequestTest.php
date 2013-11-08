@@ -133,8 +133,8 @@ class HttpRequestTest extends \PHPUnit_Framework_TestCase
 
     public function testCall()
     {
-        $REQ = HttpRequest::create('GET', 'http://www.baidu.com');
-        $REP = $REQ->call();
+        $REQ = HttpRequest::create('GET', 'http://www.youku.com');
+        $REP = $REQ->call(10);
         $this->assertEquals($REP->iStatus, 200);
         $this->assertEquals($REP->sProtocol, 'HTTP/1.1');
         $this->assertEquals($REP->sStatusMessage, 'OK');
@@ -143,14 +143,14 @@ class HttpRequestTest extends \PHPUnit_Framework_TestCase
 
     public function testCallPOST()
     {
-        $REQ = HttpRequest::create('POST', 'http://www.weibo.com', array('uid' => 5));
-        $REP = $REQ->call();
+        $REQ = HttpRequest::create('POST', 'http://www.youku.com', array('uid' => 5));
+        $REP = $REQ->call(10);
         $this->assertTrue($REP->iStatus==200);
     }
 
     public function testCallFalse()
     {
-        $REQ = HttpRequest::create('POST', 'http://0.0.0.0/', array('uid' => 5));
+        $REQ = HttpRequest::create('POST', 'http://127.1.1.1/', array('uid' => 5));
         $REP = $REQ->call(1);
         $this->assertNull($REP);
     }

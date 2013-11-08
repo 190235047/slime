@@ -10,22 +10,24 @@ use Slime\Component\DataStructure\Stack;
  * 2. 通过 getInst 静态方法获取当前请求中的上下文对象, 即栈顶 Context
  * 3. 通过 register 可以注册新的运行时对象
  * 4. 注册对象A, 可以 Context::getInst()->A 取得
- * 5. 销毁对象需显式调用 destroy 方法, 即弹出栈顶 Context 对象, 并销毁此对象中 register 的所有对象. 若栈顶并非 $this , 不做弹出
+ * 5. 销毁对象需显式调用 destroy 方法, 即弹出栈顶 Context 对象, 并销毁此对象中注册的所有元素
  *
  * @package Slime\Bundle\Framework
  * @author  smallslime@gmail.com
  *
+ * @property-read array                                      $aAppDir      应用目录数组
  * @property-read string                                     $sENV         当前环境(例如 publish:生产环境; development:开发环境)
  * @property-read string                                     $sRunMode     PHP运行方式, 当前支持 (cli||http)
  * @property-read string                                     $sNS          当前应用的命名空间
  * @property-read \DateTime                                  $DateTime     框架初始化时的时间对象
  * @property-read Bootstrap                                  $Bootstrap    框架核心基础对象
- * @property-read \Slime\Component\Config\Configure          $Config       配置对象
+ * @property-read \Slime\Component\Config\IAdaptor           $Config       配置对象
  * @property-read \Slime\Component\Log\Logger                $Log          日志对象
  * @property-read \Slime\Component\Route\Router              $Route        路由对象
  * @property-read \Slime\Component\Route\CallBack            $CallBack     路由结果回调对象
  * @property-read \Slime\Component\HTTP\HttpRequest          $HttpRequest  本次Http请求生成的HttpRequest对象
  * @property-read \Slime\Component\HTTP\HttpResponse         $HttpResponse 响应本次Http请求的HttpResponse对象
+ * @property-read array                                      $aArgv        本次CLI请求的参数数组
  * @property-read \Slime\Component\I18N\I18N                 $I18N         多语言对象
  */
 class Context
@@ -34,13 +36,13 @@ class Context
 
     /**
      * 获取当前请求的上下文对象
-     * @return \Slime\Bundle\Framework\Context|bool
+     * @return \Slime\Bundle\Framework\Context|null
      */
     public static function getInst()
     {
         /** @var Stack\Stack $__SF_CONTEXT__ */
         global $__SF_CONTEXT__;
-        return $__SF_CONTEXT__->current();
+        return empty($__SF_CONTEXT__) ? null : $__SF_CONTEXT__->current();
     }
 
     /**
@@ -106,16 +108,13 @@ class Context
         return $this->aStorage[$sVarName];
     }
 
-    public function destroy()
+    public static function destroy()
     {
         /** @var Stack\Stack $__SF_CONTEXT__ */
         global $__SF_CONTEXT__;
-        $SELF = $__SF_CONTEXT__->current();
-        if ($SELF === $this) {
-            $__SF_CONTEXT__->pop();
-            foreach (get_object_vars($SELF) as $sK => $mV) {
-                unset($this->$sK);
-            }
+        $Context = $__SF_CONTEXT__->pop();
+        foreach (get_object_vars($Context) as $sK => $mV) {
+            unset($Context->$sK);
         }
     }
 }

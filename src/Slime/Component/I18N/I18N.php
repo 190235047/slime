@@ -2,37 +2,57 @@
 namespace Slime\Component\I18N;
 
 use Slime\Component\Config;
+use Slime\Component\Http;
 
 class I18N
 {
-    public static $sCookieKey = '__sf_language__';
-
     public static $aLangMapDir = array(
         '#en-.*#' => 'english',
         '#zh-.*#' => 'zh-cn'
     );
 
-    public static $sDefaultLangDir = 'english';
-
-    public function __construct($sBaseDir, $sLang = null)
+    public static function createFromHttp(
+        $sLanguageBaseDir,
+        Http\HttpRequest $HttpRequest,
+        $sDefaultLanguageDir = 'english',
+        $sCookieKey = null
+    )
     {
-        if ($sLang === null) {
-            $sLang = empty($_COOKIE[self::$sCookieKey]) ? strtolower(
-                strtok(strip_tags($_SERVER['HTTP_ACCEPT_LANGUAGE']), ',')
-            ) : $_COOKIE[self::$sCookieKey];
+        $sLanguage = null;
+        if ($sCookieKey!==null) {
+            $sLanguage = $HttpRequest->getCookie($sCookieKey);
         }
-        $sLangDir = null;
+        $sLanguage = empty($sLanguage) ?
+            strtolower(strtok($HttpRequest->getHeader('Accept-Language'), ',')) :
+            $sLanguage;
+
+        return new self($sLanguageBaseDir, $sLanguage, $sDefaultLanguageDir);
+    }
+
+    public static function createFromCli($sLanguageBaseDir, array $aArg, $sDefaultLanguageDir = 'english')
+    {
+        $sLanguage = $aArg[count($aArg)-1];
+        if (array_search($sLanguage, self::$aLangMapDir)===false) {
+            $sLanguage = $sDefaultLanguageDir;
+        }
+
+        return new self($sLanguageBaseDir, $sLanguage, $sDefaultLanguageDir);
+    }
+
+    public function __construct($sLanguageBaseDir, $sLanguage, $sDefaultLanguageDir)
+    {
+        $sCurrentLanguageDir = null;
         foreach (self::$aLangMapDir as $sK => $sV) {
-            if (preg_match($sK, $sLang)) {
-                $sLangDir = $sV;
+            if (preg_match($sK, $sLanguage)) {
+                $sCurrentLanguageDir = $sV;
                 break;
             }
         }
-        $this->sLangDir  = $sLangDir === null ? self::$sDefaultLangDir : $sLangDir;
-        $this->Configure = new Config\Configure(
+
+        $this->Configure = Config\Configure::factory(
             '@PHP',
-            $sBaseDir . DIRECTORY_SEPARATOR . $sLangDir,
-            $sBaseDir . DIRECTORY_SEPARATOR . self::$sDefaultLangDir
+            $sLanguageBaseDir . DIRECTORY_SEPARATOR . $sCurrentLanguageDir,
+            $sLanguageBaseDir . DIRECTORY_SEPARATOR . $sDefaultLanguageDir
         );
     }
 

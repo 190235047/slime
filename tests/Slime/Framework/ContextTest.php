@@ -18,14 +18,14 @@ class ContextTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals(array('4', '5'), Context::getInst()->a);
 
-        Context::getInst()->destroy();
+        Context::destroy();
 
         $this->assertEquals('test1', Context::getInst()->a);
 
-        Context::getInst()->destroy();
+        Context::destroy();
         $this->assertEquals('test', Context::getInst()->a);
 
-        Context::getInst()->destroy();
+        Context::destroy();
         $this->assertFalse(Context::getInst());
     }
 

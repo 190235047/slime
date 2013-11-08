@@ -13,8 +13,6 @@ use Slime\Component\View;
  */
 abstract class Controller_Http extends Controller_ABS
 {
-    protected $Context;
-
     protected $sTPL = null;
     protected $aData = array();
 
@@ -56,12 +54,10 @@ abstract class Controller_Http extends Controller_ABS
 
     public function __construct(array $aParam = array())
     {
-        $this->Context       = $Context = Context::getInst();
-        $this->Log           = $Context->Log;
-        $this->Config        = $Context->Config;
-        $this->HttpRequest   = $Context->HttpRequest;
-        $this->HttpResponse  = $Context->HttpResponse;
-        $this->aParam        = $aParam;
+        parent::__construct($aParam);
+
+        $this->HttpRequest   = $this->Context->HttpRequest;
+        $this->HttpResponse  = $this->Context->HttpResponse;
         $this->View          = View\Viewer::factory('@PHP', $this->Log);
         $this->bGet          = $this->HttpRequest->getRequestMethod() === 'GET';
         $this->bAutoRender   = $this->bGet;
