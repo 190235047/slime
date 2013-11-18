@@ -2,7 +2,6 @@
 namespace Slime\Component\I18N;
 
 use Slime\Component\Config;
-use Slime\Component\Http;
 
 class I18N
 {
@@ -11,19 +10,26 @@ class I18N
         '#zh-.*#' => 'zh-cn'
     );
 
+    /**
+     * @param string                            $sLanguageBaseDir
+     * @param \Slime\Component\Http\HttpRequest $HttpRequest
+     * @param string                            $sDefaultLanguageDir
+     * @param string                            $sCookieKey
+     *
+     * @return I18N
+     */
     public static function createFromHttp(
         $sLanguageBaseDir,
-        Http\HttpRequest $HttpRequest,
+        $HttpRequest,
         $sDefaultLanguageDir = 'english',
         $sCookieKey = null
-    )
-    {
+    ) {
         $sLanguage = null;
-        if ($sCookieKey!==null) {
+        if ($sCookieKey !== null) {
             $sLanguage = $HttpRequest->getCookie($sCookieKey);
         }
         $sLanguage = empty($sLanguage) ?
-            strtolower(strtok($HttpRequest->getHeader('Accept-Language'), ',')) :
+            strtolower(strtok($HttpRequest->getHeader('Accept_Language'), ',')) :
             $sLanguage;
 
         return new self($sLanguageBaseDir, $sLanguage, $sDefaultLanguageDir);
@@ -31,8 +37,8 @@ class I18N
 
     public static function createFromCli($sLanguageBaseDir, array $aArg, $sDefaultLanguageDir = 'english')
     {
-        $sLanguage = $aArg[count($aArg)-1];
-        if (array_search($sLanguage, self::$aLangMapDir)===false) {
+        $sLanguage = $aArg[count($aArg) - 1];
+        if (array_search($sLanguage, self::$aLangMapDir) === false) {
             $sLanguage = $sDefaultLanguageDir;
         }
 
@@ -49,8 +55,7 @@ class I18N
             }
         }
 
-        $this->Configure = Config\Configure::factory(
-            '@PHP',
+        $this->Configure = new Config\Adaptor_PHP(
             $sLanguageBaseDir . DIRECTORY_SEPARATOR . $sCurrentLanguageDir,
             $sLanguageBaseDir . DIRECTORY_SEPARATOR . $sDefaultLanguageDir
         );

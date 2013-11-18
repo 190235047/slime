@@ -65,6 +65,7 @@ class Writer_DebugBar implements IWriter
             $this->DebugBar[$aArr[0]]->addMessage($sTime . ' : ' . $aArr[1], $sLevel);
         } catch (DebugBar\DebugBarException $E) {
             $this->DebugBar->addCollector(new DebugBar\DataCollector\MessagesCollector($aArr[0]));
+            $this->DebugBar[$aArr[0]]->addMessage($sTime . ' : ' . $aArr[1], $sLevel);
         }
     }
 

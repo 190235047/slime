@@ -32,7 +32,8 @@ class Writer_File implements IWriter
     public function flush2File()
     {
         if (!empty($this->aData)) {
-            file_put_contents($this->sFilePath, implode(PHP_EOL, $this->aData) . PHP_EOL, FILE_APPEND);
+            $sFilePath = is_callable($this->sFilePath) ? call_user_func($this->sFilePath) : $this->sFilePath;
+            file_put_contents($sFilePath, implode(PHP_EOL, $this->aData) . PHP_EOL, FILE_APPEND);
             $this->aData = array();
         }
     }
