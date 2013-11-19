@@ -5,6 +5,12 @@ use Slime\Bundle\Framework\Context;
 use Slime\Component\RDS\Model;
 use Slime\Component\Http;
 
+/**
+ * Class Automatic
+ *
+ * @package Slime\Component\Pagination
+ * @author  smallslime@gmail.com
+ */
 class Automatic
 {
     protected $HttpRequest;

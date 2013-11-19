@@ -4,8 +4,8 @@ namespace Slime\Component\Http;
 /**
  * Helper_XSS Class
  *
- * @package        Slime\Component\Http
- * @author         smallslime hack from codeigniter[ExpressionEngine Dev Team]
+ * @package Slime\Component\Http
+ * @author  smallslime hack from codeigniter[ExpressionEngine Dev Team]
  */
 class Helper_XSS
 {
@@ -98,7 +98,7 @@ class Helper_XSS
      */
     public function xss_clean($str, $is_image = false)
     {
-        if ($str===null || $str==='') {
+        if ($str === null || $str === '') {
             return $str;
         }
 

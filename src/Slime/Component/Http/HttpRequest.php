@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Http;
 
+/**
+ * Class HttpRequest
+ *
+ * @package Slime\Component\Http
+ * @author  smallslime@gmail.com
+ */
 class HttpRequest extends HttpCommon
 {
     /** @var Helper_XSS */

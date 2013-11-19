@@ -6,7 +6,6 @@ namespace Slime\Component\RDS;
  *
  * @package Slime\Component\RDS
  * @author  smallslime@gmail.com
- *
  * @property-read string $sDSN
  * @property-read string $sUsername
  * @property-read string $sPassword
@@ -59,6 +58,17 @@ class CURD
         return $this->Instance;
     }
 
+    /**
+     * @param string $sTable
+     * @param array  $aWhere
+     * @param string $sAttr
+     * @param string $sSelect
+     * @param bool   $bOnlyOne
+     * @param int    $iFetchStyle
+     * @param mixed  $mFetchArgs
+     *
+     * @return array|mixed
+     */
     public function querySmarty(
         $sTable,
         $aWhere = array(),
@@ -87,6 +97,13 @@ class CURD
         return $bOnlyOne ? $Stmt->fetch() : $Stmt->fetchAll();
     }
 
+    /**
+     * @param string $sTable
+     * @param array  $aWhere
+     * @param string $sAttr
+     *
+     * @return int
+     */
     public function queryCount(
         $sTable,
         $aWhere = array(),
@@ -127,6 +144,12 @@ class CURD
         return $STMT->execute($aData);
     }
 
+    /**
+     * @param string $sTable
+     * @param array  $aWhere
+     *
+     * @return bool
+     */
     public function deleteSmarty($sTable, array $aWhere)
     {
         $aArgs       = array();
@@ -165,7 +188,7 @@ class CURD
      * @param array  $aKVMap
      * @param array  $aUpdateKey
      *
-     * @return null|string
+     * @return bool
      */
     public function insertUpdateSmarty($sTable, array $aKVMap, $aUpdateKey)
     {

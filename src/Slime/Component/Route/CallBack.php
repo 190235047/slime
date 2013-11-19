@@ -15,12 +15,20 @@ class CallBack
     public $aObjInitParam = null;
     public $bAsFunc = false;
 
+    /**
+     * @param string $sNSPre
+     */
     public function __construct($sNSPre)
     {
         $this->sNSPre = $sNSPre;
     }
 
-    public function setCBObject($mClassNameOrObject, $sMethod, $aObjInitParam = null)
+    /**
+     * @param mixed $mClassNameOrObject
+     * @param string $sMethod
+     * @param array $aObjInitParam
+     */
+    public function setCBObject($mClassNameOrObject, $sMethod, array $aObjInitParam = null)
     {
         if (is_string($mClassNameOrObject)) {
             $this->aObjInitParam = $aObjInitParam === null ?
@@ -32,11 +40,20 @@ class CallBack
         }
     }
 
+    /**
+     * @param string $sClassName
+     * @param string $sMethod
+     */
     public function setCBClass($sClassName, $sMethod)
     {
         $this->mCallable = array($this->sNSPre . '\\' . $sClassName, $sMethod);
     }
 
+    /**
+     * @param mixed $mFuncNameOrClosure
+     *
+     * @return $this
+     */
     public function setCBFunc($mFuncNameOrClosure)
     {
         $this->bAsFunc = true;
@@ -48,12 +65,20 @@ class CallBack
         return $this;
     }
 
-    public function setParam($aParam = array())
+    /**
+     * @param array $aParam
+     *
+     * @return $this
+     */
+    public function setParam(array $aParam = array())
     {
         $this->aParam = $aParam;
         return $this;
     }
 
+    /**
+     * @throws \RuntimeException
+     */
     public function call()
     {
         if ($this->bAsFunc === true) {

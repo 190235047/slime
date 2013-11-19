@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Log;
 
+/**
+ * Class Writer_File
+ *
+ * @package Slime\Component\Log
+ * @author  smallslime@gmail.com
+ */
 class Writer_File implements IWriter
 {
     public $sFormat = '[:iLevel] : :sTime , :sGuid , :sMessage';

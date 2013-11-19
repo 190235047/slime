@@ -6,7 +6,6 @@ namespace Slime\Component\Config;
  *
  * @package Slime\Component\Config
  * @author  smallslime@gmail.com
- * @version 1.0
  */
 class Adaptor_PHP implements IAdaptor
 {

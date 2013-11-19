@@ -3,14 +3,38 @@ namespace Slime\Component\Context;
 
 use Slime\Component\DataStructure\Stack;
 
+/**
+ * Class Context
+ *
+ * 运行时上下文
+ * 1. 调用 makeInst 静态方法, 生成 Context 对象, 压入(后入先出的数据结构: Slime\Component\DataStructure\Stack)
+ * 2. 通过 getInst 静态方法获取当前请求中的上下文对象, 即栈顶 Context
+ * 3. 通过 register 可以注册新的运行时对象
+ * 4. 注册对象A, 可以 Context::getInst()->A 取得
+ * 5. 销毁对象需显式调用 destroy 方法, 即弹出栈顶 Context 对象, 并销毁此对象中注册的所有元素
+ *
+ * @package Slime\Component\Context
+ * @author  smallslime@gmail.com
+ */
 class Context
 {
     public $aInject = array();
+
     protected $aStorage = array();
+
+    public function __get($sVarName)
+    {
+        if (!isset($this->aStorage[$sVarName])) {
+            throw new \Exception(
+                "Object register failed. {$sVarName} has not exist"
+            );
+        }
+        return $this->aStorage[$sVarName];
+    }
 
     /**
      * 获取当前请求的上下文对象
-     * @return \Slime\Component\Context\Context|null
+     * @return $this|null
      */
     public static function getInst()
     {
@@ -33,20 +57,27 @@ class Context
         $__SF_CONTEXT__->push(new self());
     }
 
+    /**
+     * 销毁栈顶元素
+     */
+    public static function destroy()
+    {
+        /** @var Stack\Stack $__SF_CONTEXT__ */
+        global $__SF_CONTEXT__;
+        $Context = $__SF_CONTEXT__->pop();
+        foreach (get_object_vars($Context) as $sK => $mV) {
+            unset($Context->$sK);
+        }
+    }
 
+    /**
+     * @param string $sVarName
+     *
+     * @return bool
+     */
     public function isRegister($sVarName)
     {
         return array_key_exists($sVarName, $this->aStorage);
-    }
-
-    public function __get($sVarName)
-    {
-        if (!isset($this->aStorage[$sVarName])) {
-            throw new \Exception(
-                "Object register failed. {$sVarName} has not exist"
-            );
-        }
-        return $this->aStorage[$sVarName];
     }
 
     /**
@@ -74,16 +105,29 @@ class Context
         }
     }
 
-    public function registerObjWithArgs($sVarName, $sClassName, array $aArgs = array(), $bOverWrite = true, $bAllowExist = true)
-    {
+    /**
+     * @param string $sVarName
+     * @param string $sClassName
+     * @param array  $aArgs
+     * @param bool   $bOverWrite
+     * @param bool   $bAllowExist
+     */
+    public function registerObjWithArgs(
+        $sVarName,
+        $sClassName,
+        array $aArgs = array(),
+        $bOverWrite = true,
+        $bAllowExist = true
+    ) {
         $this->register($sVarName, self::createObj($sClassName, $aArgs), $bOverWrite, $bAllowExist);
     }
 
-    public function registerObjWithArgsAndContent($sVarName, $sClassName, array $aArgs = array(), $bOverWrite = true, $bAllowExist = true)
-    {
-        $this->register($sVarName, new InjectContent(self::createObj($sClassName, $aArgs), $this), $bOverWrite, $bAllowExist);
-    }
-
+    /**
+     * @param string $sClassName
+     * @param array  $aArgs
+     *
+     * @return object
+     */
     public static function createObj($sClassName, array $aArgs = array())
     {
         $sClassName = ltrim($sClassName, '/');

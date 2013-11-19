@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Http;
 
+/**
+ * Class HttpCommon
+ *
+ * @package Slime\Component\Http
+ * @author  smallslime@gmail.com
+ */
 abstract class HttpCommon
 {
     protected $Header;
@@ -22,7 +28,7 @@ abstract class HttpCommon
                 }
             }
         } else {
-            if ($sValue===null) {
+            if ($sValue === null) {
                 unset($this->Header[$mKeyOrKVMap]);
             } else {
                 $this->Header[$mKeyOrKVMap] = $sValue;

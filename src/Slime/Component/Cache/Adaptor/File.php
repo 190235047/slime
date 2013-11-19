@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Cache;
 
+/**
+ * Class Adaptor_File
+ *
+ * @package Slime\Component\Cache
+ * @author  smallslime@gmail.com
+ */
 class Adaptor_File implements IAdaptor
 {
     protected $sCacheDir;

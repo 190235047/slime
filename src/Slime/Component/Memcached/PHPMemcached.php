@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Memcached;
 
+/**
+ * Class PHPMemcached
+ *
+ * @package Slime\Component\Memcached
+ * @author  smallslime@gmail.com
+ */
 class PHPMemcached
 {
     /**

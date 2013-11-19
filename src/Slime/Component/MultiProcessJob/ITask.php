@@ -3,6 +3,12 @@ namespace Slime\Component\MultiProcessJob;
 
 use Psr\Log\LoggerInterface;
 
+/**
+ * Interface ITask
+ *
+ * @package Slime\Component\MultiProcessJob
+ * @author  smallslime@gmail.com
+ */
 interface ITask
 {
     /**

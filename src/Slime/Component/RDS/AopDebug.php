@@ -27,7 +27,8 @@ class AopDebug
                     $fT2 = microtime(true);
 
                     $Log = Context::getInst()->Log;
-                    $Log->debug('SQL : {cost}; {sql}; {bind}; ',
+                    $Log->debug(
+                        'SQL : {cost}; {sql}; {bind}; ',
                         array(
                             'sql'  => $STMT->queryString,
                             'bind' => empty($aArgs[0]) ? '' : $aArgs[0],

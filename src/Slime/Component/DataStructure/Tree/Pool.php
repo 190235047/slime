@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\DataStructure\Tree;
 
+/**
+ * Class Pool
+ *
+ * @package Slime\Component\DataStructure\Tree
+ * @author  smallslime@gmail.com
+ */
 class Pool
 {
     /**

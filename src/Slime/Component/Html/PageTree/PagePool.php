@@ -3,6 +3,12 @@ namespace Slime\Component\Html\PageTree;
 
 use Slime\Component\DataStructure\Tree;
 
+/**
+ * Class PagePool
+ *
+ * @package Slime\Component\Html\PageTree
+ * @author  smallslime@gmail.com
+ */
 class PagePool extends Tree\Pool
 {
     public static function initFromArrayRecursion($aArr)

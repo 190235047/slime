@@ -4,6 +4,12 @@ namespace Slime\Component\MultiProcessJob;
 use Psr\Log\LoggerInterface;
 use Slime\Component\Log;
 
+/**
+ * Class Manager
+ *
+ * @package Slime\Component\MultiProcessJob
+ * @author  smallslime@gmail.com
+ */
 class Manager
 {
     /** @var Child[] */

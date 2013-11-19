@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Log;
 
+/**
+ * Class Writer_STDFD
+ *
+ * @package Slime\Component\Log
+ * @author  smallslime@gmail.com
+ */
 class Writer_STDFD implements IWriter
 {
     public $sFormat = '[:sGuid][:iLevel] : :sTime , :sMessage';

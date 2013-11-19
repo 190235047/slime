@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\MultiProcessJob;
 
+/**
+ * Interface IJobQueue
+ *
+ * @package Slime\Component\MultiProcessJob
+ * @author  smallslime@gmail.com
+ */
 interface IJobQueue
 {
     /**

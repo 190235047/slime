@@ -3,8 +3,8 @@ namespace Slime\Component\RDS\Model;
 
 /**
  * Class Group
- * @package Slime\Component\RDS\Model
  *
+ * @package Slime\Component\RDS\Model
  * @author  smallslime@gmail.com
  */
 class Group implements \ArrayAccess, \Iterator, \Countable
@@ -23,7 +23,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
 
     public function relation($sModelName, Item $ModelItem = null)
     {
-        $aRelConf = $this->Model->aRelConf;
+        $aRelConf = $this->Model->aRelationConfig;
         if (!isset($aRelConf[$sModelName])) {
             throw new \Exception("Relation model $sModelName is not exist");
         }

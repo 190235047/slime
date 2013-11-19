@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Log;
 
+/**
+ * Class Writer_ECHO
+ *
+ * @package Slime\Component\Log
+ * @author  smallslime@gmail.com
+ */
 class Writer_ECHO implements IWriter
 {
     public $sFormat = '[:sGuid][:iLevel] : :sTime , :sMessage';

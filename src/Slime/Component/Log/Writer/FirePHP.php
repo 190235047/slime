@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Log;
 
+/**
+ * Class Writer_FirePHP
+ *
+ * @package Slime\Component\Log
+ * @author  smallslime@gmail.com
+ */
 class Writer_FirePHP implements IWriter
 {
     private static $aMap = array(

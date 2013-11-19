@@ -16,7 +16,7 @@ class Factory
     /** @var Model[] */
     protected $aModel = array();
 
-    public function __construct($aDBConfigAll, $aModelConfig)
+    public function __construct($aDBConfigAll, $aModelConfig, $sAppModelNS = '')
     {
         foreach ($aDBConfigAll as $sK => $aDBConfig) {
             $this->aCURD[$sK] = new CURD(
@@ -27,36 +27,54 @@ class Factory
                 $aDBConfig['options']
             );
         }
-        $this->aModelConf = $aModelConfig;
+        $this->aModelConf  = $aModelConfig;
+        $this->sAppModelNS = rtrim($sAppModelNS, '\\');
+    }
+
+    public function __call($sModel, $aArg = null)
+    {
+        if (($sModel = substr($sModel, 3)) !== false) {
+            return $this->get($sModel);
+        }
+        throw new \Exception("Call $sModel error");
     }
 
     /**
-     * @param string $sModel
+     * @param string $sModelName
      *
      * @return Model
      * @throws \Exception
      */
-    public function get($sModel)
+    public function get($sModelName)
     {
-        if (!isset($this->aModel[$sModel])) {
+        if (!isset($this->aModel[$sModelName])) {
             if (
                 $this->bAutoCreate &&
-                (!isset($this->aModelConf[$sModel]) || !isset($this->aModelConf[$sModel]['db']))
+                (!isset($this->aModelConf[$sModelName]) || !isset($this->aModelConf[$sModelName]['db']))
             ) {
-                $this->aModelConf[$sModel]['db'] = 'default';
+                $this->aModelConf[$sModelName] = array(
+                    'db' => 'default'
+                );
             }
-            $sDB = $this->aModelConf[$sModel]['db'];
+
+            $aConf = $this->aModelConf[$sModelName];
+            $sDB   = $aConf['db'];
             if (!isset($this->aCURD[$sDB])) {
-                throw new \Exception("here is no database config [$sDB] exist");
+                throw new \Exception("There is no database config [$sDB] exist");
             }
-            $this->aModel[$sModel] = new Model(
-                $sModel,
+
+            $sModelClassName = isset($aConf['model_class']) ?
+                $this->sAppModelNS . '\\' . $aConf['model_class'] :
+                '\\Slime\\Component\\RDS\\Model\\Model';
+
+            $this->aModel[$sModelName] = new $sModelClassName(
+                $sModelName,
                 $this->aCURD[$sDB],
-                $this->aModelConf[$sModel],
+                $aConf,
                 $this
             );
         }
 
-        return $this->aModel[$sModel];
+        return $this->aModel[$sModelName];
     }
 }

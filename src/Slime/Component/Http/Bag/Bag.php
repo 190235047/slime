@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Http;
 
+/**
+ * Class Bag_Bag
+ *
+ * @package Slime\Component\Http
+ * @author  smallslime@gmail.com
+ */
 class Bag_Bag implements \ArrayAccess, \Iterator, \Countable
 {
     public function __construct(array $aData = null)

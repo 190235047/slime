@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Http;
 
+/**
+ * Class Bag_Header
+ *
+ * @package Slime\Component\Http
+ * @author  smallslime@gmail.com
+ */
 class Bag_Header extends Bag_Bag
 {
     public function __toString()

@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\View;
 
+/**
+ * Interface IAdaptor
+ *
+ * @package Slime\Component\View
+ * @author  smallslime@gmail.com
+ */
 interface IAdaptor
 {
     /**

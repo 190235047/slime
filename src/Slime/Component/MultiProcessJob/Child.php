@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\MultiProcessJob;
 
+/**
+ * Class Child
+ *
+ * @package Slime\Component\MultiProcessJob
+ * @author  smallslime@gmail.com
+ */
 class Child
 {
     public $iWorkStartTimestamp = 0;

@@ -3,6 +3,12 @@ namespace Slime\Component\Html\PageTree;
 
 use Slime\Component\DataStructure\Tree;
 
+/**
+ * Class PageNode
+ *
+ * @package Slime\Component\Html\PageTree
+ * @author  smallslime@gmail.com
+ */
 class PageNode extends Tree\Node
 {
     /**

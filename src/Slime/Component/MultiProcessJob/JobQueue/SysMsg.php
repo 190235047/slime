@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\MultiProcessJob;
 
+/**
+ * Class JobQueue_SysMsg
+ *
+ * @package Slime\Component\MultiProcessJob
+ * @author  smallslime@gmail.com
+ */
 class JobQueue_SysMsg implements IJobQueue
 {
     public function __construct($sFilePathForFTOK, $sProjectWithOneChar = 'A')

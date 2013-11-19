@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Lock;
 
+/**
+ * Interface IAdaptor
+ *
+ * @package Slime\Component\Lock
+ * @author  smallslime@gmail.com
+ */
 interface IAdaptor
 {
     /**

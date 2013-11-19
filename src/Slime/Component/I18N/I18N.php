@@ -3,6 +3,12 @@ namespace Slime\Component\I18N;
 
 use Slime\Component\Config;
 
+/**
+ * Class I18N
+ *
+ * @package Slime\Component\I18N
+ * @author  smallslime@gmail.com
+ */
 class I18N
 {
     public static $aLangMapDir = array(

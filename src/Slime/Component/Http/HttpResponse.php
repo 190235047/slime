@@ -4,6 +4,7 @@ namespace Slime\Component\Http;
 /**
  * Class HttpResponse
  * @package Slime\Component\Http
+ * @author  smallslime@gmail.com
  */
 class HttpResponse extends HttpCommon
 {

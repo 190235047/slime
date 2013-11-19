@@ -132,6 +132,13 @@ class Router
         return $aCallBack;
     }
 
+    /**
+     * @param array $aArr
+     * @param array $aSearch
+     * @param array $aReplace
+     *
+     * @return mixed
+     */
     public static function replaceRecursive($aArr, $aSearch, $aReplace)
     {
         foreach ($aArr as $mK => $mRow) {

@@ -6,7 +6,6 @@ namespace Slime\Component\RDS\Model;
  *
  * @package Slime\Component\RDS
  * @author  smallslime@gmail.com
- *
  * @property-read array $aData
  * @property-read array $aOldData
  */
@@ -43,6 +42,12 @@ class Item implements \ArrayAccess
         $this->_set($sKey, $mValue);
     }
 
+    /**
+     * @param string|array $mKeyOrKVMap
+     * @param null         $mValue
+     *
+     * @return $this
+     */
     public function set($mKeyOrKVMap, $mValue = null)
     {
         if (!is_array($mKeyOrKVMap)) {
@@ -68,29 +73,43 @@ class Item implements \ArrayAccess
      * @param string $sModelName
      * @param array  $mValue
      *
-     * @throws \Exception
-     * @return $this|null
+     * @return $this
      */
     public function __call($sModelName, $mValue = array())
     {
-        if (!isset($this->Model->aRelConf[$sModelName])) {
+        return $this->relation($sModelName, (isset($mValue[0]) ? $mValue[0] : null));
+    }
+
+    /**
+     * @param string $sModelName
+     * @param mixed  $mParam
+     *
+     * @return $this
+     * @throws \Exception
+     */
+    public function relation($sModelName, $mParam = null)
+    {
+        if (!isset($this->Model->aRelationConfig[$sModelName])) {
             throw new \Exception("Can not find relation for [$sModelName]");
         }
 
         if (!isset($this->aRelation[$sModelName])) {
-            $sMethod = $this->Model->aRelConf[$sModelName];
-            $sRelation = strtolower($this->Model->aRelConf[$sModelName]);
+            $sMethod   = $this->Model->aRelationConfig[$sModelName];
+            $sRelation = strtolower($this->Model->aRelationConfig[$sModelName]);
             if ($sRelation === 'hasone' || $sRelation == 'belongsto') {
-                $this->aRelation[$sModelName] = $this->Group===null ?
+                $this->aRelation[$sModelName] = $this->Group === null ?
                     $this->$sMethod($sModelName) :
                     $this->Group->relation($sModelName, $this);
             } else {
-                $this->aRelation[$sModelName] = $this->$sMethod($sModelName, (isset($mValue[0]) ? $mValue[0] : null));
+                $this->aRelation[$sModelName] = $this->$sMethod($sModelName, $mParam);
             }
         }
         return $this->aRelation[$sModelName];
     }
 
+    /**
+     * @return bool
+     */
     public function add()
     {
         $M   = $this->Model;
@@ -104,6 +123,9 @@ class Item implements \ArrayAccess
         return $bRS;
     }
 
+    /**
+     * @return bool
+     */
     public function delete()
     {
         $M = $this->Model;
@@ -111,8 +133,7 @@ class Item implements \ArrayAccess
     }
 
     /**
-     * 
-     * @return null|bool [int:非pdo错误; true:更新成功; false:更新失败]
+     * @return int|bool [int:非pdo错误; true:更新成功; false:更新失败]
      */
     public function update()
     {
@@ -128,24 +149,6 @@ class Item implements \ArrayAccess
         );
         if ($bRS) {
             $this->aOldData = array();
-        }
-        return $bRS;
-    }
-
-    public function deleteSafe(&$iErr, &$sErr)
-    {
-        $bRS = false;
-        $M   = $this->Model;
-        if (!empty($M->aRelConf['relation'])) {
-            foreach ($M->aRelConf['relation'] as $sModelName => $sMethod) {
-                $sMethod = strtolower($sMethod);
-                if ($sMethod === 'hasone' || $sMethod === 'hasmany' || $sMethod === 'hasmanythrough') {
-                    //@todo
-                }
-            }
-        }
-        if ($bRS) {
-            $bRS = $this->delete();
         }
         return $bRS;
     }
@@ -192,8 +195,8 @@ class Item implements \ArrayAccess
     }
 
     /**
-     * @param string      $sModelTarget
-     * @param array|null  $aParam
+     * @param string     $sModelTarget
+     * @param array|null $aParam
      *
      * @return Group
      */
@@ -205,7 +208,7 @@ class Item implements \ArrayAccess
         $sRelatedTableName = 'rel__' . (strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
                 $ModelTarget->sTable . '__' . $ModelOrg->sTable :
                 $ModelOrg->sTable . '__' . $ModelTarget->sTable);
-        $CURD        = $ModelOrg->CURD;
+        $CURD              = $ModelOrg->CURD;
         //} else {
         //    $ModelRelated      = $this->Model->Factory->get($sModelRelated);
         //    $CURD              = $ModelRelated->CURD;
@@ -229,6 +232,9 @@ class Item implements \ArrayAccess
         return empty($aIDS) ? null : $ModelTarget->findMulti(array($ModelTarget->sPKName . ' IN' => $aIDS));
     }
 
+    /**
+     * @return array
+     */
     public function toArray()
     {
         return $this->aData;

@@ -4,6 +4,12 @@ namespace Slime\Component\Log;
 use DebugBar;
 use Slime\Bundle\Framework\Context;
 
+/**
+ * Class Writer_DebugBar
+ *
+ * @package Slime\Component\Log
+ * @author  smallslime@gmail.com
+ */
 class Writer_DebugBar implements IWriter
 {
     public $sFormat = ":sMessage";

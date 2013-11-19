@@ -3,6 +3,12 @@ namespace Slime\Component\Cache;
 
 use Slime\Component\Memcached;
 
+/**
+ * Class Adaptor_Memcached
+ *
+ * @package Slime\Component\Cache
+ * @author  smallslime@gmail.com
+ */
 class Adaptor_Memcached implements IAdaptor
 {
     /** @var \Memcached */

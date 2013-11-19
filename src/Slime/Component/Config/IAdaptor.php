@@ -1,6 +1,12 @@
 <?php
 namespace Slime\Component\Config;
 
+/**
+ * Interface IAdaptor
+ *
+ * @package Slime\Component\Config
+ * @author  smallslime@gmail.com
+ */
 interface IAdaptor
 {
     /**

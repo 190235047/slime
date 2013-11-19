@@ -3,6 +3,12 @@ namespace Slime\Component\Log;
 
 use Psr\Log\LoggerInterface;
 
+/**
+ * Class Logger
+ *
+ * @package Slime\Component\Log
+ * @author  smallslime@gmail.com
+ */
 class Logger implements LoggerInterface
 {
     const DESC_EMERGENCY = 'emergency';

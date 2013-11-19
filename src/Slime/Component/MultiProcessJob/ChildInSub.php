@@ -13,6 +13,7 @@ use Slime\Component\Log;
  * Class ChildSub
  *
  * @package Slime\Component\MultiProcessJob
+ * @author  smallslime@gmail.com
  */
 class ChildInSub
 {

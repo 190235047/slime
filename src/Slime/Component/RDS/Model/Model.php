@@ -11,38 +11,67 @@ use Slime\Component\RDS\CURD;
  */
 class Model
 {
+    protected $sItemClassName = 'Slime\\Component\\RDS\\Model\\Item';
+
     public $CURD;
     public $sTable;
     public $sPKName;
     public $sFKName;
-    public $aRelConf;
+    public $aRelationConfig;
     public $Factory;
 
+    /**
+     * @param string  $sModelName
+     * @param CURD    $CURD
+     * @param array   $aConfig
+     * @param Factory $Factory
+     */
     public function __construct($sModelName, CURD $CURD, $aConfig, Factory $Factory)
     {
-        $this->CURD     = $CURD;
-        $this->sTable   = isset($aConfig['table']) ? $aConfig['table'] : strtolower($sModelName);
-        $this->sPKName  = isset($aConfig['pk']) ? $aConfig['pk'] : 'id';
-        $this->sFKName  = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
-        $this->aRelConf = isset($aConfig['relation']) ? $aConfig['relation'] : array();
-        $this->Factory  = $Factory;
+        $this->CURD            = $CURD;
+        $this->sTable          = isset($aConfig['table']) ? $aConfig['table'] : strtolower($sModelName);
+        $this->sPKName         = isset($aConfig['pk']) ? $aConfig['pk'] : 'id';
+        $this->sFKName         = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
+        $this->aRelationConfig = isset($aConfig['relation']) ? $aConfig['relation'] : array();
+        $this->Factory         = $Factory;
     }
 
+    /**
+     * @param array $aKVMap
+     * @param array $aUpdateKey
+     *
+     * @return bool
+     */
     public function addUpdate($aKVMap, $aUpdateKey)
     {
         return $this->CURD->insertUpdateSmarty($this->sTable, $aKVMap, $aUpdateKey);
     }
 
+    /**
+     * @param array $aData
+     *
+     * @return Item
+     */
     public function createItem(array $aData = array())
     {
-        return new Item($aData, $this);
+        return new $this->sItemClassName($aData, $this);
     }
 
+    /**
+     * @param array $aKVMap
+     *
+     * @return bool
+     */
     public function add($aKVMap)
     {
         return $this->createItem($aKVMap)->add();
     }
 
+    /**
+     * @param mixed $mPKOrWhere
+     *
+     * @return bool
+     */
     public function delete($mPKOrWhere)
     {
         $Model = $this->find($mPKOrWhere);
@@ -52,6 +81,12 @@ class Model
         return $Model->delete();
     }
 
+    /**
+     * @param mixed $mPKOrWhere
+     * @param array $aKVMap
+     *
+     * @return bool|int
+     */
     public function update($mPKOrWhere, $aKVMap)
     {
         $Model = $this->find($mPKOrWhere);
@@ -78,7 +113,7 @@ class Model
             '',
             true
         );
-        return empty($aItem) ? null : new Item($aItem, $this);
+        return empty($aItem) ? null : new $this->sItemClassName($aItem, $this);
     }
 
     /**
@@ -103,12 +138,12 @@ class Model
         );
 
         $Group = new Group($this);
-        
+
         if (empty($aaData)) {
             return $Group;
         }
         foreach ($aaData as $aRow) {
-            $Group[$aRow[$this->sPKName]] = new Item($aRow, $this, $Group);
+            $Group[$aRow[$this->sPKName]] = new $this->sItemClassName($aRow, $this, $Group);
         }
         return $Group;
     }

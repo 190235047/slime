@@ -11,6 +11,14 @@ use Slime\Component\Http;
  */
 class Mode
 {
+    /**
+     * @param Http\HttpRequest  $Request
+     * @param Http\HttpResponse $Response
+     * @param bool              $bContinue
+     * @param string            $sAppNs
+     *
+     * @return CallBack
+     */
     public static function slimeHttp(Http\HttpRequest $Request, Http\HttpResponse $Response, &$bContinue, $sAppNs)
     {
         $aUrl      = parse_url($Request->getRequestURI());
@@ -46,6 +54,13 @@ class Mode
         return $CallBack;
     }
 
+    /**
+     * @param array  $aArg
+     * @param bool   $bContinue
+     * @param string $sAppNs
+     *
+     * @return CallBack
+     */
     public static function slimeCli($aArg, &$bContinue, $sAppNs)
     {
         if (strpos($aArg[1], '.') === false) {

@@ -3,6 +3,12 @@ namespace Slime\Component\Log;
 
 use Slime\Bundle\Framework\Context;
 
+/**
+ * Class Writer_WebPage
+ *
+ * @package Slime\Component\Log
+ * @author  smallslime@gmail.com
+ */
 class Writer_WebPage implements IWriter
 {
     public $sDebugLayer;

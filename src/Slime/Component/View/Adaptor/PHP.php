@@ -14,6 +14,9 @@ class Adaptor_PHP implements IAdaptor
 
     private $aData = array();
 
+    /**
+     * @param string|null $sBaseDir
+     */
     public function __construct($sBaseDir = null)
     {
         if ($sBaseDir!==null) {

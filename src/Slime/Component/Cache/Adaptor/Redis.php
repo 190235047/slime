@@ -3,6 +3,12 @@ namespace Slime\Component\Cache;
 
 use Slime\Component\Redis;
 
+/**
+ * Class Adaptor_Redis
+ *
+ * @package Slime\Component\Cache
+ * @author  smallslime@gmail.com
+ */
 class Adaptor_Redis implements IAdaptor
 {
     /** @var array */

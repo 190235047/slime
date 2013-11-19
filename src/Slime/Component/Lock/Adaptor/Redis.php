@@ -4,6 +4,12 @@ namespace Slime\Component\Lock;
 use Psr\Log\LoggerInterface;
 use Slime\Component\Redis;
 
+/**
+ * Class Adaptor_Redis
+ *
+ * @package Slime\Component\Lock
+ * @author  smallslime@gmail.com
+ */
 class Adaptor_Redis implements IAdaptor
 {
     /** @var array */
@@ -13,21 +19,23 @@ class Adaptor_Redis implements IAdaptor
     private $Redis;
 
     /**
-     * @param Redis\Redis     $Redis
+     * @param Redis\Redis $Redis
      */
     public function __construct(Redis\Redis $Redis)
     {
-        $this->Redis   = $Redis;
+        $this->Redis = $Redis;
     }
+
 
     /**
      * @param string $sKey
-     * @param int    $iExpire   0:永不过期
-     * @param int    $iTimeout  0:永不超时(一直阻塞); -1:异步(发现阻塞不等待立刻返回false)
+     * @param int    $iExpire      0:永不过期
+     * @param int    $iTimeout     0:永不超时(一直阻塞); -1:异步(发现阻塞不等待立刻返回false)
+     * @param bool   $bTimeoutAsMS false: 秒; true: 毫秒
      *
      * @return bool
      */
-    public function acquire($sKey, $iExpire, $iTimeout = -1)
+    public function acquire($sKey, $iExpire, $iTimeout = -1, $bTimeoutAsMS = false)
     {
         if ($iTimeout < 0) {
             $bRS = $this->Redis->setnx($sKey, 1);
@@ -41,8 +49,8 @@ class Adaptor_Redis implements IAdaptor
                 usleep(10000);
             } while (true);
         }
-        if ($iExpire!==0 && $bRS) {
-            $this->Redis->expire($sKey, $iExpire);
+        if ($iExpire !== 0 && $bRS) {
+            $bTimeoutAsMS ? $this->Redis->pExpire($sKey, $iExpire) : $this->Redis->expire($sKey, $iExpire);
         }
         return $bRS;
     }
