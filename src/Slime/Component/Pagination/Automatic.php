@@ -62,7 +62,7 @@ class Automatic
             $sPlaceHolder                 = chr(0);
             $aParseBlock['query']['page'] = $sPlaceHolder;
 
-            $sPage            = '<div class="pagination"></div>';
+            $sPage            = '<div class="pagination">';
             $aResult['first'] = 1;
             foreach (array(
                          'first' => '首页',
