@@ -9,4 +9,49 @@ namespace Slime\Component\Http;
  */
 class Bag_File extends Bag_Bag
 {
+    /**
+     * @param array $aValidator []
+     */
+    public function setValidator(array $aValidator)
+    {
+        ;
+    }
+
+    public function validate()
+    {
+        ;
+    }
+
+    public function trim()
+    {
+        ;
+    }
+
+    /**
+     * @param string $sDir
+     * @param mixed  $mCBGentFileName
+     *
+     * @throws \RuntimeException
+     */
+    public function moveToDir($sDir, $mCBGentFileName = null)
+    {
+        if (!file_exists($sDir)) {
+            if (!mkdir($sDir)) {
+                throw new \RuntimeException("Create upload dir $sDir failed");
+            }
+        }
+        if (!is_writable($sDir)) {
+            throw new \RuntimeException("Upload dir $sDir is not writable");
+        }
+        foreach ($this->aData as $sName => $aItem) {
+            $sFileName = $mCBGentFileName === null ? md5(uniqid() . rand(1, 1000)) : call_user_func(
+                $mCBGentFileName,
+                $aItem,
+                $sName
+            );
+            if ($sFileName !== null && move_uploaded_file($aItem['tmp_name'], "$sDir/$sFileName") === false) {
+                trigger_error("Move tmp file {$aItem['tmp_name']} to $sDir/$sFileName failed", E_USER_WARNING);
+            }
+        }
+    }
 }

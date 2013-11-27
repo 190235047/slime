@@ -14,7 +14,6 @@ class Adaptor_Redis implements IAdaptor
     /** @var array */
     public $aConfig;
 
-    # this is a hack for code auto complete
     /** @var \Redis */
     private $Redis;
 

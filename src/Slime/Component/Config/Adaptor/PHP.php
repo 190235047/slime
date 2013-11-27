@@ -21,6 +21,10 @@ class Adaptor_PHP implements IAdaptor
     /** @var array */
     private $aCachedData;
 
+    /**
+     * @param string $sBaseDir
+     * @param string $sDefaultBaseDir
+     */
     public function __construct($sBaseDir, $sDefaultBaseDir)
     {
         $this->sBaseDir        = $sBaseDir;
@@ -35,7 +39,6 @@ class Adaptor_PHP implements IAdaptor
      * @param bool   $bForce
      *
      * @throws \Exception
-     *
      * @return mixed
      */
     public function get($sKey, $mDefaultValue = null, $bForce = false)
@@ -61,7 +64,7 @@ class Adaptor_PHP implements IAdaptor
 
     private function _get($sKey, $sBaseDir)
     {
-        if (strpos($sKey, '.')===false) {
+        if (strpos($sKey, '.') === false) {
             if (!isset($this->aCachedData[$sBaseDir][$sKey])) {
                 $sConfigFile                         = $sBaseDir . '/' . str_replace(':', '/', $sKey) . '.php';
                 $this->aCachedData[$sBaseDir][$sKey] = file_exists($sConfigFile) ? require $sConfigFile : null;

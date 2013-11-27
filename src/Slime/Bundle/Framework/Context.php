@@ -8,7 +8,6 @@ use Slime\Component\DataStructure\Stack;
  *
  * @package Slime\Bundle\Framework
  * @author  smallslime@gmail.com
- *
  * @property-read array                                      $aAppDir      应用目录数组
  * @property-read string                                     $sENV         当前环境(例如 publish:生产环境; development:开发环境)
  * @property-read string                                     $sRunMode     PHP运行方式, 当前支持 (cli||http)
@@ -26,4 +25,39 @@ use Slime\Component\DataStructure\Stack;
  */
 class Context extends \Slime\Component\Context\Context
 {
+    /**
+     * @param $sVarName
+     * @param $sClassName
+     */
+    public function registerAutomatic($sVarName, $sClassName)
+    {
+        $this->register($sVarName, self::createObjAutomatic($sClassName));
+    }
+
+    /**
+     * @param string $sClassName
+     *
+     * @return object
+     * @throws \Exception
+     */
+    public static function createObjAutomatic($sClassName)
+    {
+        /** @var Context $SELF */
+        $SELF = self::getInst();
+        if (!$SELF->isRegister('Config')) {
+            throw new \Exception('Config must be register before use createObjAutomatic');
+        }
+
+        $aData = $SELF->Config->get("module.$sClassName");
+        if (empty($aData['class'])) {
+            throw new \Exception("Module[$sClassName] config error");
+        }
+
+        if (empty($aData['params'])) {
+            return new $aData['class']();
+        } else {
+            $Ref = new \ReflectionClass($aData['class']);
+            return $Ref->newInstanceArgs($aData['params']);
+        }
+    }
 }

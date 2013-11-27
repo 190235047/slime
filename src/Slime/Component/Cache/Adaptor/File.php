@@ -12,6 +12,13 @@ class Adaptor_File implements IAdaptor
     protected $sCacheDir;
     protected $mCBKey2File;
 
+    /**
+     * @param string $sCacheDir
+     * @param mixed  $mCBKey2File (callback 回调, 参数为缓存key, 期待返回缓存文件名)
+     * @param int    $iCreateMode
+     *
+     * @throws \Exception
+     */
     public function __construct($sCacheDir, $mCBKey2File = null, $iCreateMode = 0777)
     {
         $this->sCacheDir = rtrim($sCacheDir, '/') . '/';
@@ -58,8 +65,8 @@ class Adaptor_File implements IAdaptor
 
         $sFile = $this->getFileFromKey($sKey);
 
-        $mData = require $sFile;
-        $aData = is_array($mData) ? $mData : array();
+        $mData        = require $sFile;
+        $aData        = is_array($mData) ? $mData : array();
         $aData[$sKey] = array(
             'expire' => time() + $iExpire,
             'data'   => $mValue
@@ -92,7 +99,7 @@ class Adaptor_File implements IAdaptor
     {
         $rDir = opendir($this->sCacheDir);
         while (($sFile = readdir($rDir)) !== false) {
-            if (ltrim($sFile, '.')!=='') {
+            if (ltrim($sFile, '.') !== '') {
                 @unlink($this->sCacheDir . $sFile);
             }
         }
@@ -104,12 +111,12 @@ class Adaptor_File implements IAdaptor
     private function getFileFromKey($sKey)
     {
         $sCacheFile = $this->sCacheDir . (
-            $this->mCBKey2File===null ?  'cache.php' : call_user_func($this->mCBKey2File, $sKey)
-        );
+            $this->mCBKey2File === null ? 'cache.php' : call_user_func($this->mCBKey2File, $sKey)
+            );
 
         if (!file_exists($sCacheFile)) {
             if (!@touch($sCacheFile)) {
-              throw new \Exception("Create file[$sCacheFile] failed");
+                throw new \Exception("Create file[$sCacheFile] failed");
             }
         }
 

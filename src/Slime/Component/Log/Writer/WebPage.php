@@ -13,6 +13,7 @@ class Writer_WebPage implements IWriter
 {
     public $sDebugLayer;
 
+    protected $bCouldLog = null;
     protected $aData = array();
 
     public function __construct($sDebugLayer = null)
@@ -24,10 +25,18 @@ class Writer_WebPage implements IWriter
 
     public function acceptData($aRow)
     {
-        if (Context::getInst()->HttpRequest->isAjax()) {
+        if ($this->bCouldLog === false) {
             return;
         }
-        $this->aData[] = $aRow;
+        if (!Context::getInst()->isRegister('HttpRequest')) {
+            $this->aData[] = $aRow;
+        }
+        if (Context::getInst()->HttpRequest->isAjax()) {
+            $this->bCouldLog = false;
+            $this->aData = null;
+        } else {
+            $this->bCouldLog = true;
+        }
     }
 
     public function __destruct()

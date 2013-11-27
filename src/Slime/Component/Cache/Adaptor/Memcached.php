@@ -14,6 +14,9 @@ class Adaptor_Memcached implements IAdaptor
     /** @var \Memcached */
     public $Obj;
 
+    /**
+     * @param Memcached\PHPMemcached $Memcached
+     */
     public function __construct(Memcached\PHPMemcached $Memcached)
     {
         $this->Obj = $Memcached;

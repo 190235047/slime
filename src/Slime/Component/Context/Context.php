@@ -115,7 +115,7 @@ class Context
     public function registerObjWithArgs(
         $sVarName,
         $sClassName,
-        array $aArgs = array(),
+        array $aArgs = null,
         $bOverWrite = true,
         $bAllowExist = true
     ) {
@@ -128,10 +128,9 @@ class Context
      *
      * @return object
      */
-    public static function createObj($sClassName, array $aArgs = array())
+    public static function createObj($sClassName, array $aArgs = null)
     {
-        $sClassName = ltrim($sClassName, '/');
-        if (empty($aArgs)) {
+        if ($aArgs===null) {
             return new $sClassName();
         } else {
             $Ref = new \ReflectionClass($sClassName);

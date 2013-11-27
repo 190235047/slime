@@ -93,7 +93,7 @@ class Item implements \ArrayAccess
             throw new \Exception("Can not find relation for [$sModelName]");
         }
 
-        if (!isset($this->aRelation[$sModelName])) {
+        if (!array_key_exists($sModelName, $this->aRelation)) {
             $sMethod   = $this->Model->aRelationConfig[$sModelName];
             $sRelation = strtolower($this->Model->aRelationConfig[$sModelName]);
             if ($sRelation === 'hasone' || $sRelation == 'belongsto') {
@@ -104,7 +104,15 @@ class Item implements \ArrayAccess
                 $this->aRelation[$sModelName] = $this->$sMethod($sModelName, $mParam);
             }
         }
-        return $this->aRelation[$sModelName];
+
+        $mResult = $this->aRelation[$sModelName];
+        if ($mResult===null && ($Context = $this->Model->Factory->Context)!==null) {
+            if ($Context->isRegister('bModelCompatible') && $Context->bModelCompatible) {
+                $mResult = new CompatibleItem();
+            }
+        }
+
+        return $mResult;
     }
 
     /**
