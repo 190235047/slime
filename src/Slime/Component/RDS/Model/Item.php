@@ -73,7 +73,7 @@ class Item implements \ArrayAccess
      * @param string $sModelName
      * @param array  $mValue
      *
-     * @return $this
+     * @return $this|$this[]
      */
     public function __call($sModelName, $mValue = array())
     {
@@ -84,7 +84,7 @@ class Item implements \ArrayAccess
      * @param string $sModelName
      * @param mixed  $mParam
      *
-     * @return $this
+     * @return $this|$this[]
      * @throws \Exception
      */
     public function relation($sModelName, $mParam = null)

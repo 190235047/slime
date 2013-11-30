@@ -31,7 +31,7 @@ class Router
     {
         $aCallBack = array();
         foreach ($aRule as $sK => $mV) {
-            $bContinue = false;
+            $Continue = (object)(array('value'=>false));
             if (is_string($sK)) {
                 if (!preg_match($sK, $HttpRequest->getRequestURI(), $aMatched)) {
                     continue;
@@ -45,7 +45,7 @@ class Router
                                 $HttpRequest,
                                 $HttpResponse,
                                 $aMatched,
-                                &$bContinue,
+                                $Continue,
                                 $this->sAppNS
                             )
                         );
@@ -58,7 +58,7 @@ class Router
                         // value: array('object' => $1, 'method' => $3, 'param' => array('id' => $2, 'status' => $4))
                         // value: array('func' => $1_$3, 'param' => array('id' => $2, 'status' => $4), '_continue'=>false)
                         if (isset($mV['_continue'])) {
-                            $bContinue = $mV['_continue'] !== false;
+                            $Continue['vaule'] = ($mV['_continue'] !== false);
                             unset($mV['_continue']);
                         }
                         $aSearch = $aReplace = array();
@@ -88,7 +88,7 @@ class Router
                     array(
                         $HttpRequest,
                         $HttpResponse,
-                        &$bContinue,
+                        $Continue,
                         $this->sAppNS
                     )
                 );
@@ -96,7 +96,7 @@ class Router
                     $aCallBack[] = $mResult;
                 }
             }
-            if ($bContinue === false) {
+            if ($Continue->value === false) {
                 break;
             }
         }

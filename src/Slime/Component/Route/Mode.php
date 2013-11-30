@@ -14,12 +14,12 @@ class Mode
     /**
      * @param Http\HttpRequest  $Request
      * @param Http\HttpResponse $Response
-     * @param bool              $bContinue
+     * @param Object            $Continue
      * @param string            $sAppNs
      *
      * @return CallBack
      */
-    public static function slimeHttp(Http\HttpRequest $Request, Http\HttpResponse $Response, &$bContinue, $sAppNs)
+    public static function slimeHttp(Http\HttpRequest $Request, Http\HttpResponse $Response, $Continue, $sAppNs)
     {
         $aUrl      = parse_url($Request->getRequestURI());
         $aUrlBlock = explode('/', strtolower(substr($aUrl['path'], 1)));
@@ -56,12 +56,12 @@ class Mode
 
     /**
      * @param array  $aArg
-     * @param bool   $bContinue
+     * @param object $Continue
      * @param string $sAppNs
      *
      * @return CallBack
      */
-    public static function slimeCli($aArg, &$bContinue, $sAppNs)
+    public static function slimeCli($aArg, $Continue, $sAppNs)
     {
         if (strpos($aArg[1], '.') === false) {
             $aBlock = array($aArg[1], 'Default');

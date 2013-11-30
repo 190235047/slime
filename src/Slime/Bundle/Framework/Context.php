@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Bundle\Framework;
 
-use Slime\Component\DataStructure\Stack;
+use Slime\Component\Config\IAdaptor;
 
 /**
  * Class Context
@@ -25,30 +25,39 @@ use Slime\Component\DataStructure\Stack;
  */
 class Context extends \Slime\Component\Context\Context
 {
-    /**
-     * @param $sVarName
-     * @param $sClassName
-     */
-    public function registerAutomatic($sVarName, $sClassName)
+    public function registerAutomatic(IAdaptor $Config = null)
     {
+        if ($Config === null) {
+            /** @var Context $SELF */
+            $SELF = self::getInst();
+            if (!$SELF->isRegister('Config')) {
+                throw new \Exception('Config must be register before use createObjAutomatic');
+            }
+        }
+        $Module = $Config->get('module');
+
         $this->register($sVarName, self::createObjAutomatic($sClassName));
     }
 
     /**
      * @param string $sClassName
+     * @param IAdaptor $Config
      *
      * @return object
      * @throws \Exception
      */
-    public static function createObjAutomatic($sClassName)
+    public static function createObjAutomatic($sClassName, IAdaptor $Config = null)
     {
-        /** @var Context $SELF */
-        $SELF = self::getInst();
-        if (!$SELF->isRegister('Config')) {
-            throw new \Exception('Config must be register before use createObjAutomatic');
+        if ($Config===null) {
+            /** @var Context $SELF */
+            $SELF = self::getInst();
+            if (!$SELF->isRegister('Config')) {
+                throw new \Exception('Config must be register before use createObjAutomatic');
+            }
+            $Config = $SELF->Config;
         }
 
-        $aData = $SELF->Config->get("module.$sClassName");
+        $aData = $Config->get("module.$sClassName");
         if (empty($aData['class'])) {
             throw new \Exception("Module[$sClassName] config error");
         }
