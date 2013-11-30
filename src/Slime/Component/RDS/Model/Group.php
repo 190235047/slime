@@ -44,8 +44,8 @@ class Group implements \ArrayAccess, \Iterator, \Countable
         }
 
         $sPK = $ModelItem[$this->Model->sPKName];
-        if (isset($this->aRelObj[$sModelName][$sPK])) {
-            return $this->aRelObj[$sModelName][$sPK];
+        if (isset($this->aRelObj[$sModelName])) {
+            return isset($this->aRelObj[$sModelName][$sPK]) ? $this->aRelObj[$sModelName][$sPK] : null;
         }
 
         $aPK                          = array_keys($this->aModelItem);
@@ -58,9 +58,9 @@ class Group implements \ArrayAccess, \Iterator, \Countable
 
         $this->aRelObj[$sModelName] = array();
         $aQ                         = & $this->aRelObj[$sModelName];
-        foreach ($Group as $iID => $ItemNew) {
+        foreach ($Group as $ItemNew) {
             $sThisPK      = $this->aModelItem[$ItemNew[$this->Model->sFKName]][$this->Model->sPKName];
-            $aQ[$sThisPK] = $iID;
+            $aQ[$sThisPK] = $ItemNew;
         }
 
         return $aQ[$sPK];
@@ -79,8 +79,8 @@ class Group implements \ArrayAccess, \Iterator, \Countable
         } else {
             $Model = $this->Model->Factory->get($sModelName);
             $sFK   = $ModelItem[$Model->sFKName];
-            if (isset($this->aRelation[$sModelName][$sFK])) {
-                return $this->aRelation[$sModelName][$sFK];
+            if (isset($this->aRelation[$sModelName])) {
+                return isset($this->aRelation[$sModelName][$sFK]) ? $this->aRelation[$sModelName][$sFK] : null;
             }
         }
 
