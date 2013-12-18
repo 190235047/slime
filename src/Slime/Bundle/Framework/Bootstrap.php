@@ -24,7 +24,7 @@ use Slime\Component\Http;
 abstract class Bootstrap
 {
     /**
-     * @var Context
+     * @var \Slime\Bundle\Framework\Context
      */
     protected $Context;
 
@@ -42,6 +42,7 @@ abstract class Bootstrap
         set_error_handler(array($this, 'handleError'));
 
         Context::makeInst();
+        /** @var $Context Context */
         $this->Context = $Context = Context::getInst();
 
         # run mode
@@ -93,53 +94,40 @@ abstract class Bootstrap
         $Context->register('DateTime', new \DateTime());
 
         # register config
-        $sDirConfig = $this->Context->aAppDir['config'];
+        $sDirConfig = $Context->aAppDir['config'];
         $Config     = Config\Configure::factory(
             '@PHP',
-            $sDirConfig . '/' . $this->Context->sENV,
+            $sDirConfig . '/' . $Context->sENV,
             $sDirConfig . '/publish'
         );
-        $this->Context->register('Config', $Config);
+        $Context->register('Config', $Config);
 
         # register http / argv
         if ($sRunMode === 'http') {
-            $this->Context->register(
+            $Context->register(
                 'HttpRequest',
                 $mIn instanceof Http\HttpRequest ? $mIn : Http\HttpRequest::createFromGlobals()
             );
-            $this->Context->register('HttpResponse', Http\HttpResponse::create()->setNoCache());
+            $Context->register('HttpResponse', Http\HttpResponse::create()->setNoCache());
 
             # register i18n
-            $aI18NConfig = $this->Context->aAppDir;
+            $aI18NConfig = $Context->aAppDir;
             if (isset($aI18NConfig['i18n'])) {
                 # register I18N
-                $this->Context->register(
+                $Context->register(
                     'I18N',
-                    I18N\I18N::createFromHttp($aI18NConfig['i18n'], $this->Context->HttpRequest)
+                    I18N\I18N::createFromHttp($aI18NConfig['i18n'], $Context->HttpRequest)
                 );
             }
         } else {
-            $this->Context->register(
+            $Context->register(
                 'aArgv',
                 is_array($mIn) ? $mIn : $GLOBALS['argv']
             );
         }
 
         # register route
-        $this->Context->register('Route', new Route\Router($this->Context->sNS));
-
-        # register custom
-        $Ref     = new \ReflectionClass($this);
-        $aMethod = $Ref->getMethods(\ReflectionMethod::IS_PROTECTED ^ \ReflectionMethod::IS_ABSTRACT);
-        if (!empty($aMethod)) {
-            $sTip = 'regOn' . ucfirst($sRunMode);
-            foreach ($aMethod as $Method) {
-                $aArr = explode('_', $Method->name, 2);
-                if ($aArr[0] === 'reg' || $aArr[0] == $sTip) {
-                    $this->{$Method->name}();
-                }
-            }
-        }
+        $Context->register('Route', new Route\Router($Context->sNS));
     }
 
     public function run()
@@ -205,7 +193,7 @@ abstract class Bootstrap
         $Context = Context::getInst();
         # 在某些对象, 在PHP全局回收时调用析构函数. 此时 Context 已经销毁, 如果析构函数中发生错误, 会拿不到 Context. 尽量避免!
         if ($Context === null || !$Context->isRegister('Log')) {
-            trigger_error($sStr, $iErrNum);
+            trigger_error($sStr, E_USER_WARNING);
         } else {
             switch ($iErrNum) {
                 case E_NOTICE:

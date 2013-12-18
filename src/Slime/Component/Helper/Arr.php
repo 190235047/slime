@@ -47,19 +47,14 @@ class Arr
     {
         $aResult = array();
         if (!empty($aLeft)) {
+            $aLeft = array_flip($aLeft);
             foreach ($aArr as $aItem) {
-                $aRow = array();
-                foreach ($aLeft as $sLeftKey) {
-                    $aRow[$sLeftKey] = $aItem[$sLeftKey];
-                }
-                $aResult[$aItem[$sKey]] = $aRow;
+                $aResult[$aItem[$sKey]] = array_intersect_key($aItem, $aLeft);
             }
         } elseif (!empty($aExcept)) {
+            $aExcept = array_flip($aExcept);
             foreach ($aArr as $aItem) {
-                foreach ($aExcept as $sExceptKey) {
-                    unset($aItem[$sExceptKey]);
-                }
-                $aResult[$aItem[$sKey]] = $aItem;
+                $aResult[$aItem[$sKey]] = array_diff_key($aItem, $aExcept);;
             }
         } else {
             foreach ($aArr as $aItem) {
@@ -95,7 +90,7 @@ class Arr
     {
         $aResult = array();
         foreach ($aArr as $aItem) {
-            $aResult = $aItem[$sKey];
+            $aResult[] = $aItem[$sKey];
         }
         return $aResult;
     }

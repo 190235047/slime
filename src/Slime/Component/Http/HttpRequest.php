@@ -278,10 +278,18 @@ class HttpRequest extends HttpCommon
 
     //------------------- call logic -----------------------
 
-    public function call($iTimeout = null)
+    /**
+     * @param int $iConnectTimeOutMS
+     * @param int $iCallTimeOutMS
+     * @param bool $bAsHttps
+     * @param null $sCacert
+     * @param int  $iSSLVerifyHost
+     *
+     * @return null|HttpResponse
+     */
+    public function call($iConnectTimeOutMS = null, $iCallTimeOutMS = null, $bAsHttps = false, $sCacert = null, $iSSLVerifyHost = 0)
     {
-        $aArr = explode('/', $this->sProtocol, 2);
-        $rCurl = curl_init(sprintf('%s://%s', $aArr[0], $this->Header['Host'] . $this->sRequestURI));
+        $rCurl = curl_init(sprintf('%s://%s', $bAsHttps ? 'https' : 'http', $this->Header['Host'] . $this->sRequestURI));
         curl_setopt($rCurl, CURLOPT_HEADER, 1);
         curl_setopt($rCurl, CURLOPT_RETURNTRANSFER, 1);
         if ($this->sRequestMethod==='POST') {
@@ -291,8 +299,20 @@ class HttpRequest extends HttpCommon
         if (!empty($aHeader)) {
             curl_setopt($rCurl, CURLOPT_HTTPHEADER, $aHeader);
         }
-        if ($iTimeout!==null) {
-            curl_setopt($rCurl, CURLOPT_TIMEOUT, (int)$iTimeout);;
+        if ($iConnectTimeOutMS!==null) {
+            curl_setopt($rCurl, CURLOPT_CONNECTTIMEOUT_MS, (int)$iConnectTimeOutMS);
+        }
+        if ($iCallTimeOutMS!==null) {
+            curl_setopt($rCurl, CURLOPT_TIMEOUT_MS, (int)$iCallTimeOutMS);;
+        }
+        if ($bAsHttps) {
+            if ($sCacert!==null) {
+                curl_setopt($rCurl, CURLOPT_SSL_VERIFYPEER, true);   // 只信任CA颁布的证书
+                curl_setopt($rCurl, CURLOPT_CAINFO, $sCacert);
+            } else {
+                curl_setopt($rCurl, CURLOPT_SSL_VERIFYPEER, false);
+            }
+            curl_setopt($rCurl, CURLOPT_SSL_VERIFYHOST, $iSSLVerifyHost);
         }
         $mData = curl_exec($rCurl);
 

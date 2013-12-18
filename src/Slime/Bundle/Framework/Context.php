@@ -8,6 +8,7 @@ use Slime\Component\Config\IAdaptor;
  *
  * @package Slime\Bundle\Framework
  * @author  smallslime@gmail.com
+ *
  * @property-read array                                      $aAppDir      应用目录数组
  * @property-read string                                     $sENV         当前环境(例如 publish:生产环境; development:开发环境)
  * @property-read string                                     $sRunMode     PHP运行方式, 当前支持 (cli||http)
@@ -25,7 +26,7 @@ use Slime\Component\Config\IAdaptor;
  */
 class Context extends \Slime\Component\Context\Context
 {
-    public function registerAutomatic(IAdaptor $Config = null)
+    public function registerModulesAutomatic(IAdaptor $Config = null)
     {
         if ($Config === null) {
             /** @var Context $SELF */
@@ -34,9 +35,17 @@ class Context extends \Slime\Component\Context\Context
                 throw new \Exception('Config must be register before use createObjAutomatic');
             }
         }
-        $Module = $Config->get('module');
+        $aModule = $Config->get('module');
 
-        $this->register($sVarName, self::createObjAutomatic($sClassName));
+        foreach ($aModule as $sModuleName => $aModuleConfig) {
+            if (empty($aModuleConfig['params'])) {
+                $Obj = new $aModuleConfig['class']();
+            } else {
+                $Ref = new \ReflectionClass($aModuleConfig['class']);
+                $Obj = $Ref->newInstanceArgs($aModuleConfig['params']);
+            }
+            $this->register($sModuleName, self::createObjAutomatic($Obj));
+        }
     }
 
     /**

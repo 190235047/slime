@@ -100,9 +100,9 @@ class HttpResponse extends HttpCommon
      */
     public function setNoCache()
     {
-        $this->setHeader('Cache-Control', 'no-cache, must-revalidate');
-        $this->setHeader('pragma', 'no-cache');
-        $this->setHeader('expires', '-1');
+        $this->setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        $this->setHeader('Pragma', 'no-cache');
+        $this->setHeader('Expires', '0');
         return $this;
     }
 
