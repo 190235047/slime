@@ -23,6 +23,7 @@ use Slime\Component\Config\IAdaptor;
  * @property-read \Slime\Component\HTTP\HttpResponse         $HttpResponse 响应本次Http请求的HttpResponse对象
  * @property-read array                                      $aArgv        本次CLI请求的参数数组
  * @property-read \Slime\Component\I18N\I18N                 $I18N         多语言对象
+ * @property-read \Slime\Component\View\IAdaptor             $View         模板对象
  */
 class Context extends \Slime\Component\Context\Context
 {

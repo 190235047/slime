@@ -22,8 +22,14 @@ class Factory
      */
     public $Context;
 
-    public function __construct($aDBConfigAll, $aModelConfig, $sAppModelNS = '')
-    {
+    protected $sDefaultModelClass;
+
+    public function __construct(
+        $aDBConfigAll,
+        $aModelConfig,
+        $sAppModelNS = '',
+        $sDefaultModelClass = '\\Slime\\Component\\RDS\\Model\\Model'
+    ) {
         foreach ($aDBConfigAll as $sK => $aDBConfig) {
             $this->aCURD[$sK] = new CURD(
                 $sK,
@@ -33,9 +39,10 @@ class Factory
                 $aDBConfig['options']
             );
         }
-        $this->aModelConf  = $aModelConfig;
-        $this->sAppModelNS = rtrim($sAppModelNS, '\\');
-        $this->Context     = class_exists('Slime\Component\Context\Context') ? Context::getInst() : null;
+        $this->aModelConf         = $aModelConfig;
+        $this->sAppModelNS        = rtrim($sAppModelNS, '\\');
+        $this->Context            = class_exists('Slime\\Component\\Context\\Context') ? Context::getInst() : null;
+        $this->sDefaultModelClass = $sDefaultModelClass;
     }
 
     public function __call($sModel, $aArg = null)
@@ -70,7 +77,7 @@ class Factory
 
             $sModelClassName = isset($aConf['model_class']) ?
                 $this->sAppModelNS . '\\' . $aConf['model_class'] :
-                '\\Slime\\Component\\RDS\\Model\\Model';
+                $this->sDefaultModelClass;
 
             $this->aModel[$sModelName] = new $sModelClassName(
                 $sModelName,

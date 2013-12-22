@@ -45,15 +45,11 @@ class CURD
     {
         if (!$this->Instance) {
             $this->Instance = new \PDO($this->sDSN, $this->sUsername, $this->sPassword, $this->aOptions);
-        } else {
-            if ($bCheckConnect || $this->bCheckConnect) {
-                if (!$this->Instance || $this->Instance->getAttribute(
-                        \PDO::ATTR_SERVER_INFO
-                    ) == 'MySQL server has gone away'
-                ) {
-                    $this->Instance = new \PDO($this->sDSN, $this->sUsername, $this->sPassword, $this->aOptions);
-                }
-            }
+        } elseif (
+            ($bCheckConnect || $this->bCheckConnect) &&
+            (!$this->Instance || $this->Instance->getAttribute(\PDO::ATTR_SERVER_INFO)===null)
+        ) {
+            $this->Instance = new \PDO($this->sDSN, $this->sUsername, $this->sPassword, $this->aOptions);
         }
         return $this->Instance;
     }
@@ -71,7 +67,7 @@ class CURD
      */
     public function querySmarty(
         $sTable,
-        $aWhere = array(),
+        array $aWhere = null,
         $sAttr = '',
         $sSelect = '',
         $bOnlyOne = false,
@@ -221,7 +217,7 @@ class CURD
      *
      * @return int|string
      */
-    public static function buildCondition(array $aWhere, &$aArgs = array())
+    public static function buildCondition(array $aWhere = null, &$aArgs = array())
     {
         # 为空直接返回1
         if (empty($aWhere)) {

@@ -281,7 +281,7 @@ class Item implements \ArrayAccess
      */
     public function offsetGet($offset)
     {
-        return $this->aData[$offset];
+        return isset($this->aData[$offset]) ? $this->aData[$offset] : null;
     }
 
     /**
@@ -297,7 +297,7 @@ class Item implements \ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        $this->aData[$offset] = $value;
+        $this->_set($offset, $value);
     }
 
     /**

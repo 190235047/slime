@@ -8,7 +8,7 @@ class ModeTest extends \PHPUnit_Framework_TestCase
     public function __construct()
     {
         parent::__construct();
-        $this->HttpResponse = Http\HttpResPonse::create()->setNoCache();
+        $this->HttpResponse = Http\HttpResponse::create()->setNoCache();
         $this->Router = new Router('Slime\Component\Route');
     }
 

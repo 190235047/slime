@@ -58,14 +58,15 @@ abstract class Controller_Http extends Controller_ABS
 
         $this->HttpRequest   = $this->Context->HttpRequest;
         $this->HttpResponse  = $this->Context->HttpResponse;
-        $this->View          = View\Viewer::factory('@PHP', $this->Log);
         $this->bGet          = $this->HttpRequest->getRequestMethod() === 'GET';
         $this->bAutoRender   = $this->bGet;
         $this->bAjax         = $this->HttpRequest->isAjax();
         $this->bAutoRedirect = (!$this->bGet) && (!$this->bAjax);
+        $this->View          = View\Viewer::factory('@PHP', $this->Log);
         if (defined('DIR_VIEW')) {
             $this->View->setBaseDir(DIR_VIEW);
         }
+        $this->Context->register('View', $this->View);
     }
 
     /**
