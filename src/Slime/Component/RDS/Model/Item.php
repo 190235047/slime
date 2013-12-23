@@ -66,7 +66,7 @@ class Item implements \ArrayAccess
             return;
         }
         $this->aOldData[$sKey] = isset($this->aData[$sKey]) ? $this->aData[$sKey] : null;
-        $this->aData[$sKey]    = $mValue;
+        $this->aData[$sKey] = $mValue;
     }
 
     /**
@@ -94,7 +94,7 @@ class Item implements \ArrayAccess
         }
 
         if (!array_key_exists($sModelName, $this->aRelation)) {
-            $sMethod   = $this->Model->aRelationConfig[$sModelName];
+            $sMethod = $this->Model->aRelationConfig[$sModelName];
             $sRelation = strtolower($this->Model->aRelationConfig[$sModelName]);
             if ($sRelation === 'hasone' || $sRelation == 'belongsto') {
                 $this->aRelation[$sModelName] = $this->Group === null ?
@@ -106,7 +106,7 @@ class Item implements \ArrayAccess
         }
 
         $mResult = $this->aRelation[$sModelName];
-        if ($mResult===null && ($Context = $this->Model->Factory->Context)!==null) {
+        if ($mResult === null && ($Context = $this->Model->Factory->Context) !== null) {
             if ($Context->isRegister('bModelCompatible') && $Context->bModelCompatible) {
                 $mResult = new CompatibleItem();
             }
@@ -120,13 +120,13 @@ class Item implements \ArrayAccess
      */
     public function add()
     {
-        $M   = $this->Model;
+        $M = $this->Model;
         $iID = $M->CURD->insertSmarty($M->sTable, $this->aData);
         if ($iID === null) {
             $bRS = false;
         } else {
             $this->aData[$M->sPKName] = $iID;
-            $bRS                      = true;
+            $bRS = true;
         }
         return $bRS;
     }
@@ -149,7 +149,7 @@ class Item implements \ArrayAccess
         if (empty($aUpdate)) {
             return 99;
         }
-        $M   = $this->Model;
+        $M = $this->Model;
         $bRS = $M->CURD->updateSmarty(
             $M->sTable,
             $aUpdate,
@@ -168,7 +168,7 @@ class Item implements \ArrayAccess
      */
     public function hasOne($sModelName)
     {
-        $M     = $this->Model;
+        $M = $this->Model;
         $Model = $M->Factory->get($sModelName);
         return $Model->find(array($M->sFKName => $this->aData[$M->sPKName]));
     }
@@ -185,51 +185,56 @@ class Item implements \ArrayAccess
     }
 
     /**
-     * @param string     $sModel
-     * @param array|null $aParam
+     * @param string $sModel
+     * @param array  $aWhere
+     * @param string $sOrderBy
+     * @param int    $iLimit
+     * @param int    $iOffset
      *
-     * @return Group
+     * @return Group|Item[]
      */
-    public function hasMany($sModel, $aParam = null)
+    public function hasMany($sModel, $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
     {
-        $M     = $this->Model;
+        $M = $this->Model;
         $Model = $M->Factory->get($sModel);
         return $Model->findMulti(
-            (empty($aParam) ?
+            (empty($aWhere) ?
                 array($M->sFKName => $this->aData[$Model->sPKName]) :
-                array_merge(array($M->sFKName => $this->aData[$Model->sPKName]), $aParam)
-            )
+                array_merge(array($M->sFKName => $this->aData[$Model->sPKName]), $aWhere)
+            ),
+            $sOrderBy,
+            $iLimit,
+            $iOffset
         );
     }
 
     /**
-     * @param string     $sModelTarget
-     * @param array|null $aParam
+     * @param string $sModelTarget
+     * @param array  $aWhere
+     * @param string $sOrderBy
+     * @param int    $iLimit
+     * @param int    $iOffset
      *
-     * @return Group
+     * @return null|Group|Item[]
      */
-    public function hasManyThrough($sModelTarget, $aParam = null)
+    public function hasManyThrough($sModelTarget, $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
     {
         $ModelTarget = $this->Model->Factory->get($sModelTarget);
-        $ModelOrg    = $this->Model;
+        $ModelOrg = $this->Model;
         //if ($sModelRelated === null) {
         $sRelatedTableName = 'rel__' . (strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
                 $ModelTarget->sTable . '__' . $ModelOrg->sTable :
                 $ModelOrg->sTable . '__' . $ModelTarget->sTable);
-        $CURD              = $ModelOrg->CURD;
+        $CURD = $ModelOrg->CURD;
         //} else {
         //    $ModelRelated      = $this->Model->Factory->get($sModelRelated);
         //    $CURD              = $ModelRelated->CURD;
         //    $sRelatedTableName = $ModelRelated->sTable;
         //}
 
-
         $aIDS = $CURD->querySmarty(
             $sRelatedTableName,
-            (empty($aParam) ?
-                array($ModelOrg->sFKName => $this->aData[$ModelOrg->sPKName]) :
-                array_merge(array($ModelOrg->sFKName => $this->aData[$ModelOrg->sPKName]), $aParam)
-            ),
+            array($ModelOrg->sFKName => $this->aData[$ModelOrg->sPKName]),
             '',
             $ModelTarget->sFKName,
             false,
@@ -237,7 +242,15 @@ class Item implements \ArrayAccess
             0
         );
 
-        return empty($aIDS) ? null : $ModelTarget->findMulti(array($ModelTarget->sPKName . ' IN' => $aIDS));
+        return empty($aIDS) ? null : $ModelTarget->findMulti(
+            (empty($aWhere) ?
+                array($ModelTarget->sPKName . ' IN' => $aIDS) :
+                array_merge(array($ModelTarget->sPKName . ' IN' => $aIDS), $aWhere)
+            ),
+            $sOrderBy,
+            $iLimit,
+            $iOffset
+        );
     }
 
     /**

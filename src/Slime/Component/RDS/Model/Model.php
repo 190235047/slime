@@ -11,7 +11,7 @@ use Slime\Component\RDS\CURD;
  */
 class Model
 {
-    protected $sItemClassNS   = 'Slime\\Component\\RDS\\Model';
+    protected $sItemClassNS = 'Slime\\Component\\RDS\\Model';
     protected $sItemClassPartName = 'Item';
 
     private $sItemClassName;
@@ -33,14 +33,14 @@ class Model
      */
     public function __construct($sModelName, CURD $CURD, $aConfig, Factory $Factory)
     {
-        $this->sModelName      = $sModelName;
-        $this->CURD            = $CURD;
-        $this->sTable          = isset($aConfig['table']) ? $aConfig['table'] : strtolower($sModelName);
-        $this->sPKName         = isset($aConfig['pk']) ? $aConfig['pk'] : 'id';
-        $this->sFKName         = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
+        $this->sModelName = $sModelName;
+        $this->CURD = $CURD;
+        $this->sTable = isset($aConfig['table']) ? $aConfig['table'] : strtolower($sModelName);
+        $this->sPKName = isset($aConfig['pk']) ? $aConfig['pk'] : 'id';
+        $this->sFKName = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
         $this->aRelationConfig = isset($aConfig['relation']) ? $aConfig['relation'] : array();
-        $this->Factory         = $Factory;
-        $this->sItemClassName  = $this->sItemClassNS . '\\' . $this->sItemClassPartName;
+        $this->Factory = $Factory;
+        $this->sItemClassName = $this->sItemClassNS . '\\' . $this->sItemClassPartName;
     }
 
     /**
@@ -128,12 +128,12 @@ class Model
      * @param string $sOrderBy
      * @param int    $iLimit
      * @param int    $iOffset
-     * @param string $sAttr
      *
      * @return Group|Item[]
      */
-    public function findMulti(array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null, $sAttr = '')
+    public function findMulti(array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
     {
+        $sAttr = '';
         $sOrderBy !== null && $sAttr .= " ORDER BY $sOrderBy";
         $iLimit !== null && $sAttr .= " LIMIT $iLimit";
         $iOffset !== null && $sAttr .= " OFFSET $iOffset";
