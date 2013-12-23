@@ -11,7 +11,7 @@ namespace Slime\Component\RDS\Model;
  */
 class Item implements \ArrayAccess
 {
-    private $aRelation = array();
+    private $aRelData = array();
 
     /** @var Model */
     public $Model;
@@ -77,39 +77,56 @@ class Item implements \ArrayAccess
      */
     public function __call($sModelName, $mValue = array())
     {
-        return $this->relation($sModelName, (isset($mValue[0]) ? $mValue[0] : null));
+        if (empty($mValue)) {
+            return $this->relation($sModelName);
+        } else {
+            array_unshift($mValue, $sModelName);
+            return call_user_func_array(array($this, 'relation'), $mValue);
+        }
     }
 
     /**
      * @param string $sModelName
-     * @param mixed  $mParam
+     * @param array  $aWhere
+     * @param string $sOrderBy
+     * @param int    $iLimit
+     * @param int    $iOffset
      *
      * @return $this|$this[]
      * @throws \Exception
      */
-    public function relation($sModelName, $mParam = null)
+    public function relation($sModelName, array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
     {
         if (!isset($this->Model->aRelationConfig[$sModelName])) {
             throw new \Exception("Can not find relation for [$sModelName]");
         }
-
-        if (!array_key_exists($sModelName, $this->aRelation)) {
-            $sMethod = $this->Model->aRelationConfig[$sModelName];
-            $sRelation = strtolower($this->Model->aRelationConfig[$sModelName]);
-            if ($sRelation === 'hasone' || $sRelation == 'belongsto') {
-                $this->aRelation[$sModelName] = $this->Group === null ?
+        $sMethod = strtolower($this->Model->aRelationConfig[$sModelName]);
+        if ($sMethod === 'hasone' || $sMethod === 'belongsto') {
+            $sKey = $sModelName;
+            if (!array_key_exists($sModelName, $this->aRelData)) {
+                $this->aRelData[$sKey] = $this->Group === null ?
                     $this->$sMethod($sModelName) :
                     $this->Group->relation($sModelName, $this);
-            } else {
-                $this->aRelation[$sModelName] = $this->$sMethod($sModelName, $mParam);
             }
+        } else {
+            if (empty($aWhere)) {
+                $sWhere = '';
+            } else {
+                ksort($aWhere);
+                $sWhere = json_encode($aWhere);
+            }
+            $sKey = sprintf('%s:%s:%s:%s', $sWhere, $sOrderBy, $iLimit, $iOffset);
+            $this->aRelData[$sKey] = $this->$sMethod($sModelName, $aWhere, $sOrderBy, $iLimit, $iOffset);
         }
 
-        $mResult = $this->aRelation[$sModelName];
-        if ($mResult === null && ($Context = $this->Model->Factory->Context) !== null) {
-            if ($Context->isRegister('bModelCompatible') && $Context->bModelCompatible) {
-                $mResult = new CompatibleItem();
-            }
+        $mResult = $this->aRelData[$sKey];
+        if (
+            $mResult === null &&
+            ($Context = $this->Model->Factory->Context) !== null &&
+            $Context->isRegister('bModelCompatible') &&
+            $Context->bModelCompatible
+        ) {
+            $mResult = new CompatibleItem();
         }
 
         return $mResult;
@@ -193,7 +210,7 @@ class Item implements \ArrayAccess
      *
      * @return Group|Item[]
      */
-    public function hasMany($sModel, $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
+    public function hasMany($sModel, array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
     {
         $M = $this->Model;
         $Model = $M->Factory->get($sModel);
@@ -217,7 +234,7 @@ class Item implements \ArrayAccess
      *
      * @return null|Group|Item[]
      */
-    public function hasManyThrough($sModelTarget, $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
+    public function hasManyThrough($sModelTarget, array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
     {
         $ModelTarget = $this->Model->Factory->get($sModelTarget);
         $ModelOrg = $this->Model;
