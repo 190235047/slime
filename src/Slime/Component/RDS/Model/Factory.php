@@ -2,7 +2,6 @@
 namespace Slime\Component\RDS\Model;
 
 use Slime\Component\RDS\CURD;
-use Slime\Component\Context\Context;
 
 /**
  * Class Factory
@@ -12,15 +11,11 @@ use Slime\Component\Context\Context;
  */
 class Factory
 {
-    public $bAutoCreate = true;
+    public $bAutoCreate     = true;
+    public $bCompatibleMode = false;
 
     /** @var Model[] */
     protected $aModel = array();
-
-    /**
-     * @var Context|null
-     */
-    public $Context;
 
     protected $sDefaultModelClass;
 
@@ -28,7 +23,7 @@ class Factory
         $aDBConfigAll,
         $aModelConfig,
         $sAppModelNS = '',
-        $sDefaultModelClass = '\\Slime\\Component\\RDS\\Model\\Model'
+        $sDefaultModelClass = 'Slime\\Component\\RDS\\Model\\Model'
     ) {
         foreach ($aDBConfigAll as $sK => $aDBConfig) {
             $this->aCURD[$sK] = new CURD(
@@ -40,8 +35,7 @@ class Factory
             );
         }
         $this->aModelConf         = $aModelConfig;
-        $this->sAppModelNS        = rtrim($sAppModelNS, '\\');
-        $this->Context            = class_exists('Slime\\Component\\Context\\Context') ? Context::getInst() : null;
+        $this->sAppModelNS        = $sAppModelNS;
         $this->sDefaultModelClass = $sDefaultModelClass;
     }
 

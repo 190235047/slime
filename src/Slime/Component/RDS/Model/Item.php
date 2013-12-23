@@ -6,13 +6,12 @@ namespace Slime\Component\RDS\Model;
  *
  * @package Slime\Component\RDS
  * @author  smallslime@gmail.com
+ *
  * @property-read array $aData
  * @property-read array $aOldData
  */
 class Item implements \ArrayAccess
 {
-    private $aRelData = array();
-
     /** @var Model */
     public $Model;
 
@@ -77,11 +76,17 @@ class Item implements \ArrayAccess
      */
     public function __call($sModelName, $mValue = array())
     {
+        if (substr($sModelName, 0, 5)==='count') {
+            $sModelName = substr($sModelName, 5);
+            $sMethod    = 'relationCount';
+        } else {
+            $sMethod    = 'relation';
+        }
         if (empty($mValue)) {
-            return $this->relation($sModelName);
+            return $this->$sMethod($sModelName);
         } else {
             array_unshift($mValue, $sModelName);
-            return call_user_func_array(array($this, 'relation'), $mValue);
+            return call_user_func_array(array($this, $sMethod), $mValue);
         }
     }
 
@@ -97,39 +102,42 @@ class Item implements \ArrayAccess
      */
     public function relation($sModelName, array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
     {
+        $mResult = null;
+
         if (!isset($this->Model->aRelationConfig[$sModelName])) {
             throw new \Exception("Can not find relation for [$sModelName]");
         }
+
         $sMethod = strtolower($this->Model->aRelationConfig[$sModelName]);
         if ($sMethod === 'hasone' || $sMethod === 'belongsto') {
-            $sKey = $sModelName;
-            if (!array_key_exists($sModelName, $this->aRelData)) {
-                $this->aRelData[$sKey] = $this->Group === null ?
-                    $this->$sMethod($sModelName) :
-                    $this->Group->relation($sModelName, $this);
-            }
+            $mResult = $this->Group === null ?
+                $this->$sMethod($sModelName) :
+                $this->Group->relation($sModelName, $this);
         } else {
-            if (empty($aWhere)) {
-                $sWhere = '';
-            } else {
-                ksort($aWhere);
-                $sWhere = json_encode($aWhere);
-            }
-            $sKey = sprintf('%s:%s:%s:%s', $sWhere, $sOrderBy, $iLimit, $iOffset);
-            $this->aRelData[$sKey] = $this->$sMethod($sModelName, $aWhere, $sOrderBy, $iLimit, $iOffset);
+            $mResult = $this->$sMethod($sModelName, $aWhere, $sOrderBy, $iLimit, $iOffset);
         }
 
-        $mResult = $this->aRelData[$sKey];
-        if (
-            $mResult === null &&
-            ($Context = $this->Model->Factory->Context) !== null &&
-            $Context->isRegister('bModelCompatible') &&
-            $Context->bModelCompatible
-        ) {
+        if ($mResult === null && $this->Model->Factory->bCompatibleMode === true) {
             $mResult = new CompatibleItem();
         }
 
         return $mResult;
+    }
+
+    public function relationCount($sModelName, array $aWhere = null)
+    {
+        if (!isset($this->Model->aRelationConfig[$sModelName])) {
+            throw new \Exception("Can not find relation for [$sModelName]");
+        }
+
+        $sMethod = strtolower($this->Model->aRelationConfig[$sModelName]);
+        if ($sMethod === 'hasone' || $sMethod === 'belongsto') {
+            return null;
+        }
+
+        $sMethod .= 'Count';
+        return $this->$sMethod($sModelName, $aWhere);
+
     }
 
     /**
@@ -226,6 +234,24 @@ class Item implements \ArrayAccess
     }
 
     /**
+     * @param string $sModel
+     * @param array  $aWhere
+     *
+     * @return int
+     */
+    public function hasManyCount($sModel, array $aWhere = null)
+    {
+        $M = $this->Model;
+        $Model = $M->Factory->get($sModel);
+        return $Model->findCount(
+            (empty($aWhere) ?
+                array($M->sFKName => $this->aData[$Model->sPKName]) :
+                array_merge(array($M->sFKName => $this->aData[$Model->sPKName]), $aWhere)
+            )
+        );
+    }
+
+    /**
      * @param string $sModelTarget
      * @param array  $aWhere
      * @param string $sOrderBy
@@ -238,16 +264,11 @@ class Item implements \ArrayAccess
     {
         $ModelTarget = $this->Model->Factory->get($sModelTarget);
         $ModelOrg = $this->Model;
-        //if ($sModelRelated === null) {
+        //@todo $sRelatedTableName declare in config
         $sRelatedTableName = 'rel__' . (strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
                 $ModelTarget->sTable . '__' . $ModelOrg->sTable :
                 $ModelOrg->sTable . '__' . $ModelTarget->sTable);
         $CURD = $ModelOrg->CURD;
-        //} else {
-        //    $ModelRelated      = $this->Model->Factory->get($sModelRelated);
-        //    $CURD              = $ModelRelated->CURD;
-        //    $sRelatedTableName = $ModelRelated->sTable;
-        //}
 
         $aIDS = $CURD->querySmarty(
             $sRelatedTableName,
@@ -267,6 +288,31 @@ class Item implements \ArrayAccess
             $sOrderBy,
             $iLimit,
             $iOffset
+        );
+    }
+
+    public function hasManyThroughCount($sModelTarget, array $aWhere = null)
+    {
+        $ModelTarget = $this->Model->Factory->get($sModelTarget);
+        $ModelOrg = $this->Model;
+        //@todo $sRelatedTableName declare in config
+        $sRelatedTableName = 'rel__' . (strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
+                $ModelTarget->sTable . '__' . $ModelOrg->sTable :
+                $ModelOrg->sTable . '__' . $ModelTarget->sTable);
+        $CURD = $ModelOrg->CURD;
+
+        $aIDS = $CURD->querySmarty(
+            $sRelatedTableName,
+            array($ModelOrg->sFKName => $this->aData[$ModelOrg->sPKName]),
+            '',
+            $ModelTarget->sFKName,
+            false,
+            \PDO::FETCH_COLUMN,
+            0
+        );
+
+        return empty($aIDS) ? 0 : (
+            empty($aWhere) ? count($aIDS) : $ModelTarget->findCount($aWhere)
         );
     }
 
