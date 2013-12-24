@@ -102,7 +102,7 @@ class ModelPagination
         }
         $mRenderCB = $mRenderCB === null ?
             ($this->mDefaultRender === null ?  array($this, 'defaultRender') : $this->mDefaultRender) : $mRenderCB;
-        $sPage = call_user_func($mRenderCB, $aResult);
+        $sPage = call_user_func($mRenderCB, $this->HttpRequest, $aResult);
 
         # result
         return $sPage;
