@@ -31,12 +31,13 @@ class Automatic
         $aWhere = array(),
         $sOrderBy = null,
         $iPerPage = null,
-        $mRenderCB = null
+        $mRenderCB = null,
+        $bOnlyCount = false
     ) {
         return $this->_getList(
             array($Item, "count$sRelationModelName"),
             array($Item, $sRelationModelName),
-            $aWhere, $sOrderBy, $iPerPage, $mRenderCB
+            $aWhere, $sOrderBy, $iPerPage, $mRenderCB, $bOnlyCount
         );
     }
 
@@ -45,12 +46,13 @@ class Automatic
         $aWhere = array(),
         $sOrderBy = null,
         $iPerPage = null,
-        $mRenderCB = null
+        $mRenderCB = null,
+        $bOnlyCount = false
     ) {
         return $this->_getList(
             array($Model, 'findCount'),
             array($Model, 'findMulti'),
-            $aWhere, $sOrderBy, $iPerPage, $mRenderCB
+            $aWhere, $sOrderBy, $iPerPage, $mRenderCB, $bOnlyCount
         );
     }
 
@@ -60,7 +62,8 @@ class Automatic
         $aWhere = array(),
         $sOrderBy = null,
         $iPerPage = null,
-        $mRenderCB = null
+        $mRenderCB = null,
+        $bOnlyCount = false
     )
     {
         $iPerPage = $iPerPage === null ? (int)$this->iPerPage : (int)$iPerPage;
@@ -73,8 +76,7 @@ class Automatic
 
         $iTotal  = call_user_func($mCountCB, $aWhere);
         $iPage   = max(1, (int)$this->HttpRequest->getGet($this->sVarPage));
-
-        $aResult = Pagination::run($iTotal, $iPerPage, $iPage);
+        $aResult = $bOnlyCount ? array($iTotal, $iPerPage) : Pagination::run($iTotal, $iPerPage, $iPage);
         $Group   = call_user_func($mListCB, $aWhere, $sOrderBy, $iPerPage, ($iPage - 1) * $iPerPage);
 
         $mRenderCB = $mRenderCB === null ?
@@ -127,5 +129,10 @@ class Automatic
         $sPage .= '</div>';
 
         return $sPage;
+    }
+
+    protected function ajaxRender($aResult)
+    {
+        return $aResult;
     }
 }
