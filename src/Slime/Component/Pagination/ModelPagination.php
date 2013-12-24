@@ -48,23 +48,6 @@ class ModelPagination
         );
     }
 
-    public function getListFromRelationOnlyCount(
-        Model\Item $Item,
-        $sRelationModelName,
-        &$List,
-        $aWhere = array(),
-        $sOrderBy = null,
-        $iNumberPerPage = null,
-        $mPageGetCBOrPageVar = null
-    )
-    {
-        return $this->_getList(
-            array($Item, "count$sRelationModelName"),
-            array($Item, $sRelationModelName),
-            $List, $aWhere, $sOrderBy, $iNumberPerPage, $mPageGetCBOrPageVar, null, true
-        );
-    }
-
     public function getList(
         Model\Model $Model,
         &$List,
@@ -81,22 +64,6 @@ class ModelPagination
         );
     }
 
-    public function getListOnlyCount(
-        Model\Model $Model,
-        &$List,
-        $aWhere = array(),
-        $sOrderBy = null,
-        $iNumberPerPage = null,
-        $mPageGetCBOrPageVar = null
-    )
-    {
-        return $this->_getList(
-            array($Model, 'findCount'),
-            array($Model, 'findMulti'),
-            $List, $aWhere, $sOrderBy, $iNumberPerPage, $mPageGetCBOrPageVar, null, true
-        );
-    }
-
     protected function _getList(
         $mCountCB,
         $mListCB,
@@ -105,8 +72,7 @@ class ModelPagination
         $sOrderBy = null,
         $iNumberPerPage = null,
         $mPageGetCBOrPageVar = null,
-        $mRenderCB = null,
-        $bOnlyCount = false
+        $mRenderCB = null
     )
     {
         # number per page
@@ -121,16 +87,14 @@ class ModelPagination
             (int)call_user_func($mPageGetCBOrPageVar);
 
         # get total
-        $iTotalPage = call_user_func($mCountCB, $aWhere);
+        $iTotalItem = call_user_func($mCountCB, $aWhere);
 
-        # get pagination result
+        # get pagination data
+        $aResult               = Pagination::run($iTotalItem, $iNumberPerPage, $iCurrentPage);
+        $aResult['total_item'] = $iTotalItem;
+
+        # get list data
         $List    = call_user_func($mListCB, $aWhere, $sOrderBy, $iNumberPerPage, ($iCurrentPage - 1) * $iNumberPerPage);
-        # if only count : return
-        if ($bOnlyCount) {
-            return $iTotalPage;
-        }
-
-        $aResult = Pagination::run($iTotalPage, $iNumberPerPage, $iCurrentPage);
 
         # render pagination result
         if ($mRenderCB===null) {
@@ -187,5 +151,10 @@ class ModelPagination
         $sPage .= '</div>';
 
         return $sPage;
+    }
+
+    public static function noRender(Http\HttpRequest $HttpRequest, $aResult)
+    {
+        return array('total_page' => $aResult['total'], 'total_item' => $aResult['total_item']);
     }
 }
