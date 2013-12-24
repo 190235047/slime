@@ -26,8 +26,8 @@ class ModelPagination
     )
     {
         $this->HttpRequest                 = $HttpRequest;
-        $this->$iDefaultNumberPerPage      = $iDefaultNumberPerPage===null ? 10 : (int)$iDefaultNumberPerPage;
-        $this->$mDefaultPageGetCBOrPageVar = $mDefaultPageGetCBOrPageVar === null ? 'page' : $mDefaultPageGetCBOrPageVar;
+        $this->iDefaultNumberPerPage      = $iDefaultNumberPerPage===null ? 10 : (int)$iDefaultNumberPerPage;
+        $this->mDefaultPageGetCBOrPageVar = $mDefaultPageGetCBOrPageVar === null ? 'page' : $mDefaultPageGetCBOrPageVar;
         $this->mDefaultRender              = $mDefaultRender===null ? array('Slime\\Component\\Pagination\\ModelPagination', 'defaultRender') : $mDefaultRender;
     }
 
