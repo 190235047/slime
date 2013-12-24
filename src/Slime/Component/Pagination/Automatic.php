@@ -86,7 +86,7 @@ class Automatic
         return array($Group, $sPage);
     }
 
-    protected function defaultRender($aResult)
+    public function defaultRender($aResult)
     {
         $sURI = strstr($this->HttpRequest->getRequestURI(), '?', true);
         $Get  = $this->HttpRequest->Get;
@@ -131,7 +131,7 @@ class Automatic
         return $sPage;
     }
 
-    protected function ajaxRender($aResult)
+    public function ajaxRender($aResult)
     {
         return $aResult;
     }
