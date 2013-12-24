@@ -76,7 +76,7 @@ class Automatic
 
         $iTotal  = call_user_func($mCountCB, $aWhere);
         $iPage   = max(1, (int)$this->HttpRequest->getGet($this->sVarPage));
-        $aResult = $bOnlyCount ? array($iTotal, $iPerPage) : Pagination::run($iTotal, $iPerPage, $iPage);
+        $aResult = $bOnlyCount ? array('total' => $iTotal, 'current_page' => $iPerPage) : Pagination::run($iTotal, $iPerPage, $iPage);
         $Group   = call_user_func($mListCB, $aWhere, $sOrderBy, $iPerPage, ($iPage - 1) * $iPerPage);
 
         $mRenderCB = $mRenderCB === null ?
