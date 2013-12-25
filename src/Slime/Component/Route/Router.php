@@ -58,7 +58,7 @@ class Router
                         // value: array('object' => $1, 'method' => $3, 'param' => array('id' => $2, 'status' => $4))
                         // value: array('func' => $1_$3, 'param' => array('id' => $2, 'status' => $4), '_continue'=>false)
                         if (isset($mV['_continue'])) {
-                            $Continue['vaule'] = ($mV['_continue'] !== false);
+                            $Continue['value'] = ($mV['_continue'] !== false);
                             unset($mV['_continue']);
                         }
                         $aSearch = $aReplace = array();
