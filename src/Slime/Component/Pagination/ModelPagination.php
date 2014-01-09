@@ -90,7 +90,7 @@ class ModelPagination
         $iTotalItem = call_user_func($mCountCB, $aWhere);
 
         # get pagination data
-        $aResult               = Pagination::run($iTotalItem, $iNumberPerPage, $iCurrentPage);
+        $aResult               = Core::run($iTotalItem, $iNumberPerPage, $iCurrentPage);
         $aResult['total_item'] = $iTotalItem;
 
         # get list data

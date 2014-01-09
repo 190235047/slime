@@ -35,9 +35,10 @@ abstract class Bootstrap
      * @param string                      $sENV                  当前环境(例如 publish:生产环境; development:开发环境)
      * @param string                      $sAppNs                应用的命名空间
      * @param array                       $mLogConfigOrLogObject 日志对象初始化配置
+     * @param string|null                 $sModuleConfigKey      自动加载模块的配置文件名(null:不做自动加载)
      * @param Http\HttpRequest|array|null $mIn
      */
-    final public function __construct($sAPI, $sENV, $sAppNs, $mLogConfigOrLogObject, $mIn = null)
+    final public function __construct($sAPI, $sENV, $sAppNs, $mLogConfigOrLogObject, $mIn = null, $sModuleConfigKey = 'module')
     {
         set_error_handler(array($this, 'handleError'));
 
@@ -128,6 +129,11 @@ abstract class Bootstrap
 
         # register route
         $Context->register('Route', new Route\Router($Context->sNS));
+
+        # register automatic
+        if ($sModuleConfigKey!==null) {
+            $Context->registerModulesAutomatic($sModuleConfigKey);
+        }
     }
 
     public function run()

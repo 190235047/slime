@@ -28,12 +28,10 @@ class CallBack
      * @param string $sMethod
      * @param array $aObjInitParam
      */
-    public function setCBObject($mClassNameOrObject, $sMethod, array $aObjInitParam = null)
+    public function setCBObject($mClassNameOrObject, $sMethod, array $aObjInitParam = array())
     {
         if (is_string($mClassNameOrObject)) {
-            $this->aObjInitParam = $aObjInitParam === null ?
-                array() :
-                (is_array($aObjInitParam) ? $aObjInitParam : array($aObjInitParam));
+            $this->aObjInitParam = $aObjInitParam;
             $this->mCallable = array($this->sNSPre . '\\' . $mClassNameOrObject, $sMethod);
         } else {
             $this->mCallable = array($mClassNameOrObject, $sMethod);

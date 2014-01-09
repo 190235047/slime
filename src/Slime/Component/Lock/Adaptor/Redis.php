@@ -1,7 +1,6 @@
 <?php
 namespace Slime\Component\Lock;
 
-use Psr\Log\LoggerInterface;
 use Slime\Component\Redis;
 
 /**
@@ -12,45 +11,52 @@ use Slime\Component\Redis;
  */
 class Adaptor_Redis implements IAdaptor
 {
-    /** @var array */
-    public $aConfig;
-
     /** @var \Redis */
     private $Redis;
 
     /**
      * @param Redis\Redis $Redis
+     * @param int         $iLockRetryLoopMS
      */
-    public function __construct(Redis\Redis $Redis)
+    public function __construct(Redis\Redis $Redis, $iLockRetryLoopMS = 10)
     {
-        $this->Redis = $Redis;
+        $this->Redis            = $Redis;
+        $this->iLockRetryLoopUS = $iLockRetryLoopMS * 10000;
     }
 
 
     /**
      * @param string $sKey
-     * @param int    $iExpire      0:永不过期
-     * @param int    $iTimeout     0:永不超时(一直阻塞); -1:异步(发现阻塞不等待立刻返回false)
-     * @param bool   $bTimeoutAsMS false: 秒; true: 毫秒
+     * @param int    $iExpire   (单位MS); >0:锁过期时间 / other:永不过期(null)
+     * @param int    $iTimeout  (单位MS); 获取锁失败后: 0:立刻返回false / >0 等待时间 / other:永久阻塞(null);
      *
      * @return bool
      */
-    public function acquire($sKey, $iExpire, $iTimeout = -1, $bTimeoutAsMS = false)
+    public function acquire($sKey, $iExpire = null, $iTimeout = null)
     {
-        if ($iTimeout < 0) {
+        if ($iTimeout === 0) {
             $bRS = $this->Redis->setnx($sKey, 1);
-        } else {
+        } elseif ($iTimeout > 0) {
             $iT1 = microtime(true);
             do {
                 $bRS = $this->Redis->setnx($sKey, 1);
-                if ($bRS || ($iTimeout > 0 && microtime(true) - $iT1 > $iTimeout)) {
+                if ($bRS || (microtime(true) - $iT1 > $iTimeout)) {
                     break;
                 }
-                usleep(10000);
+                usleep($this->iLockRetryLoopUS);
+            } while (true);
+        } else {
+            do {
+                $bRS = $this->Redis->setnx($sKey, 1);
+                if ($bRS) {
+                    break;
+                }
+                usleep($this->iLockRetryLoopUS);
             } while (true);
         }
-        if ($iExpire !== 0 && $bRS) {
-            $bTimeoutAsMS ? $this->Redis->pExpire($sKey, $iExpire) : $this->Redis->expire($sKey, $iExpire);
+
+        if ($iExpire > 0 && $bRS) {
+            $this->Redis->pExpire($sKey, $iExpire);
         }
         return $bRS;
     }

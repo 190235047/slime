@@ -27,30 +27,31 @@ use Slime\Component\Config\IAdaptor;
  */
 class Context extends \Slime\Component\Context\Context
 {
-    public function registerModulesAutomatic(IAdaptor $Config = null)
+    public function registerModulesAutomatic($sModuleKey = 'module')
     {
-        if ($Config === null) {
-            /** @var Context $SELF */
-            $SELF = self::getInst();
-            if (!$SELF->isRegister('Config')) {
-                throw new \Exception('Config must be register before use createObjAutomatic');
-            }
-        }
-        $aModule = $Config->get('module');
+        $aModule = $this->Config->get($sModuleKey);
 
-        foreach ($aModule as $sModuleName => $aModuleConfig) {
-            if (empty($aModuleConfig['params'])) {
-                $Obj = new $aModuleConfig['class']();
-            } else {
-                $Ref = new \ReflectionClass($aModuleConfig['class']);
-                $Obj = $Ref->newInstanceArgs($aModuleConfig['params']);
+        if (!empty($aModule) && is_array($aModule)) {
+            foreach ($aModule as $sModuleName => $aModuleConfig) {
+                if (empty($aModuleConfig['params'])) {
+                    $Obj = new $aModuleConfig['class']();
+                } else {
+                    $Ref = new \ReflectionClass($aModuleConfig['class']);
+                    foreach ($aModuleConfig['params'] as $mK => $mV) {
+                        if (is_string($mV) && $mV[0] === ':') {
+                            $sUseModule                   = substr($mV, 1);
+                            $aModuleConfig['params'][$mK] = $this->{$sUseModule};
+                        }
+                    }
+                    $Obj = $Ref->newInstanceArgs($aModuleConfig['params']);
+                }
+                $this->register($sModuleName, $Obj);
             }
-            $this->register($sModuleName, self::createObjAutomatic($Obj));
         }
     }
 
     /**
-     * @param string $sClassName
+     * @param string   $sClassName
      * @param IAdaptor $Config
      *
      * @return object
@@ -58,7 +59,7 @@ class Context extends \Slime\Component\Context\Context
      */
     public static function createObjAutomatic($sClassName, IAdaptor $Config = null)
     {
-        if ($Config===null) {
+        if ($Config === null) {
             /** @var Context $SELF */
             $SELF = self::getInst();
             if (!$SELF->isRegister('Config')) {

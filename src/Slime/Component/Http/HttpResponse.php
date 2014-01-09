@@ -9,10 +9,10 @@ namespace Slime\Component\Http;
 class HttpResponse extends HttpCommon
 {
     /** @var int */
-    public $iStatus;
+    public $iStatus = 200;
 
     /** @var string */
-    public $sProtocol;
+    public $sProtocol = 'HTTP/1.1';
 
     /** @var string */
     public $sStatusMessage;
@@ -108,11 +108,16 @@ class HttpResponse extends HttpCommon
 
     /**
      * @param string $sURL
+     * @param int    $iCode
      *
      * @return HttpResponse
      */
-    public function setRedirect($sURL)
+    public function setRedirect($sURL, $iCode = null)
     {
+        if ($iCode!==null) {
+            $this->iStatus = $iCode;
+        }
+
         $this->setHeader('Location', $sURL);
         return $this;
     }
@@ -127,6 +132,11 @@ class HttpResponse extends HttpCommon
         // headers have already been sent by the developer
         if (headers_sent()) {
             return $this;
+        }
+
+        // first line
+        if ($this->iStatus !== 200) {
+            header(sprintf('%s %d %s', $this->sProtocol, $this->iStatus, Helper_HttpStatus::getString($this->iStatus)));
         }
 
         // headers

@@ -10,24 +10,6 @@ namespace Slime\Component\Http;
 class Bag_File extends Bag_Bag
 {
     /**
-     * @param array $aValidator []
-     */
-    public function setValidator(array $aValidator)
-    {
-        ;
-    }
-
-    public function validate()
-    {
-        ;
-    }
-
-    public function trim()
-    {
-        ;
-    }
-
-    /**
      * @param string $sDir
      * @param mixed  $mCBGentFileName
      *

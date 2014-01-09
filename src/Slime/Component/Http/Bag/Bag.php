@@ -9,17 +9,58 @@ namespace Slime\Component\Http;
  */
 class Bag_Bag implements \ArrayAccess, \Iterator, \Countable
 {
+    protected $aMap;
+    protected $iLen;
+    protected $iCursor;
+
     public function __construct(array $aData = null)
     {
-        $this->aData   = $aData === null ? array() : $aData;
+        if (empty($aData)) {
+            $aData = array();
+        }
+        $this->aData   = $aData;
         $this->aMap    = array_keys($this->aData);
-        $this->iLen    = count($aData);
+        $this->iLen    = count($this->aData);
         $this->iCursor = 0;
+    }
+
+    public function __get($sKey)
+    {
+        return $this->offsetGet($sKey);
     }
 
     public function set($sKey, $mValue)
     {
         $this->offsetSet($sKey, $mValue);
+        return $this;
+    }
+
+    public function delete($mKeyOrKeys)
+    {
+        if (is_array($mKeyOrKeys)) {
+            foreach ($mKeyOrKeys as $sKey) {
+                if (isset($this->aData[$sKey])) {
+                    unset($this->aData[$sKey]);
+                }
+            }
+        } else {
+            if (isset($this->aData[$mKeyOrKeys])) {
+                unset($this->aData[$mKeyOrKeys]);
+            }
+        }
+
+        return $this;
+    }
+
+    public function merge(array $aArr, $bOverwriteIfExist = true)
+    {
+        if (!empty($aArr)) {
+            $this->aData = $bOverwriteIfExist ?
+                array_replace($this->aData, $aArr):
+                array_merge($aArr, $this->aData);
+            $this->aMap    = array_keys($this->aData);
+            $this->iLen    = count($this->aData);
+        }
         return $this;
     }
 

@@ -17,4 +17,23 @@ interface IAdaptor
      * @return mixed
      */
     public function get($sKey, $mDefaultValue = null, $bForce = false);
+
+    /**
+     * @param bool $bParse
+     *
+     * @return $this
+     */
+    public function setParseMode($bParse = true);
+
+    /**
+     * @param bool $bParse
+     *
+     * @return $this
+     */
+    public function setTmpParseMode($bParse = false);
+
+    /**
+     * @return $this
+     */
+    public function resetParseMode();
 }

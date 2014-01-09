@@ -34,13 +34,11 @@ class Context
 
     /**
      * 获取当前请求的上下文对象
-     * @return $this|null
+     * @return $this 有可能为NULL
      */
     public static function getInst()
     {
-        /** @var Stack\Stack $__SF_CONTEXT__ */
-        global $__SF_CONTEXT__;
-        return empty($__SF_CONTEXT__) ? null : $__SF_CONTEXT__->current();
+        return end($GLOBALS['__SF_CONTEXT__']);
     }
 
     /**
@@ -49,12 +47,9 @@ class Context
     public static function makeInst()
     {
         if (!isset($GLOBALS['__SF_CONTEXT__'])) {
-            $GLOBALS['__SF_CONTEXT__'] = new Stack\Stack();
+            $GLOBALS['__SF_CONTEXT__'] = array();
         }
-
-        /** @var Stack\Stack $__SF_CONTEXT__ */
-        global $__SF_CONTEXT__;
-        $__SF_CONTEXT__->push(new self());
+        $GLOBALS['__SF_CONTEXT__'][] = new static();
     }
 
     /**
@@ -62,12 +57,7 @@ class Context
      */
     public static function destroy()
     {
-        /** @var Stack\Stack $__SF_CONTEXT__ */
-        global $__SF_CONTEXT__;
-        $Context = $__SF_CONTEXT__->pop();
-        foreach (get_object_vars($Context) as $sK => $mV) {
-            unset($Context->$sK);
-        }
+        array_pop($GLOBALS['__SF_CONTEXT__']);
     }
 
     /**

@@ -277,19 +277,31 @@ class HttpRequest extends HttpCommon
     }
 
     //------------------- call logic -----------------------
+    protected $sRemoteServer = null;
+    public function setRemoteServer($sRemoteServer)
+    {
+        $this->sRemoteServer = $sRemoteServer;
+        return $this;
+    }
 
     /**
-     * @param int $iConnectTimeOutMS
-     * @param int $iCallTimeOutMS
-     * @param bool $bAsHttps
-     * @param null $sCacert
-     * @param int  $iSSLVerifyHost
+     * @param int   $iConnectTimeOutMS
+     * @param int   $iCallTimeOutMS
+     * @param array $aOptKVMap
+     * @param bool  $bAsHttps
+     * @param null  $sCacert
+     * @param int   $iSSLVerifyHost
      *
      * @return null|HttpResponse
      */
-    public function call($iConnectTimeOutMS = null, $iCallTimeOutMS = null, $bAsHttps = false, $sCacert = null, $iSSLVerifyHost = 0)
+    public function call($iConnectTimeOutMS = null, $iCallTimeOutMS = null, array $aOptKVMap = null, $bAsHttps = false, $sCacert = null, $iSSLVerifyHost = 0)
     {
-        $rCurl = curl_init(sprintf('%s://%s', $bAsHttps ? 'https' : 'http', $this->Header['Host'] . $this->sRequestURI));
+        $rCurl = curl_init(
+            sprintf(
+                '%s://%s',
+                $bAsHttps ? 'https' : 'http',
+                ($this->sRemoteServer===null ? $this->Header['Host'] : $this->sRemoteServer) . $this->sRequestURI)
+        );
         curl_setopt($rCurl, CURLOPT_HEADER, 1);
         curl_setopt($rCurl, CURLOPT_RETURNTRANSFER, 1);
         if ($this->sRequestMethod==='POST') {
@@ -304,6 +316,11 @@ class HttpRequest extends HttpCommon
         }
         if ($iCallTimeOutMS!==null) {
             curl_setopt($rCurl, CURLOPT_TIMEOUT_MS, (int)$iCallTimeOutMS);;
+        }
+        if ($aOptKVMap!==null) {
+            foreach ($aOptKVMap as $sK => $sV) {
+                curl_setopt($rCurl, $sK, $sV);
+            }
         }
         if ($bAsHttps) {
             if ($sCacert!==null) {

@@ -9,6 +9,9 @@ namespace Slime\Component\Http;
  */
 abstract class HttpCommon
 {
+    /**
+     * @var Bag_Header
+     */
     protected $Header;
     protected $sContent;
 
@@ -17,22 +20,12 @@ abstract class HttpCommon
         return $this->Header[$sKey];
     }
 
-    public function setHeader($mKeyOrKVMap, $sValue = null)
+    public function setHeader($mKeyOrKVMap, $sValue = null, $bOverwrite = true)
     {
         if (is_array($mKeyOrKVMap)) {
-            foreach ($mKeyOrKVMap as $sK => $sV) {
-                if ($sV === null) {
-                    unset($this->Header[$sK]);
-                } else {
-                    $this->Header[$sK] = $sV;
-                }
-            }
+            $this->Header->merge($mKeyOrKVMap, $bOverwrite);
         } else {
-            if ($sValue === null) {
-                unset($this->Header[$mKeyOrKVMap]);
-            } else {
-                $this->Header[$mKeyOrKVMap] = $sValue;
-            }
+            $this->Header[$mKeyOrKVMap] = $sValue;
         }
 
         return $this;

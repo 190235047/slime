@@ -32,4 +32,23 @@ final class Configure
         }
         return $Obj;
     }
+
+    public static function parseRecursion($mResult, IAdaptor $Config)
+    {
+        if (is_string($mResult)) {
+            switch ($mResult[0]) {
+                case '@':
+                    $mResult = $Config->get(substr($mResult, 1));
+                    break;
+                case '\\':
+                    $mResult = substr($mResult, 1);
+                    break;
+            }
+        } elseif (is_array($mResult)) {
+            foreach ($mResult as $mK => $mV) {
+                $mResult[$mK] = self::parseRecursion($mV, $Config);
+            }
+        }
+        return $mResult;
+    }
 }

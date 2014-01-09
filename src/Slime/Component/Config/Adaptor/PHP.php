@@ -7,7 +7,7 @@ namespace Slime\Component\Config;
  * @package Slime\Component\Config
  * @author  smallslime@gmail.com
  */
-class Adaptor_PHP implements IAdaptor
+class Adaptor_PHP extends Adaptor_ABS
 {
     /** @var string */
     private $sBaseDir;
@@ -22,15 +22,14 @@ class Adaptor_PHP implements IAdaptor
     private $aCachedData;
 
     /**
-     * @param string $sBaseDir
-     * @param string $sDefaultBaseDir
+     * @param string  $sBaseDir
+     * @param string  $sDefaultBaseDir
      */
     public function __construct($sBaseDir, $sDefaultBaseDir)
     {
         $this->sBaseDir        = $sBaseDir;
         $this->sDefaultBaseDir = $sDefaultBaseDir;
-
-        $this->bIsDefault = $this->sBaseDir === $this->sDefaultBaseDir;
+        $this->bIsDefault      = $this->sBaseDir === $this->sDefaultBaseDir;
     }
 
     /**
@@ -62,22 +61,27 @@ class Adaptor_PHP implements IAdaptor
         return $mResult;
     }
 
-    private function _get($sKey, $sBaseDir)
+    protected function _get($sKey, $sBaseDir)
     {
         if (strpos($sKey, '.') === false) {
-            if (!isset($this->aCachedData[$sBaseDir][$sKey])) {
-                $sConfigFile                         = $sBaseDir . '/' . str_replace(':', '/', $sKey) . '.php';
-                $this->aCachedData[$sBaseDir][$sKey] = file_exists($sConfigFile) ? require $sConfigFile : null;
-            }
-            $mResult = $this->aCachedData[$sBaseDir][$sKey];
+            $sK = $sKey;
+            $aKeys = null;
         } else {
             $aKeys = explode('.', $sKey);
-            $sFile = array_shift($aKeys);
-            if (!isset($this->aCachedData[$sBaseDir][$sFile])) {
-                $sConfigFile                          = $sBaseDir . '/' . str_replace(':', '/', $sFile) . '.php';
-                $this->aCachedData[$sBaseDir][$sFile] = file_exists($sConfigFile) ? require $sConfigFile : null;
-            }
-            $mResult = $this->aCachedData[$sBaseDir][$sFile];
+            $sK = array_shift($aKeys);
+        }
+
+        if (!isset($this->aCachedData[$sBaseDir][$sK])) {
+            $sConfFile = $sBaseDir . '/' . str_replace(':', '/', $sK) . '.php';
+            $mResult   = file_exists($sConfFile) ? require $sConfFile : null;
+            $mResult   = $this->bParseMode ? Configure::parseRecursion($mResult, $this) : $mResult;
+
+            $this->aCachedData[$sBaseDir][$sK] = $mResult;
+        } else {
+            $mResult = $this->aCachedData[$sBaseDir][$sK];
+        }
+
+        if ($aKeys!==null) {
             foreach ($aKeys as $sKey) {
                 if (!isset($mResult[$sKey])) {
                     $mResult = null;
@@ -86,6 +90,7 @@ class Adaptor_PHP implements IAdaptor
                 $mResult = $mResult[$sKey];
             }
         }
+
         return $mResult;
     }
 }

@@ -65,6 +65,7 @@ class I18N
             $sLanguageBaseDir . DIRECTORY_SEPARATOR . $sCurrentLanguageDir,
             $sLanguageBaseDir . DIRECTORY_SEPARATOR . $sDefaultLanguageDir
         );
+        $this->Configure->setParseMode(false);
     }
 
     public function get($sString)
