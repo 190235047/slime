@@ -1,154 +1,121 @@
 <?php
 namespace Slime\Bundle\Framework;
 
-use Slime\Component\Config;
-use Slime\Component\I18N;
-use Slime\Component\Log;
-use Slime\Component\Route;
-use Slime\Component\Http;
+use Slime\Component\Config\IAdaptor;
+use Slime\Component\Http\HttpRequest;
+use Slime\Component\Http\HttpResponse;
+use Slime\Component\Route\Router;
 
-/**
- * Class Bootstrap
- * 框架核心运行类
- * 1. 调用静态方法 factory
- *    1. 生成上下文对象;
- *    2. 注册各种变量/对象到上下文对象 详见 Slime\Bundle\Framework\Context;
- *    3. 注册 ErrorHandle 方法
- * 2. 调用 run 方法运行
- *    1. 路由, 获取回调对象
- *    2. 执行回调
- *
- * @package Slime\Bundle\Framework
- * @author  smallslime@gmail.com
- */
-abstract class Bootstrap
+class Bootstrap
 {
-    /**
-     * @var \Slime\Bundle\Framework\Context
-     */
-    protected $Context;
+    # error deal
+    private static $mCBErrorHandle = null;
+    private static $mCBUncaughtException = null;
 
-    abstract protected function getAppDir();
-
-    /**
-     * @param string                      $sAPI                  PHP运行方式, 当前支持 (cli||http)
-     * @param string                      $sENV                  当前环境(例如 publish:生产环境; development:开发环境)
-     * @param string                      $sAppNs                应用的命名空间
-     * @param array                       $mLogConfigOrLogObject 日志对象初始化配置
-     * @param string|null                 $sModuleConfigKey      自动加载模块的配置文件名(null:不做自动加载)
-     * @param Http\HttpRequest|array|null $mIn
-     */
-    final public function __construct($sAPI, $sENV, $sAppNs, $mLogConfigOrLogObject, $mIn = null, $sModuleConfigKey = 'module')
+    public static function setHandle($mCBErrorHandle = null, $mCBUncaughtException = null)
     {
-        set_error_handler(array($this, 'handleError'));
+        self::$mCBErrorHandle = $mCBErrorHandle === null ?
+            array('Slime\\Bundle\\Framework\\Bootstrap', 'handleError') :
+            $mCBErrorHandle;
 
-        Context::makeInst();
-        /** @var $Context Context */
-        $this->Context = $Context = Context::getInst();
+        self::$mCBUncaughtException = $mCBUncaughtException === null ?
+            array('Slime\\Bundle\\Framework\\Bootstrap', 'handleUncaughtException') :
+            $mCBUncaughtException;
+    }
 
-        # run mode
-        $sRunMode = (strtolower($sAPI) === 'cli' ? 'cli' : 'http');
+    public static function handleUncaughtException(\Exception $E)
+    {
+        trigger_error($E->getMessage(), E_USER_ERROR);
+    }
 
-        # register logger
-        if ($mLogConfigOrLogObject instanceof Log\Logger) {
-            $Context->register('Log', $mLogConfigOrLogObject);
+    public static function handleError($iErrNum, $sErrStr, $sErrFile, $iErrLine, $sErrContext)
+    {
+        $sStr = $iErrNum . ':' . $sErrStr . "\nIn File[$sErrFile]:Line[$iErrLine]";
+
+        $Context = Context::getInst();
+        # 在某些对象, 在PHP全局回收时调用析构函数. 此时 Context 已经销毁, 如果析构函数中发生错误, 会拿不到 Context. 尽量避免!
+        if ($Context === null || !$Context->isRegister('Log')) {
+            trigger_error($sStr, E_USER_WARNING);
         } else {
-            $mLogConfigOrLogObject = $mLogConfigOrLogObject[$sRunMode];
-            $aWriter               = array();
-            foreach ($mLogConfigOrLogObject['writer'] as $mKey => $mV) {
-                if (is_int($mKey) && is_string($mV)) {
-                    $sClass    = $mV[0] === '@' ?
-                        '\\Slime\\Component\\Log\\Writer_' . substr($mV, 1) :
-                        $mV;
-                    $aWriter[] = new $sClass();
-                } else {
-                    $sClass    = $mKey;
-                    $aParam    = $mV;
-                    $Ref       = new \ReflectionClass(
-                        $sClass[0] === '@' ?
-                            '\\Slime\\Component\\Log\\Writer_' . substr($sClass, 1) :
-                            $sClass
-                    );
-                    $aWriter[] = $Ref->newInstanceArgs($aParam);
-                }
+            switch ($iErrNum) {
+                case E_NOTICE:
+                case E_USER_NOTICE:
+                    $Context->Log->notice($sStr);
+                    break;
+                case E_USER_ERROR:
+                    $Context->Log->error($sStr);
+                    exit(1);
+                    break;
+                default:
+                    $Context->Log->warning($sStr);
+                    break;
             }
-            $Log = new Log\Logger($aWriter, isset($mLogConfigOrLogObject['level']) ? $mLogConfigOrLogObject['level'] : Log\Logger::LEVEL_ALL);
-            $Context->register('Log', $Log);
         }
+    }
 
-        # register app_dir
-        $Context->register('aAppDir', $this->getAppDir());
+    /**
+     * @param string       $sENV
+     * @param string       $sAppNs
+     * @param IAdaptor     $Config
+     * @param null|Context $Context
+     * @param null|string  $sAPI
+     * @param null|mixed   $mHttpReqOrCliArg
+     * @param string       $sModuleConfigKey
+     */
+    public function __construct(
+        $sENV,
+        $sAppNs,
+        IAdaptor $Config,
+        $Context = null,
+        $sAPI = null,
+        $mHttpReqOrCliArg = null,
+        $sModuleConfigKey = 'module'
+    ) {
+        /** @var Context $Context */
+        if ($Context === null || !$Context instanceof Context) {
+            Context::makeInst();
+            $Context = Context::getInst();
+        }
+        $this->Context = $Context;
 
-        # register run_mode
-        $Context->register('sRunMode', $sRunMode);
-
-        #register env
-        $Context->register('sENV', $sENV);
-
-        #register app namespace
-        $Context->register('sNS', $sAppNs);
-
-        # register this
-        $Context->register('Bootstrap', $this);
-
-        # register datetime
-        $Context->register('DateTime', new \DateTime());
-
-        # register config
-        $sDirConfig = $Context->aAppDir['config'];
-        $Config     = Config\Configure::factory(
-            '@PHP',
-            $sDirConfig . '/' . $Context->sENV,
-            $sDirConfig . '/publish'
+        # register
+        $aMap = array(
+            'Bootstrap' => $this,
+            'sENV'      => $sENV,
+            'sNS'       => $sAppNs,
+            'Config'    => $Config,
+            'Route'     => new Router($sAppNs),
+            'sRunMode'  => $sAPI === null ?
+                    (strtolower(PHP_SAPI) === 'cli' ? 'cli' : 'http') :
+                    (strtolower($sAPI) === 'cli' ? 'cli' : 'http'),
         );
-        $Context->register('Config', $Config);
 
-        # register http / argv
-        if ($sRunMode === 'http') {
-            $Context->register(
-                'HttpRequest',
-                $mIn instanceof Http\HttpRequest ? $mIn : Http\HttpRequest::createFromGlobals()
-            );
-            $Context->register('HttpResponse', Http\HttpResponse::create()->setNoCache());
-
-            # register i18n
-            $aI18NConfig = $Context->aAppDir;
-            if (isset($aI18NConfig['i18n'])) {
-                # register I18N
-                $Context->register(
-                    'I18N',
-                    I18N\I18N::createFromHttp($aI18NConfig['i18n'], $Context->HttpRequest)
-                );
-            }
+        if ($aMap['sRunMode'] === 'cli') {
+            $aMap['aArgv'] = is_array($mHttpReqOrCliArg) ?
+                $mHttpReqOrCliArg :
+                $GLOBALS['argv'];
         } else {
-            $Context->register(
-                'aArgv',
-                is_array($mIn) ? $mIn : $GLOBALS['argv']
-            );
+            $aMap['HttpRequest']  = $mHttpReqOrCliArg instanceof HttpRequest ?
+                $mHttpReqOrCliArg :
+                HttpRequest::createFromGlobals();
+            $aMap['HttpResponse'] = HttpResponse::create();
         }
 
-        # register route
-        $Context->register('Route', new Route\Router($Context->sNS));
-
-        # register automatic
-        if ($sModuleConfigKey!==null) {
-            $Context->registerModulesAutomatic($sModuleConfigKey);
-        }
+        $Context->registerMulti($aMap);
     }
 
     public function run()
     {
         $sMethod = 'run' . $this->Context->sRunMode;
-        try {
+        if (self::$mCBUncaughtException===null) {
             $this->$sMethod();
-        } catch (\Exception $E) {
-            $mExceptionHandle = $this->Context->Config->get('system.uncaught_exception_handle');
-            if ($mExceptionHandle !== null) {
-                call_user_func($mExceptionHandle, $E);
-            } else {
-                $this->Context->Log->error($E->getMessage());
+        } else {
+            try {
+                $this->$sMethod();
+            } catch (\Exception $E) {
+                call_user_func(self::$mCBUncaughtException, $E);
+                exit(1);
             }
-            exit(1);
         }
     }
 
@@ -183,42 +150,5 @@ abstract class Bootstrap
                 $CallBack->call();
             }
         }
-    }
-
-    /**
-     * @param int    $iErrNum     错误码
-     * @param string $sErrStr     错误信息
-     * @param string $sErrFile    错误发生文件
-     * @param int    $iErrLine    错误发生行
-     * @param string $sErrContext 错误发生上下文
-     */
-    public function handleError($iErrNum, $sErrStr, $sErrFile, $iErrLine, $sErrContext)
-    {
-        $sStr = $iErrNum . ':' . $sErrStr . "\nIn File[$sErrFile]:Line[$iErrLine]";
-
-        $Context = Context::getInst();
-        # 在某些对象, 在PHP全局回收时调用析构函数. 此时 Context 已经销毁, 如果析构函数中发生错误, 会拿不到 Context. 尽量避免!
-        if ($Context === null || !$Context->isRegister('Log')) {
-            trigger_error($sStr, E_USER_WARNING);
-        } else {
-            switch ($iErrNum) {
-                case E_NOTICE:
-                case E_USER_NOTICE:
-                    $Context->Log->notice($sStr);
-                    break;
-                case E_USER_ERROR:
-                    $Context->Log->error($sStr);
-                    exit(1);
-                    break;
-                default:
-                    $Context->Log->warning($sStr);
-                    break;
-            }
-        }
-    }
-
-    final public function __clone()
-    {
-        throw new \Exception('Can not clone');
     }
 }

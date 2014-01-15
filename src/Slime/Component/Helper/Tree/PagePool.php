@@ -9,7 +9,7 @@ namespace Slime\Component\Helper;
  */
 class Tree_PagePool extends Tree_Pool
 {
-    public static function initFromArrayRecursion($aArr)
+    public static function initFromArrayRecursion(array $aArr)
     {
         if (count($aArr) !== 1) {
             throw new \Exception('Tree array data must own and only can own one root node');

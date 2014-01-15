@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\MultiProcessJob;
 
-use Psr\Log\LoggerInterface;
+use Slime\Component\Log\Logger;
 
 /**
  * Interface ITask
@@ -12,25 +12,25 @@ use Psr\Log\LoggerInterface;
 interface ITask
 {
     /**
-     * @param LoggerInterface $Logger
+     * @param Logger $Logger
      *
      * @return string|bool string as ok and false as fail
      */
-    public function fetchMsgInMain(LoggerInterface $Logger);
+    public function fetchMsgInMain(Logger $Logger);
 
     /**
      * @param string          $sMessage
-     * @param LoggerInterface $Logger
+     * @param Logger $Logger
      *
      * @return void
      */
-    public function dealMsgInChild($sMessage, LoggerInterface $Logger);
+    public function dealMsgInChild($sMessage, Logger $Logger);
 
     /**
      * @param string          $sMessage
-     * @param LoggerInterface $Logger
+     * @param Logger $Logger
      *
      * @return void
      */
-    public function dealWhenException($sMessage, LoggerInterface $Logger);
+    public function dealWhenException($sMessage, Logger $Logger);
 }

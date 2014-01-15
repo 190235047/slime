@@ -109,4 +109,17 @@ abstract class Controller_ABS
         $Bootstrap->run();
         Context::destroy();
     }
+
+    public function getParam($sK, $mDefault = null, $bForce = false)
+    {
+        if (array_key_exists($sK, $this->aParam)) {
+            return $this->aParam[$sK];
+        } else {
+            if ($bForce) {
+                throw new \Exception("Key[$sK] is not in param");
+            } else {
+                return $mDefault;
+            }
+        }
+    }
 }

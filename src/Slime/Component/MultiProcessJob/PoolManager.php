@@ -1,8 +1,7 @@
 <?php
 namespace Slime\Component\MultiProcessJob;
 
-use Psr\Log\LoggerInterface;
-use Slime\Component\Log;
+use Slime\Component\Log\Logger;
 
 /**
  * Class PoolManager
@@ -32,7 +31,7 @@ class PoolManager
 
     public function __construct(
         $sFifoDir,
-        LoggerInterface $Log,
+        Logger $Log,
         ITask $Task,
         $sConfigFile = null,
         $iPoolSize = 20,
@@ -40,9 +39,7 @@ class PoolManager
         $iMaxExecuteTime = 600
     ) {
         # var init
-        if ($Log instanceof Log\Logger) {
-            $Log->sGUID = 'Main:' . posix_getpid() . '';
-        }
+        $Log->sGUID = 'Main:' . posix_getpid() . '';
 
         $this->sFifoDir = $sFifoDir;
         $this->Log      = $Log;

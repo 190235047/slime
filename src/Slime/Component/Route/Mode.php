@@ -38,9 +38,7 @@ class Mode
             $aUrlBlock[$iK] = implode('', array_map('ucfirst', explode('_', $sBlock)));
         }
 
-        if (strpos($sAction, '.')) {
-            $sAction = strstr($sAction, '.', true);
-        }
+        list($sAction, $sExt) = array_replace(array('', 'html'), explode('.', $sAction, 2));
         $sAction = 'action' . implode('', array_map('ucfirst', explode('_', $sAction)));
 
         $sRequestMethod = $Request->getRequestMethod();
@@ -49,7 +47,11 @@ class Mode
         }
 
         $CallBack = new CallBack($sAppNs);
-        $CallBack->setCBObject('ControllerHttp_' . implode('_', $aUrlBlock), $sAction);
+        $CallBack->setCBObject(
+            'ControllerHttp_' . implode('_', $aUrlBlock),
+            $sAction,
+            array(array('__ext__' => strtolower($sExt)))
+        );
 
         return $CallBack;
     }

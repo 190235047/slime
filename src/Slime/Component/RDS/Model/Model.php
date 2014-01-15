@@ -128,10 +128,11 @@ class Model
      * @param string $sOrderBy
      * @param int    $iLimit
      * @param int    $iOffset
+     * @param string $sTable
      *
      * @return Group|Item[]
      */
-    public function findMulti(array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
+    public function findMulti(array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null, $sTable = null)
     {
         $sAttr = '';
         $sOrderBy !== null && $sAttr .= " ORDER BY $sOrderBy";
@@ -139,7 +140,7 @@ class Model
         $iOffset !== null && $sAttr .= " OFFSET $iOffset";
 
         $aaData = $this->CURD->querySmarty(
-            $this->sTable,
+            $sTable === null ? $this->sTable : $sTable,
             $aWhere,
             $sAttr
         );
@@ -169,6 +170,7 @@ class Model
      * @param array  $aWhere
      * @param string $sAttr
      * @param string $sSelect
+     * @param string $sTable
      * @param bool   $bOnlyOne
      * @param int    $iFetchStyle
      * @param mixed  $mFetchArgs
@@ -179,10 +181,11 @@ class Model
         $aWhere = array(),
         $sAttr = '',
         $sSelect = '',
+        $sTable  = null,
         $bOnlyOne = false,
         $iFetchStyle = \PDO::FETCH_ASSOC,
         $mFetchArgs = null
     ) {
-        return $this->CURD->querySmarty($this->sTable, $aWhere, $sAttr, $sSelect, $bOnlyOne, $iFetchStyle, $mFetchArgs);
+        return $this->CURD->querySmarty($sTable===null ? $this->sTable : $sTable, $aWhere, $sAttr, $sSelect, $bOnlyOne, $iFetchStyle, $mFetchArgs);
     }
 }

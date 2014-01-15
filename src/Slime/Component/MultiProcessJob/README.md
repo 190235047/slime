@@ -1,9 +1,8 @@
 # MultiProcess Job Deal
 
 ```php
-use Psr\Log\LoggerInterface;
 use Slime\Component\MultiProcessJob;
-use Slime\Component\Log;
+use Slime\Component\Log\Logger;
 
 class Task implements MultiProcess\ITask
 {
@@ -12,7 +11,7 @@ class Task implements MultiProcess\ITask
      *
      * @return string|bool string as ok and false as fail
      */
-    public function fetchMsgInMain(LoggerInterface $Logger)
+    public function fetchMsgInMain(Logger $Logger)
     {
         if (($i = rand(0, 100))>50) {
             return json_encode(array($i, rand(100, 1000)));
@@ -22,12 +21,12 @@ class Task implements MultiProcess\ITask
     }
 
     /**
-     * @param string          $sMessage
-     * @param LoggerInterface $Logger
+     * @param string $sMessage
+     * @param Logger $Logger
      *
      * @return void
      */
-    public function dealMsgInChild($sMessage, LoggerInterface $Logger)
+    public function dealMsgInChild($sMessage, Logger $Logger)
     {
         $aArr = json_decode($sMessage);
         if (count($aArr) == 2) {
@@ -51,7 +50,7 @@ class Task implements MultiProcess\ITask
 
 $PoolManager = new MultiProcess\PoolManager(
     '/tmp/fifo',
-    new Log\Logger(array(new Log\Writer_STDFD())),
+    new Logger(array(new Log\Writer_STDFD())),
     new Task()
 );
 $PoolManager->run();

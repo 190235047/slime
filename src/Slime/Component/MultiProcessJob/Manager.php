@@ -1,8 +1,7 @@
 <?php
 namespace Slime\Component\MultiProcessJob;
 
-use Psr\Log\LoggerInterface;
-use Slime\Component\Log;
+use Slime\Component\Log\Logger;
 
 /**
  * Class Manager
@@ -16,15 +15,13 @@ class Manager
     //private $aChildren = array();
 
     public function __construct(
-        LoggerInterface $Log,
+        Logger $Log,
         ITask $Task,
         $sConfigFile = null,
         $iMaxExecuteTime = 600
     ) {
         # var init
-        if ($Log instanceof Log\Logger) {
-            $Log->sGUID = 'Main:' . posix_getpid() . '';
-        }
+        $Log->sGUID = 'Main:' . posix_getpid() . '';
 
         $this->Log      = $Log;
         $this->Task     = $Task;

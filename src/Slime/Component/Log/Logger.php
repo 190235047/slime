@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\Log;
 
-use Psr\Log\LoggerInterface;
+use Slime\Component\Helper\Sugar;
 
 /**
  * Class Logger
@@ -42,18 +42,41 @@ class Logger implements LoggerInterface
     );
 
     /**
-     * @param IWriter[] $aWriter
+     * @param array     $aWriterConf
      * @param int       $iLogLevel
      * @param null      $sRequestID
      */
     public function __construct(
-        array $aWriter,
+        array $aWriterConf,
         $iLogLevel = self::LEVEL_ALL,
         $sRequestID = null
     ) {
-        $this->aWriter   = $aWriter;
+        $this->aWriter   = self::createWriter($aWriterConf);
         $this->iLogLevel = $iLogLevel;
         $this->sGUID     = $sRequestID ? $sRequestID : md5(uniqid(__CLASS__, true));
+    }
+
+    /**
+     * @param $aWriterConf ['@File' => ['param1', 'param2'], '@FirePHP']
+     *
+     * @return IWriter[]
+     */
+    public static function createWriter($aWriterConf)
+    {
+        $aWriter = array();
+        foreach ($aWriterConf as $sK => $aParam) {
+            $aClassAndArgs = array();
+            if (is_int($sK)) {
+                $aClassAndArgs[] = (string)$aParam;
+            } else {
+                $aClassAndArgs[] = $sK;
+                if (!empty($aParam) && is_array($aParam)) {
+                    $aClassAndArgs = array_merge($aClassAndArgs, $aParam);
+                }
+            }
+            $aWriter[] = Sugar::createObjAdaptor(__NAMESPACE__, $aClassAndArgs, 'IWriter', 'Writer_');
+        }
+        return $aWriter;
     }
 
     /**

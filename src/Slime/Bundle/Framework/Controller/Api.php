@@ -8,6 +8,7 @@ use Slime\Component\Helper\Arr2XML;
 /**
  * Class Controller_API
  * Slime 内置Http控制器基类
+ * 建议 Autoload View Module
  *
  * @package Slime\Bundle\Framework
  * @author  smallslime@gmail.com
@@ -63,7 +64,7 @@ abstract class Controller_Api extends Controller_ABS
             ->setContent(
                 $this->sTPL === null ?
                     Arr2XML::factory()->Array2XML($this->aData) :
-                    $this->View()->setTpl($this->sTPL)->renderAsResult()
+                    $this->Context->View->setTpl($this->sTPL)->renderAsResult()
             );
     }
 
@@ -74,7 +75,7 @@ abstract class Controller_Api extends Controller_ABS
             ->setContent(
                 $this->sTPL === null ?
                     json_encode($this->aData) :
-                    $this->View()->setTpl($this->sTPL)->renderAsResult()
+                    $this->Context->View->setTpl($this->sTPL)->renderAsResult()
             );
     }
 
@@ -89,21 +90,7 @@ abstract class Controller_Api extends Controller_ABS
             ->setContent(
                 $this->sTPL === null ?
                     $sCB . '(' . json_encode($this->aData) . ')' :
-                    $this->View()->setTpl($this->sTPL)->renderAsResult()
+                    $this->Context->View->setTpl($this->sTPL)->renderAsResult()
             );
-    }
-
-
-    protected $View = null;
-    /**
-     * @return \Slime\Component\View\IAdaptor
-     */
-    protected function View()
-    {
-        if ($this->View === null) {
-            $this->View = View\Viewer::factory('@PHP')->setBaseDir($this->Context->aAppDir['view']);
-        }
-
-        return $this->View;
     }
 }

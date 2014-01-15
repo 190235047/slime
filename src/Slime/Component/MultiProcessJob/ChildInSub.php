@@ -1,8 +1,7 @@
 <?php
 namespace Slime\Component\MultiProcessJob;
 
-use Psr\Log\LoggerInterface;
-use Slime\Component\Log;
+use Slime\Component\Log\Logger;
 
 /**
  * 1. 以写方式打开子到父管道, 以读方式打开父到子管道
@@ -17,13 +16,11 @@ use Slime\Component\Log;
  */
 class ChildInSub
 {
-    public function __construct($sPipeDir, ITask $Task, LoggerInterface $Log, $iMaxFinishCount)
+    public function __construct($sPipeDir, ITask $Task, Logger $Log, $iMaxFinishCount)
     {
         # Init var
         $this->iPID = posix_getpid();
-        if ($Log instanceof Log\Logger) {
-            $Log->sGUID = "CHILD:$this->iPID";
-        }
+        $Log->sGUID = "CHILD:$this->iPID";
         $this->Log             = $Log;
         $this->Task            = $Task;
         $this->iMaxFinishCount = $iMaxFinishCount;

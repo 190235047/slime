@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\Context;
 
-use Slime\Component\DataStructure\Stack;
+use Slime\Component\Helper\Sugar;
 
 /**
  * Class Context
@@ -18,8 +18,6 @@ use Slime\Component\DataStructure\Stack;
  */
 class Context
 {
-    public $aInject = array();
-
     protected $aStorage = array();
 
     public function __get($sVarName)
@@ -33,7 +31,29 @@ class Context
     }
 
     /**
+     * @param string $sVarName
+     * @param bool   $bForce
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public function get($sVarName, $bForce = true)
+    {
+        if (!isset($this->aStorage[$sVarName])) {
+            if ($bForce) {
+                throw new \Exception(
+                    "Object register failed. {$sVarName} has not exist"
+                );
+            } else {
+                return null;
+            }
+        }
+        return $this->aStorage[$sVarName];
+    }
+
+    /**
      * 获取当前请求的上下文对象
+     *
      * @return $this 有可能为NULL
      */
     public static function getInst()
@@ -85,14 +105,22 @@ class Context
                 $this->aStorage[$sVarName] = $mEveryThing;
             } else {
                 if (!$bAllowExist) {
-                    throw new \Exception(
-                        "Object register failed. {$sVarName} has exist"
-                    );
+                    throw new \Exception("Object register failed. {$sVarName} has exist");
                 }
             }
         } else {
             $this->aStorage[$sVarName] = $mEveryThing;
         }
+    }
+
+    public function registerMulti(array $aKVMap, $bOverWrite = true, $bAllowExist = true)
+    {
+        if (!$bAllowExist) {
+            if (count($aArr = array_intersect_key($this->aStorage, $aKVMap)) === 0) {
+                throw new \Exception(sprintf("Object register failed. [%s] has exist"), json_encode($aArr));
+            }
+        }
+        $this->aStorage = $bOverWrite ? array_merge($this->aStorage, $aKVMap) : array_merge($aKVMap, $this->aStorage);
     }
 
     /**
@@ -105,26 +133,10 @@ class Context
     public function registerObjWithArgs(
         $sVarName,
         $sClassName,
-        array $aArgs = null,
+        array $aArgs = array(),
         $bOverWrite = true,
         $bAllowExist = true
     ) {
-        $this->register($sVarName, self::createObj($sClassName, $aArgs), $bOverWrite, $bAllowExist);
-    }
-
-    /**
-     * @param string $sClassName
-     * @param array  $aArgs
-     *
-     * @return object
-     */
-    public static function createObj($sClassName, array $aArgs = null)
-    {
-        if ($aArgs===null) {
-            return new $sClassName();
-        } else {
-            $Ref = new \ReflectionClass($sClassName);
-            return $Ref->newInstanceArgs($aArgs);
-        }
+        $this->register($sVarName, Sugar::createObj($sClassName, $aArgs), $bOverWrite, $bAllowExist);
     }
 }

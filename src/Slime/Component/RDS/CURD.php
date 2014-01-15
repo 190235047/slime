@@ -1,11 +1,14 @@
 <?php
 namespace Slime\Component\RDS;
 
+use Slime\Component\Helper\Packer;
+
 /**
  * Class CURD
  *
  * @package Slime\Component\RDS
  * @author  smallslime@gmail.com
+ *
  * @property-read string $sDSN
  * @property-read string $sUsername
  * @property-read string $sPassword
@@ -27,13 +30,20 @@ class CURD
 
     public $bCheckConnect = false;
 
-    public function __construct($sKey, $sDSN, $sUsername, $sPassword, $aOptions = array())
-    {
-        $this->sKey      = $sKey;
-        $this->sDSN      = $sDSN;
-        $this->sUsername = $sUsername;
-        $this->sPassword = $sPassword;
-        $this->aOptions  = $aOptions;
+    public function __construct(
+        $sKey,
+        $sDSN,
+        $sUsername,
+        $sPassword,
+        array $aOptions = array(),
+        array $aAOPCallBack = array()
+    ) {
+        $this->sKey          = $sKey;
+        $this->sDSN          = $sDSN;
+        $this->sUsername     = $sUsername;
+        $this->sPassword     = $sPassword;
+        $this->aOptions      = $aOptions;
+        $this->aAOPCallBack  = $aAOPCallBack;
     }
 
     /**
@@ -43,13 +53,16 @@ class CURD
      */
     public function getInstance($bCheckConnect = false)
     {
-        if (!$this->Instance) {
-            $this->Instance = new \PDO($this->sDSN, $this->sUsername, $this->sPassword, $this->aOptions);
-        } elseif (
-            ($bCheckConnect || $this->bCheckConnect) &&
-            (!$this->Instance || $this->Instance->getAttribute(\PDO::ATTR_SERVER_INFO)===null)
+        if (!$this->Instance ||
+            (
+                ($bCheckConnect || $this->bCheckConnect) &&
+                ($this->Instance->getAttribute(\PDO::ATTR_SERVER_INFO) === null)
+            )
         ) {
-            $this->Instance = new \PDO($this->sDSN, $this->sUsername, $this->sPassword, $this->aOptions);
+            $this->Instance = new Packer(
+                new \PDO($this->sDSN, $this->sUsername, $this->sPassword, $this->aOptions),
+                $this->aAOPCallBack
+            );
         }
         return $this->Instance;
     }
@@ -125,8 +138,12 @@ class CURD
     {
         $aUpdatePre = $aUpdateData = array();
         foreach ($aKVMap as $sK => $sV) {
-            $aUpdatePre[]  = "`$sK` = ?";
-            $aUpdateData[] = $sV;
+            if (is_int($sK)) {
+                $aUpdatePre[] = $sV;
+            } else {
+                $aUpdatePre[]  = "`$sK` = ?";
+                $aUpdateData[] = $sV;
+            }
         }
         $aArgs       = array();
         $sSQLPrepare = sprintf(

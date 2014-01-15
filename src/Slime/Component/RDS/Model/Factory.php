@@ -23,7 +23,8 @@ class Factory
         $aDBConfigAll,
         $aModelConfig,
         $sAppModelNS = '',
-        $sDefaultModelClass = 'Slime\\Component\\RDS\\Model\\Model'
+        $sDefaultModelClass = 'Slime\\Component\\RDS\\Model\\Model',
+        array $aAOP = array()
     ) {
         foreach ($aDBConfigAll as $sK => $aDBConfig) {
             $this->aCURD[$sK] = new CURD(
@@ -31,7 +32,8 @@ class Factory
                 $aDBConfig['dsn'],
                 $aDBConfig['username'],
                 $aDBConfig['password'],
-                $aDBConfig['options']
+                $aDBConfig['options'],
+                $aAOP
             );
         }
         $this->aModelConf         = $aModelConfig;

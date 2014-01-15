@@ -27,6 +27,8 @@ class CallBack
      * @param mixed $mClassNameOrObject
      * @param string $sMethod
      * @param array $aObjInitParam
+     *
+     * @return $this
      */
     public function setCBObject($mClassNameOrObject, $sMethod, array $aObjInitParam = array())
     {
@@ -36,15 +38,19 @@ class CallBack
         } else {
             $this->mCallable = array($mClassNameOrObject, $sMethod);
         }
+        return $this;
     }
 
     /**
      * @param string $sClassName
      * @param string $sMethod
+     *
+     * @return $this
      */
     public function setCBClass($sClassName, $sMethod)
     {
         $this->mCallable = array($this->sNSPre . '\\' . $sClassName, $sMethod);
+        return $this;
     }
 
     /**
@@ -105,7 +111,9 @@ class CallBack
             $sMid = $this->mCallable[1];
             if (!isset($aMethod[$sMid])) {
                 throw new \RuntimeException(
-                    sprintf('There is no method[%s] in class[%s]', $sMid, $mClassOrObj)
+                    sprintf('There is no method[%s] in class[%s]', $sMid,
+                        is_object($mClassOrObj) ? get_class($mClassOrObj) : $mClassOrObj
+                    )
                 );
             }
 
