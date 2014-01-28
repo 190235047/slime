@@ -17,9 +17,6 @@ class HttpResponse extends HttpCommon
     /** @var string */
     public $sStatusMessage;
 
-    /** @var Bag_Header */
-    protected $Header;
-
     /** @var string */
     protected $sContent;
 

@@ -55,7 +55,8 @@ class Arr2XML
                 $EL = $this->DOMDocument->createElement($sK);
                 $this->_Array2XML($mV, $EL, $sK);
             } else {
-                $EL = $this->DOMDocument->createElement($sK, (string)$mV);
+                $EL = $this->DOMDocument->createElement($sK);
+                $EL->appendChild($this->DOMDocument->createTextNode((string)$mV));
             }
             $DOM->appendChild($EL);
         }

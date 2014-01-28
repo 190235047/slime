@@ -9,6 +9,18 @@ namespace Slime\Component\Http;
  */
 class Bag_File extends Bag_Bag
 {
+    public function filter($mCB)
+    {
+        $aParam = func_get_args();
+        foreach ($this->aData as $sName => $aItem) {
+            if (!call_user_func_array($mCB, $aParam)) {
+                unset($this->aData[$sName]);
+            }
+        }
+
+        return $this;
+    }
+
     /**
      * @param string $sDir
      * @param mixed  $mCBGentFileName

@@ -44,23 +44,6 @@ class Core
             }
         }
 
-        /*
-        # add first page and last page
-        $iFirst = abs($aResult[0]);
-        if ($iFirst > 1) {
-            if ($iFirst > 2) {
-                array_unshift($aResult, 0);
-            }
-            array_unshift($aResult, 1);
-        }
-        $iLast = abs($aResult[count($aResult) - 1]);
-        if ($iLast < $iTotalPage) {
-            if ($iLast < $iTotalPage - 1) {
-                array_push($aResult, 0);
-            }
-            array_push($aResult, $iTotalPage);
-        }*/
-
         # build data
         $iPre  = $iCurrentPage - 1;
         $iNext = $iCurrentPage + 1;

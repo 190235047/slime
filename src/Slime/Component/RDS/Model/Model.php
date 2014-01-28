@@ -129,10 +129,18 @@ class Model
      * @param int    $iLimit
      * @param int    $iOffset
      * @param string $sTable
+     * @param string $sSelect
      *
      * @return Group|Item[]
      */
-    public function findMulti(array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null, $sTable = null)
+    public function findMulti(
+        array $aWhere = null,
+        $sOrderBy = null,
+        $iLimit = null,
+        $iOffset = null,
+        $sTable = null,
+        $sSelect = ''
+    )
     {
         $sAttr = '';
         $sOrderBy !== null && $sAttr .= " ORDER BY $sOrderBy";
@@ -142,7 +150,8 @@ class Model
         $aaData = $this->CURD->querySmarty(
             $sTable === null ? $this->sTable : $sTable,
             $aWhere,
-            $sAttr
+            $sAttr,
+            $sSelect
         );
 
         $Group = new Group($this);

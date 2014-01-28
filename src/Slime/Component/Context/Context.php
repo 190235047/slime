@@ -1,8 +1,6 @@
 <?php
 namespace Slime\Component\Context;
 
-use Slime\Component\Helper\Sugar;
-
 /**
  * Class Context
  *
@@ -18,43 +16,10 @@ use Slime\Component\Helper\Sugar;
  */
 class Context
 {
-    protected $aStorage = array();
-
-    public function __get($sVarName)
-    {
-        if (!isset($this->aStorage[$sVarName])) {
-            throw new \Exception(
-                "Object register failed. {$sVarName} has not exist"
-            );
-        }
-        return $this->aStorage[$sVarName];
-    }
-
-    /**
-     * @param string $sVarName
-     * @param bool   $bForce
-     *
-     * @return mixed
-     * @throws \Exception
-     */
-    public function get($sVarName, $bForce = true)
-    {
-        if (!isset($this->aStorage[$sVarName])) {
-            if ($bForce) {
-                throw new \Exception(
-                    "Object register failed. {$sVarName} has not exist"
-                );
-            } else {
-                return null;
-            }
-        }
-        return $this->aStorage[$sVarName];
-    }
-
     /**
      * 获取当前请求的上下文对象
      *
-     * @return $this 有可能为NULL
+     * @return self 有可能为NULL
      */
     public static function getInst()
     {
@@ -63,13 +28,17 @@ class Context
 
     /**
      * 生成上下文
+     *
+     * @return self
      */
     public static function makeInst()
     {
         if (!isset($GLOBALS['__SF_CONTEXT__'])) {
             $GLOBALS['__SF_CONTEXT__'] = array();
         }
-        $GLOBALS['__SF_CONTEXT__'][] = new static();
+        $Obj = new static();
+        $GLOBALS['__SF_CONTEXT__'][] = $Obj;
+        return $Obj;
     }
 
     /**
@@ -80,6 +49,11 @@ class Context
         array_pop($GLOBALS['__SF_CONTEXT__']);
     }
 
+    public function __get($sVar)
+    {
+        throw new \Exception("Please register $sVar first!");
+    }
+
     /**
      * @param string $sVarName
      *
@@ -87,56 +61,24 @@ class Context
      */
     public function isRegister($sVarName)
     {
-        return array_key_exists($sVarName, $this->aStorage);
+        return property_exists($this, $sVarName);
     }
 
     /**
      * @param string $sVarName    标志(唯一, 作为调用时的Key)
      * @param mixed  $mEveryThing 值
-     * @param bool   $bOverWrite  是否自动覆盖已存在的同标志对象
-     * @param bool   $bAllowExist 是否允许存在同标志对象(若此值为假, 并且存在相同标志对象, 则将抛错, 程序退出)
      *
      * @throws \Exception
      */
-    public function register($sVarName, $mEveryThing, $bOverWrite = true, $bAllowExist = true)
+    public function register($sVarName, $mEveryThing)
     {
-        if (isset($this->aStorage[$sVarName])) {
-            if ($bOverWrite) {
-                $this->aStorage[$sVarName] = $mEveryThing;
-            } else {
-                if (!$bAllowExist) {
-                    throw new \Exception("Object register failed. {$sVarName} has exist");
-                }
-            }
-        } else {
-            $this->aStorage[$sVarName] = $mEveryThing;
-        }
+        $this->$sVarName = $mEveryThing;
     }
 
-    public function registerMulti(array $aKVMap, $bOverWrite = true, $bAllowExist = true)
+    public function registerMulti(array $aKVMap)
     {
-        if (!$bAllowExist) {
-            if (count($aArr = array_intersect_key($this->aStorage, $aKVMap)) === 0) {
-                throw new \Exception(sprintf("Object register failed. [%s] has exist"), json_encode($aArr));
-            }
+        foreach ($aKVMap as $sK => $mV) {
+            $this->$sK = $mV;
         }
-        $this->aStorage = $bOverWrite ? array_merge($this->aStorage, $aKVMap) : array_merge($aKVMap, $this->aStorage);
-    }
-
-    /**
-     * @param string $sVarName
-     * @param string $sClassName
-     * @param array  $aArgs
-     * @param bool   $bOverWrite
-     * @param bool   $bAllowExist
-     */
-    public function registerObjWithArgs(
-        $sVarName,
-        $sClassName,
-        array $aArgs = array(),
-        $bOverWrite = true,
-        $bAllowExist = true
-    ) {
-        $this->register($sVarName, Sugar::createObj($sClassName, $aArgs), $bOverWrite, $bAllowExist);
     }
 }

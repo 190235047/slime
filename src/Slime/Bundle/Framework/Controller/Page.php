@@ -1,9 +1,6 @@
 <?php
 namespace Slime\Bundle\Framework;
 
-use Slime\Component\Http;
-use Slime\Component\View;
-
 /**
  * Class Controller_Page
  * Slime 内置 Page 控制器基类
