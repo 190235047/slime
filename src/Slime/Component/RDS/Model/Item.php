@@ -65,7 +65,7 @@ class Item implements \ArrayAccess
             return;
         }
         $this->aOldData[$sKey] = isset($this->aData[$sKey]) ? $this->aData[$sKey] : null;
-        $this->aData[$sKey] = $mValue;
+        $this->aData[$sKey]    = $mValue;
     }
 
     /**
@@ -76,11 +76,11 @@ class Item implements \ArrayAccess
      */
     public function __call($sModelName, $mValue = array())
     {
-        if (substr($sModelName, 0, 5)==='count') {
+        if (substr($sModelName, 0, 5) === 'count') {
             $sModelName = substr($sModelName, 5);
             $sMethod    = 'relationCount';
         } else {
-            $sMethod    = 'relation';
+            $sMethod = 'relation';
         }
         if (empty($mValue)) {
             return $this->$sMethod($sModelName);
@@ -96,11 +96,12 @@ class Item implements \ArrayAccess
      * @param string $sOrderBy
      * @param int    $iLimit
      * @param int    $iOffset
+     * @param bool   $bJoin
      *
      * @return $this|$this[]
      * @throws \Exception
      */
-    public function relation($sModelName, array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
+    public function relation($sModelName, array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null, $bJoin = false)
     {
         $mResult = null;
 
@@ -114,7 +115,7 @@ class Item implements \ArrayAccess
                 $this->$sMethod($sModelName) :
                 $this->Group->relation($sModelName, $this);
         } else {
-            $mResult = $this->$sMethod($sModelName, $aWhere, $sOrderBy, $iLimit, $iOffset);
+            $mResult = $this->$sMethod($sModelName, $aWhere, $sOrderBy, $iLimit, $iOffset, $bJoin);
         }
 
         if ($mResult === null && $this->Model->Factory->bCompatibleMode === true) {
@@ -145,13 +146,13 @@ class Item implements \ArrayAccess
      */
     public function add()
     {
-        $M = $this->Model;
+        $M   = $this->Model;
         $iID = $M->CURD->insertSmarty($M->sTable, $this->aData);
         if ($iID === null) {
             $bRS = false;
         } else {
             $this->aData[$M->sPKName] = $iID;
-            $bRS = true;
+            $bRS                      = true;
         }
         return $bRS;
     }
@@ -174,7 +175,7 @@ class Item implements \ArrayAccess
         if (empty($aUpdate)) {
             return 99;
         }
-        $M = $this->Model;
+        $M   = $this->Model;
         $bRS = $M->CURD->updateSmarty(
             $M->sTable,
             $aUpdate,
@@ -193,7 +194,7 @@ class Item implements \ArrayAccess
      */
     public function hasOne($sModelName)
     {
-        $M = $this->Model;
+        $M     = $this->Model;
         $Model = $M->Factory->get($sModelName);
         return $Model->find(array($M->sFKName => $this->aData[$M->sPKName]));
     }
@@ -218,10 +219,16 @@ class Item implements \ArrayAccess
      *
      * @return Group|Item[]
      */
-    public function hasMany($sModel, array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
-    {
-        $M = $this->Model;
+    public function hasMany(
+        $sModel,
+        array $aWhere = null,
+        $sOrderBy = null,
+        $iLimit = null,
+        $iOffset = null
+    ) {
+        $M     = $this->Model;
         $Model = $M->Factory->get($sModel);
+
         return $Model->findMulti(
             (empty($aWhere) ?
                 array($M->sFKName => $this->aData[$Model->sPKName]) :
@@ -241,8 +248,9 @@ class Item implements \ArrayAccess
      */
     public function hasManyCount($sModel, array $aWhere = null)
     {
-        $M = $this->Model;
+        $M     = $this->Model;
         $Model = $M->Factory->get($sModel);
+
         return $Model->findCount(
             (empty($aWhere) ?
                 array($M->sFKName => $this->aData[$Model->sPKName]) :
@@ -257,63 +265,79 @@ class Item implements \ArrayAccess
      * @param string $sOrderBy
      * @param int    $iLimit
      * @param int    $iOffset
+     * @param bool   $bJoin
      *
      * @return null|Group|Item[]
      */
-    public function hasManyThrough($sModelTarget, array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null)
-    {
+    public function hasManyThrough(
+        $sModelTarget,
+        array $aWhere = null,
+        $sOrderBy = null,
+        $iLimit = null,
+        $iOffset = null,
+        $bJoin = false
+    ) {
         $ModelTarget = $this->Model->Factory->get($sModelTarget);
-        $ModelOrg = $this->Model;
+        $ModelOrg    = $this->Model;
         //@todo $sRelatedTableName declare in config
         $sRelatedTableName = 'rel__' . (strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
                 $ModelTarget->sTable . '__' . $ModelOrg->sTable :
                 $ModelOrg->sTable . '__' . $ModelTarget->sTable);
-        $CURD = $ModelOrg->CURD;
 
-        $aIDS = $CURD->querySmarty(
-            $sRelatedTableName,
-            array($ModelOrg->sFKName => $this->aData[$ModelOrg->sPKName]),
-            '',
-            $ModelTarget->sFKName,
-            false,
-            \PDO::FETCH_COLUMN,
-            0
-        );
+        $sMTPKName    = $ModelTarget->sPKName;
+        $sMTFKName    = $ModelTarget->sFKName;
+        $sMTTableName = $ModelTarget->sTable;
+        $sTable       = "$sMTTableName JOIN $sRelatedTableName ON $sMTTableName.$sMTPKName = $sRelatedTableName.$sMTFKName";
+        $sSelect      = "$sMTTableName.*";
+        if ($bJoin) {
+            $aArrTable = array($ModelTarget->sTable, $sRelatedTableName);
+            $aWhere    = self::preReplace($aWhere, $aArrTable);
+            $sOrderBy  = self::preReplace($sOrderBy, $aArrTable);
+        }
 
-        return empty($aIDS) ? null : $ModelTarget->findMulti(
-            (empty($aWhere) ?
-                array($ModelTarget->sPKName . ' IN' => $aIDS) :
-                array_merge(array($ModelTarget->sPKName . ' IN' => $aIDS), $aWhere)
-            ),
-            $sOrderBy,
-            $iLimit,
-            $iOffset
-        );
+        return $ModelTarget->findMulti($aWhere, $sOrderBy, $iLimit, $iOffset, $sTable, $sSelect);
     }
 
-    public function hasManyThroughCount($sModelTarget, array $aWhere = null)
+    public function hasManyThroughCount($sModelTarget, array $aWhere = null, $bJoin = false)
     {
         $ModelTarget = $this->Model->Factory->get($sModelTarget);
-        $ModelOrg = $this->Model;
+        $ModelOrg    = $this->Model;
         //@todo $sRelatedTableName declare in config
         $sRelatedTableName = 'rel__' . (strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
                 $ModelTarget->sTable . '__' . $ModelOrg->sTable :
                 $ModelOrg->sTable . '__' . $ModelTarget->sTable);
-        $CURD = $ModelOrg->CURD;
 
-        $aIDS = $CURD->querySmarty(
-            $sRelatedTableName,
-            array($ModelOrg->sFKName => $this->aData[$ModelOrg->sPKName]),
-            '',
-            $ModelTarget->sFKName,
-            false,
-            \PDO::FETCH_COLUMN,
-            0
-        );
+        $sMTPKName    = $ModelTarget->sPKName;
+        $sMTFKName    = $ModelTarget->sFKName;
+        $sMTTableName = $ModelTarget->sTable;
+        $sTable       = "$sMTTableName JOIN $sRelatedTableName ON $sMTTableName.$sMTPKName = $sRelatedTableName.$sMTFKName";
+        if ($bJoin) {
+            $aArrTable = array($ModelTarget->sTable, $sRelatedTableName);
+            $aWhere    = self::preReplace($aWhere, $aArrTable);
+        }
 
-        return empty($aIDS) ? 0 : (
-            empty($aWhere) ? count($aIDS) : $ModelTarget->findCount($aWhere)
-        );
+        return $ModelTarget->findCount($aWhere, $sTable);
+    }
+
+    /**
+     * @param array|string $mMix
+     * @param array        $aArrTable
+     *
+     * @return array|string
+     */
+    public static function preReplace($mMix, array $aArrTable)
+    {
+        if (!is_array($mMix)) {
+            return is_string($mMix) ? str_replace(array('!', '@'), $aArrTable, $mMix) : $mMix;
+        }
+
+        $aWhereNew = array();
+        foreach ($mMix as $mK => $mV) {
+            $sFixKey             = is_string($mK) ? self::preReplace($mK, $aArrTable) : $mK;
+            $aWhereNew[$sFixKey] = self::preReplace($mV, $aWhereNew, $aArrTable);
+        }
+
+        return $aWhereNew;
     }
 
     /**

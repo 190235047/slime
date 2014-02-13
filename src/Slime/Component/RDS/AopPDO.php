@@ -15,7 +15,7 @@ class AopPDO
             'SQL : {cost}; {sql}; {bind}; ',
             array(
                 'sql'  => $Obj->queryString,
-                'bind' => empty($aArgs[0]) ? '' : $aArgs[0],
+                'bind' => empty($aArgv[0]) ? '' : json_encode($aArgv[0]),
                 'cost' => sprintf('%.2f ms', $fDiff * 1000)
             )
         );

@@ -60,15 +60,25 @@ $M = new ModelFactory(
             'relation' => array(
                 'Author' => 'belongsTo'
             )
-        )
+        ),
+        'Author' => array(
+            'relation' => array(
+                'Book' => 'hasMany'
+            ),
+        ),
     )
 );
 
+//Test1
 $BooksList = $M->get('Book')->findMulti(array('create_time >=' => '2014-01-01'), 'create_time DESC', 20, 10);
-
 foreach ($BooksList as $OneBook) {
     echo $OneBook->Author();
 }
+
+//Test2
+$Author = $M->get('Author')->find(array('id' => 1));
+echo $Author->Book();
+
 */
 ```
 

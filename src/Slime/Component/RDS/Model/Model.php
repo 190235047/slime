@@ -166,13 +166,14 @@ class Model
     }
 
     /**
-     * @param array $aWhere
+     * @param array  $aWhere
+     * @param string $sTable
      *
      * @return int
      */
-    public function findCount($aWhere = array())
+    public function findCount($aWhere = array(), $sTable = null)
     {
-        return $this->CURD->queryCount($this->sTable, $aWhere);
+        return $this->CURD->queryCount($sTable===null ? $this->sTable : $sTable, $aWhere);
     }
 
     /**

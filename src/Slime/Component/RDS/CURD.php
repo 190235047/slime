@@ -38,12 +38,12 @@ class CURD
         array $aOptions = array(),
         array $aAOPCallBack = array()
     ) {
-        $this->sKey          = $sKey;
-        $this->sDSN          = $sDSN;
-        $this->sUsername     = $sUsername;
-        $this->sPassword     = $sPassword;
-        $this->aOptions      = $aOptions;
-        $this->aAOPCallBack  = $aAOPCallBack;
+        $this->sKey         = $sKey;
+        $this->sDSN         = $sDSN;
+        $this->sUsername    = $sUsername;
+        $this->sPassword    = $sPassword;
+        $this->aOptions     = $aOptions;
+        $this->aAOPCallBack = $aAOPCallBack;
     }
 
     /**
@@ -139,9 +139,11 @@ class CURD
         $aUpdatePre = $aUpdateData = array();
         foreach ($aKVMap as $sK => $sV) {
             if (is_int($sK)) {
+                //['a'=>'a1', 'b=b+1']
                 $aUpdatePre[] = $sV;
             } else {
-                $aUpdatePre[]  = "`$sK` = ?";
+                $sKK = self::addQuote($sK);
+                $aUpdatePre[]  = "$sKK = ?";
                 $aUpdateData[] = $sV;
             }
         }
@@ -149,7 +151,7 @@ class CURD
         $sSQLPrepare = sprintf(
             "UPDATE %s SET %s WHERE %s",
             $sTable,
-            implode(' , ', $aUpdatePre),
+            implode(',', $aUpdatePre),
             self::buildCondition($aWhere, $aArgs)
         );
         $aData       = array_merge($aUpdateData, $aArgs);
@@ -180,11 +182,12 @@ class CURD
      */
     public function insertSmarty($sTable, array $aKVMap, $iType = self::INSERT_STANDARD)
     {
+        $aFixKey     = self::addQuote(array_keys($aKVMap));
         $sSQLPrepare = sprintf(
             "%s INTO %s %s VALUES(%s)",
             $iType == self::INSERT_IGNORE ? 'INSERT IGNORE' : ($iType == self::INSERT_REPLACE ? 'REPLACE' : 'INSERT'),
             $sTable,
-            isset($aKVMap[0]) ? '' : '(`' . implode('`,`', array_keys($aKVMap)) . '`)',
+            isset($aKVMap[0]) ? '' : '(' . implode(',', $aFixKey) . ')',
             implode(',', array_pad(array(), count($aKVMap), '?'))
         );
         $PDO         = $this->getInstance();
@@ -207,14 +210,14 @@ class CURD
     {
         $aUpdatePre = $aUpdateData = array();
         foreach ($aUpdateKey as $sK) {
-            $aUpdatePre[]  = "`$sK` = ?";
+            $sKK           = self::addQuote($sK);
+            $aUpdatePre[]  = "$sKK = ?";
             $aUpdateData[] = $aKVMap[$sK];
         }
         $sSQLPrepare = sprintf(
-            "%s INTO %s %s VALUES(%s) ON DUPLICATE KEY UPDATE %s",
-            'INSERT',
+            "INSERT INTO %s %s VALUES(%s) ON DUPLICATE KEY UPDATE %s",
             $sTable,
-            '(`' . implode('`,`', array_keys($aKVMap)) . '`)',
+            '(' . implode(',', array_keys($aKVMap)) . ')',
             implode(',', array_pad(array(), count($aKVMap), '?')),
             implode(' , ', $aUpdatePre)
         );
@@ -258,20 +261,16 @@ class CURD
             } else {
                 # 如果不是子条件, 解析
                 list($sKey, $sOP) = array_replace(array('', '='), explode(' ', $sK, 2));
-                $sOP         = trim(strtoupper($sOP));
-                $sKeyWrapper = '`';
-                if ($sKey[0] === ':') {
-                    $sKey        = substr($sKey, 1);
-                    $sKeyWrapper = '';
-                }
+                $sKey = self::addQuote($sKey);
+                $sOP  = trim(strtoupper($sOP));
                 if ($sOP == 'IN' || $sOP == 'NOT IN') {
                     $aWhereBuild[] = sprintf(
-                        "$sKeyWrapper{$sKey}$sKeyWrapper $sOP (%s)",
+                        "$sKey $sOP (%s)",
                         implode(',', array_fill(0, count($mV), '?'))
                     );
                     $aArgs         = array_merge($aArgs, $mV);
                 } else {
-                    $aWhereBuild[] = "$sKeyWrapper{$sKey}$sKeyWrapper $sOP ?";
+                    $aWhereBuild[] = "$sKey $sOP ?";
                     $aArgs[]       = $mV;
                 }
             }
@@ -281,8 +280,24 @@ class CURD
         return implode(" $sRelation ", $aWhereBuild);
     }
 
-    public function __sleep()
+
+    public static function addQuote($mK)
     {
-        return array('sDSN', 'sUsername', 'sPassword', 'aOptions', 'bCheckConnect');
+        if (is_array($mK)) {
+            $aKFix = array();
+            foreach ($mK as $mKK => $mVV) {
+                $aKFix[$mKK] = self::addQuote($mVV);
+            }
+            return $aKFix;
+        } else {
+            $aK = explode('.', $mK);
+            return count($aK) === 1 ? self::_addQuote($aK[0]) :
+                implode('.', array_map(array('Slime\\Component\\RDS\\CURD', '_addQuote'), $aK));
+        }
+    }
+
+    public static function _addQuote($sK)
+    {
+        return $sK[0] === ':' ? substr($sK, 1) : "`$sK`";
     }
 }
