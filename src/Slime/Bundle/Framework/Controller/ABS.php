@@ -25,7 +25,7 @@ abstract class Controller_ABS
     protected $Log;
 
     /**
-     * @var \Slime\Component\Config\Configure 配置对象
+     * @var \Slime\Component\Config\IAdaptor 配置对象
      */
     protected $Config;
 

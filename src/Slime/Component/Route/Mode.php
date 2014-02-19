@@ -1,7 +1,8 @@
 <?php
 namespace Slime\Component\Route;
 
-use Slime\Component\Http;
+use Slime\Component\Http\HttpRequest;
+use Slime\Component\Http\HttpResponse;
 
 /**
  * Class Mode
@@ -12,15 +13,23 @@ use Slime\Component\Http;
 class Mode
 {
     /**
-     * @param Http\HttpRequest  $Request
-     * @param Http\HttpResponse $Response
-     * @param Object            $Continue
-     * @param string            $sAppNs
+     * @param HttpRequest  $Request
+     * @param HttpResponse $Response
+     * @param Object       $Continue
+     * @param string       $sAppNs
+     * @param string       $sControllerPre
      *
      * @return CallBack
      */
-    public static function slimeHttp(Http\HttpRequest $Request, Http\HttpResponse $Response, $Continue, $sAppNs)
-    {
+    public static function slimeHttp(
+        HttpRequest $Request,
+        HttpResponse $Response,
+        $Continue,
+        $sAppNs,
+        $sControllerPre = null
+    ) {
+        $sControllerPre === null && $sControllerPre = 'ControllerHttp_';
+
         $aUrl      = parse_url($Request->getRequestURI());
         $aUrlBlock = explode('/', strtolower(substr($aUrl['path'], 1)));
 
@@ -48,7 +57,7 @@ class Mode
 
         $CallBack = new CallBack($sAppNs);
         $CallBack->setCBObject(
-            'ControllerHttp_' . implode('_', $aUrlBlock),
+            $sControllerPre . implode('_', $aUrlBlock),
             $sAction,
             array(array('__ext__' => strtolower($sExt)))
         );
@@ -57,15 +66,23 @@ class Mode
     }
 
     /**
-     * @param Http\HttpRequest  $Request
-     * @param Http\HttpResponse $Response
-     * @param Object            $Continue
-     * @param string            $sAppNs
+     * @param HttpRequest  $Request
+     * @param HttpResponse $Response
+     * @param Object       $Continue
+     * @param string       $sAppNs
+     * @param string       $sControllerPre
      *
      * @return CallBack
      */
-    public static function slimeApi(Http\HttpRequest $Request, Http\HttpResponse $Response, $Continue, $sAppNs)
-    {
+    public static function slimeApi(
+        HttpRequest $Request,
+        HttpResponse $Response,
+        $Continue,
+        $sAppNs,
+        $sControllerPre = null
+    ) {
+        $sControllerPre === null && $sControllerPre = 'ControllerAPI_';
+
         $aURI  = parse_url($Request->getRequestURI());
         $aPath = explode('/', trim($aURI['path'], '/'));
         if (count($aPath) < 2) {
@@ -76,26 +93,29 @@ class Mode
         $aParam  = array('__ext__' => $sExt);
         $Version = strtoupper(array_shift($aPath));
         $sEntity = array_pop($aPath);
-        if (($i = strpos($sEntity, '.'))!==false) {
-            $sExt    = substr($sEntity, $i+1);
+        if (($i = strpos($sEntity, '.')) !== false) {
+            $sExt    = substr($sEntity, $i + 1);
             $sEntity = substr($sEntity, 0, $i);
         } else {
             $sExt = 'json';
         }
         if (($iCount = count($aPath)) >= 2 && $iCount % 2 === 0) {
             for ($i = 0; $i < $iCount; $i += 2) {
-                $aParam[$aPath[$i]] = $aPath[$i+1];
+                $aParam[$aPath[$i]] = $aPath[$i + 1];
             }
         }
         $aParam['__ext__'] = $sExt;
-        $sMethod = strtolower($Request->getRequestMethod());
-        $sController = 'Controller_' . $Version . '_' . implode('',
+        $sMethod           = strtolower($Request->getRequestMethod());
+        $sController       = $sControllerPre . $Version . '_' . implode(
+                '',
                 array_map(
-                    function($sPart){return ucfirst(strtolower($sPart));},
+                    function ($sPart) {
+                        return ucfirst(strtolower($sPart));
+                    },
                     explode('_', $sEntity)
                 )
             );
-        $CallBack = new CallBack($sAppNs);
+        $CallBack          = new CallBack($sAppNs);
         $CallBack->setCBObject($sController, $sMethod, array($aParam));
 
         return $CallBack;
@@ -105,11 +125,13 @@ class Mode
      * @param array  $aArg
      * @param object $Continue
      * @param string $sAppNs
+     * @param string $sControllerPre
      *
      * @return CallBack
      */
-    public static function slimeCli($aArg, $Continue, $sAppNs)
+    public static function slimeCli($aArg, $Continue, $sAppNs, $sControllerPre = null)
     {
+        $sControllerPre === null && $sControllerPre = 'ControllerCli_';
         if (strpos($aArg[1], '.') === false) {
             $aBlock = array($aArg[1], 'Default');
         } else {
@@ -120,7 +142,7 @@ class Mode
             json_decode($aArg[2], true);
 
         $CallBack = new CallBack($sAppNs);
-        $CallBack->setCBObject("ControllerCli_{$aBlock[0]}", "action{$aBlock[1]}", array($aParam));
+        $CallBack->setCBObject("{$sControllerPre}{$aBlock[0]}", "action{$aBlock[1]}", array($aParam));
 
         return $CallBack;
     }

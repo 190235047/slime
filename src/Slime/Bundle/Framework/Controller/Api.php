@@ -79,7 +79,7 @@ abstract class Controller_Api extends Controller_ABS
             );
     }
 
-    protected function _renderJS()
+    protected function _renderJSONP()
     {
         $sCB = $this->HttpRequest->getGet($this->sJSCBParam);
         if ($sCB===null) {
@@ -92,5 +92,10 @@ abstract class Controller_Api extends Controller_ABS
                     $sCB . '(' . json_encode($this->aData) . ')' :
                     $this->Context->View->setTpl($this->sTPL)->renderAsResult()
             );
+    }
+
+    protected function _renderJS()
+    {
+        $this->_renderJSONP();
     }
 }

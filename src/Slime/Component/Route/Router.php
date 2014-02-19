@@ -11,12 +11,15 @@ use Slime\Component\Http;
  */
 class Router
 {
+    public $sAppNS;
+    public $sControllerPre;
+
     /**
      * @param string $sAppNS
      */
     public function __construct($sAppNS)
     {
-        $this->sAppNS = $sAppNS;
+        $this->sAppNS         = $sAppNS;
     }
 
     /**
@@ -31,7 +34,7 @@ class Router
     {
         $aCallBack = array();
         foreach ($aRule as $sK => $mV) {
-            $Continue = (object)(array('value'=>false));
+            $Continue = new \ArrayObject(array('value' => false));
             if (is_string($sK)) {
                 if (!preg_match($sK, $HttpRequest->getRequestURI(), $aMatched)) {
                     continue;
@@ -46,7 +49,8 @@ class Router
                                 $HttpResponse,
                                 $aMatched,
                                 $Continue,
-                                $this->sAppNS
+                                $this->sAppNS,
+                                $this->sControllerPre
                             )
                         );
                         if ($mResult instanceof CallBack) {
@@ -63,7 +67,7 @@ class Router
                         }
                         $aSearch = $aReplace = array();
                         foreach ($aMatched as $iK => $sV) {
-                            $aSearch[$iK] = '$' . $iK;
+                            $aSearch[$iK]  = '$' . $iK;
                             $aReplace[$iK] = $sV;
                         }
                         $mV = self::replaceRecursive($mV, $aSearch, $aReplace);
@@ -89,7 +93,8 @@ class Router
                         $HttpRequest,
                         $HttpResponse,
                         $Continue,
-                        $this->sAppNS
+                        $this->sAppNS,
+                        $this->sControllerPre
                     )
                 );
                 if ($mResult instanceof CallBack) {
@@ -120,12 +125,12 @@ class Router
     {
         $aCallBack = array();
         foreach ($aRule as $mV) {
-            $bContinue = false;
-            $mResult = call_user_func_array($mV, array($aArg, &$bContinue, $this->sAppNS));
+            $Continue = new \ArrayObject(array('value' => false));
+            $mResult  = call_user_func_array($mV, array($aArg, $Continue, $this->sAppNS, $this->sControllerPre));
             if ($mResult instanceof CallBack) {
                 $aCallBack[] = $mResult;
             }
-            if ($bContinue === false) {
+            if ($Continue['value'] === false) {
                 break;
             }
         }

@@ -101,8 +101,14 @@ class Item implements \ArrayAccess
      * @return $this|$this[]
      * @throws \Exception
      */
-    public function relation($sModelName, array $aWhere = null, $sOrderBy = null, $iLimit = null, $iOffset = null, $bJoin = false)
-    {
+    public function relation(
+        $sModelName,
+        array $aWhere = null,
+        $sOrderBy = null,
+        $iLimit = null,
+        $iOffset = null,
+        $bJoin = false
+    ) {
         $mResult = null;
 
         if (!isset($this->Model->aRelationConfig[$sModelName])) {
@@ -265,7 +271,6 @@ class Item implements \ArrayAccess
      * @param string $sOrderBy
      * @param int    $iLimit
      * @param int    $iOffset
-     * @param bool   $bJoin
      *
      * @return null|Group|Item[]
      */
@@ -274,8 +279,7 @@ class Item implements \ArrayAccess
         array $aWhere = null,
         $sOrderBy = null,
         $iLimit = null,
-        $iOffset = null,
-        $bJoin = false
+        $iOffset = null
     ) {
         $ModelTarget = $this->Model->Factory->get($sModelTarget);
         $ModelOrg    = $this->Model;
@@ -289,16 +293,20 @@ class Item implements \ArrayAccess
         $sMTTableName = $ModelTarget->sTable;
         $sTable       = "$sMTTableName JOIN $sRelatedTableName ON $sMTTableName.$sMTPKName = $sRelatedTableName.$sMTFKName";
         $sSelect      = "$sMTTableName.*";
-        if ($bJoin) {
-            $aArrTable = array($ModelTarget->sTable, $sRelatedTableName);
-            $aWhere    = self::preReplace($aWhere, $aArrTable);
-            $sOrderBy  = self::preReplace($sOrderBy, $aArrTable);
+        $aArrTable    = array($ModelTarget->sTable, $sRelatedTableName);
+
+        $aNewWhere = array("$sRelatedTableName.{$ModelOrg->sFKName}" => $this->aData[$ModelOrg->sPKName]);
+        if (!empty($aWhere)) {
+            $aNewWhere = array($aNewWhere, self::preReplace($aWhere, $aArrTable));
+        }
+        if (!empty($sOrderBy)) {
+            $sOrderBy = self::preReplace($sOrderBy, $aArrTable);
         }
 
-        return $ModelTarget->findMulti($aWhere, $sOrderBy, $iLimit, $iOffset, $sTable, $sSelect);
+        return $ModelTarget->findMulti($aNewWhere, $sOrderBy, $iLimit, $iOffset, $sTable, $sSelect);
     }
 
-    public function hasManyThroughCount($sModelTarget, array $aWhere = null, $bJoin = false)
+    public function hasManyThroughCount($sModelTarget, array $aWhere = null)
     {
         $ModelTarget = $this->Model->Factory->get($sModelTarget);
         $ModelOrg    = $this->Model;
@@ -311,12 +319,13 @@ class Item implements \ArrayAccess
         $sMTFKName    = $ModelTarget->sFKName;
         $sMTTableName = $ModelTarget->sTable;
         $sTable       = "$sMTTableName JOIN $sRelatedTableName ON $sMTTableName.$sMTPKName = $sRelatedTableName.$sMTFKName";
-        if ($bJoin) {
-            $aArrTable = array($ModelTarget->sTable, $sRelatedTableName);
-            $aWhere    = self::preReplace($aWhere, $aArrTable);
+        $aArrTable    = array($ModelTarget->sTable, $sRelatedTableName);
+        $aNewWhere    = array("$sRelatedTableName.{$ModelOrg->sFKName}" => $this->aData[$ModelOrg->sPKName]);
+        if (!empty($aWhere)) {
+            $aNewWhere = array($aNewWhere, self::preReplace($aWhere, $aArrTable));
         }
 
-        return $ModelTarget->findCount($aWhere, $sTable);
+        return $ModelTarget->findCount($aNewWhere, $sTable);
     }
 
     /**
@@ -334,7 +343,7 @@ class Item implements \ArrayAccess
         $aWhereNew = array();
         foreach ($mMix as $mK => $mV) {
             $sFixKey             = is_string($mK) ? self::preReplace($mK, $aArrTable) : $mK;
-            $aWhereNew[$sFixKey] = self::preReplace($mV, $aWhereNew, $aArrTable);
+            $aWhereNew[$sFixKey] = self::preReplace($mV, $aArrTable);
         }
 
         return $aWhereNew;

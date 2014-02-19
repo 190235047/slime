@@ -104,14 +104,22 @@ class Bootstrap
         $Context->registerMulti($aMap);
     }
 
-    public function run()
+    /**
+     * @param string $sRouteKey      Route file name using by get from config
+     * @param string $sControllerPre Null means default and string means custom
+     */
+    public function run($sRouteKey = null, $sControllerPre = null)
     {
         $sMethod = 'run' . $this->Context->sRunMode;
-        if (self::$mCBUncaughtException===null) {
-            $this->$sMethod();
+        if ($sControllerPre !== null) {
+            $this->Context->Route->sControllerPre = (string)$sControllerPre;
+        }
+
+        if (self::$mCBUncaughtException === null) {
+            $this->$sMethod($sRouteKey);
         } else {
             try {
-                $this->$sMethod();
+                $this->$sMethod($sRouteKey);
             } catch (\Exception $E) {
                 call_user_func(self::$mCBUncaughtException, $E);
                 exit(1);
@@ -119,13 +127,13 @@ class Bootstrap
         }
     }
 
-    protected function runHttp()
+    protected function runHttp($sRouteKey)
     {
         # run route
         $aCallBack = $this->Context->Route->generateFromHttp(
             $this->Context->HttpRequest,
             $this->Context->HttpResponse,
-            $this->Context->Config->get('route.http')
+            $this->Context->Config->get($sRouteKey === null ? 'route.http' : $sRouteKey)
         );
         if (!empty($aCallBack)) {
             foreach ($aCallBack as $CallBack) {
@@ -138,11 +146,11 @@ class Bootstrap
         $this->Context->HttpResponse->send();
     }
 
-    protected function runCli()
+    protected function runCli($sRouteKey)
     {
         $aCallBack = $this->Context->Route->generateFromCli(
             $this->Context->aArgv,
-            $this->Context->Config->get('route.cli')
+            $this->Context->Config->get($sRouteKey === null ? 'route.cli' : $sRouteKey)
         );
         if (!empty($aCallBack)) {
             foreach ($aCallBack as $CallBack) {
