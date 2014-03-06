@@ -41,5 +41,3 @@ function main($mCBFetchMSG, $mCBDealMSG, LoggerInterface $MasterLog, LoggerInter
         }
     }
 }
-
-main();
