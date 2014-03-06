@@ -19,7 +19,7 @@ class Adaptor_PHP implements IAdaptor
      */
     public function __construct($sBaseDir = null)
     {
-        if ($sBaseDir!==null) {
+        if ($sBaseDir !== null) {
             $this->sBaseDir = $sBaseDir;
         }
     }

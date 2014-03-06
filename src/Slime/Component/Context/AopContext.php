@@ -16,7 +16,7 @@ class AopContext
 
     public static function registerBefore($Obj, $sMethod, array $aArgv, \ArrayObject $Result)
     {
-        $C = C::getInst();
+        $C    = C::getInst();
         $sStr = sprintf('Context Reg: %s', $aArgv[0]);
         if (!$C->isRegister('Log')) {
             self::$aCacheData[] = $sStr;

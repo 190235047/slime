@@ -39,7 +39,7 @@ class Context extends \Slime\Component\Context\Context
             $this->Config->resetParseMode();
             $sRunMode = $this->sRunMode;
             foreach ($aAllCFG as $aItem) {
-                if (!empty($aItem['run_mode']) && $aItem['run_mode']!==$sRunMode) {
+                if (!empty($aItem['run_mode']) && $aItem['run_mode'] !== $sRunMode) {
                     continue;
                 }
                 $this->__aModuleConf__[$aItem['module']] = $aItem;

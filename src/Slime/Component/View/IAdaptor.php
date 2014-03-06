@@ -24,7 +24,7 @@ interface IAdaptor
     /**
      * @param string $sTpl
      *
-     * @return $this
+     * @return IAdaptor
      */
     public function setTpl($sTpl);
 
@@ -38,7 +38,7 @@ interface IAdaptor
      * @param mixed  $mV
      * @param bool   $bOverwrite
      *
-     * @return $this
+     * @return IAdaptor
      */
     public function assign($sK, $mV, $bOverwrite = true);
 
@@ -46,7 +46,7 @@ interface IAdaptor
      * @param array $aKVMap
      * @param bool  $bOverwrite
      *
-     * @return $this
+     * @return IAdaptor
      */
     public function assignMulti($aKVMap, $bOverwrite = true);
 

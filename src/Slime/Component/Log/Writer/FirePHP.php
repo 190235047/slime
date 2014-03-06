@@ -1005,12 +1005,12 @@ class FirePHP
                                     'Function' => isset($trace[$i]['function']) ? $trace[$i]['function'] : '',
                                     'Message'  => $trace[$i]['args'][0],
                                     'File'     => isset($trace[$i]['file']) ? $this->_escapeTraceFile(
-                                        $trace[$i]['file']
-                                    ) : '',
+                                            $trace[$i]['file']
+                                        ) : '',
                                     'Line'     => isset($trace[$i]['line']) ? $trace[$i]['line'] : '',
                                     'Args'     => isset($trace[$i]['args']) ? $this->encodeObject(
-                                        $trace[$i]['args']
-                                    ) : '',
+                                            $trace[$i]['args']
+                                        ) : '',
                                     'Trace'    => $this->_escapeTrace(array_splice($trace, $i + 1))
                                 );
 
@@ -1650,7 +1650,7 @@ class FirePHP
      * provides a slower PHP-only method for installations
      * that lack the multibye string extension.
      *
-     * @param    string $utf8   UTF-8 character
+     * @param    string $utf8 UTF-8 character
      *
      * @return   string  UTF-16 character
      * @access   private
@@ -1930,8 +1930,8 @@ class FirePHP
     /**
      * array-walking function for use in generating JSON-formatted name-value pairs
      *
-     * @param    string $name   name of key to use
-     * @param    mixed  $value  reference to an array element to be encoded
+     * @param    string $name  name of key to use
+     * @param    mixed  $value reference to an array element to be encoded
      *
      * @return   string  JSON-formatted name-value pair, like '"name":value'
      * @access   private

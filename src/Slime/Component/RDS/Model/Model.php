@@ -25,6 +25,8 @@ class Model
     public $aRelationConfig;
     public $Factory;
 
+    protected $sFKNameTmp = null;
+
     /**
      * @param string  $sModelName
      * @param CURD    $CURD
@@ -33,14 +35,31 @@ class Model
      */
     public function __construct($sModelName, CURD $CURD, $aConfig, Factory $Factory)
     {
-        $this->sModelName = $sModelName;
-        $this->CURD = $CURD;
-        $this->sTable = isset($aConfig['table']) ? $aConfig['table'] : strtolower($sModelName);
-        $this->sPKName = isset($aConfig['pk']) ? $aConfig['pk'] : 'id';
-        $this->sFKName = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
+        $this->sModelName      = $sModelName;
+        $this->CURD            = $CURD;
+        $this->sTable          = isset($aConfig['table']) ? $aConfig['table'] : strtolower($sModelName);
+        $this->sPKName         = isset($aConfig['pk']) ? $aConfig['pk'] : 'id';
+        $this->sFKName         = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
         $this->aRelationConfig = isset($aConfig['relation']) ? $aConfig['relation'] : array();
-        $this->Factory = $Factory;
-        $this->sItemClassName = $this->sItemClassNS . '\\' . $this->sItemClassPartName;
+        $this->Factory         = $Factory;
+        $this->sItemClassName  = $this->sItemClassNS . '\\' . $this->sItemClassPartName;
+    }
+
+    /**
+     * @param string $sFKName
+     */
+    public function setFKTmp($sFKName)
+    {
+        $this->sFKNameTmp = $this->sFKName;
+        $this->sFKName    = $sFKName;
+    }
+
+    public function resetFK()
+    {
+        if ($this->sFKNameTmp !== null) {
+            $this->sFKName    = $this->sFKNameTmp;
+            $this->sFKNameTmp = null;
+        }
     }
 
     /**
@@ -140,8 +159,7 @@ class Model
         $iOffset = null,
         $sTable = null,
         $sSelect = ''
-    )
-    {
+    ) {
         $sAttr = '';
         $sOrderBy !== null && $sAttr .= " ORDER BY $sOrderBy";
         $iLimit !== null && $sAttr .= " LIMIT $iLimit";
@@ -173,7 +191,7 @@ class Model
      */
     public function findCount($aWhere = array(), $sTable = null)
     {
-        return $this->CURD->queryCount($sTable===null ? $this->sTable : $sTable, $aWhere);
+        return $this->CURD->queryCount($sTable === null ? $this->sTable : $sTable, $aWhere);
     }
 
     /**
@@ -191,11 +209,19 @@ class Model
         $aWhere = array(),
         $sAttr = '',
         $sSelect = '',
-        $sTable  = null,
+        $sTable = null,
         $bOnlyOne = false,
         $iFetchStyle = \PDO::FETCH_ASSOC,
         $mFetchArgs = null
     ) {
-        return $this->CURD->querySmarty($sTable===null ? $this->sTable : $sTable, $aWhere, $sAttr, $sSelect, $bOnlyOne, $iFetchStyle, $mFetchArgs);
+        return $this->CURD->querySmarty(
+            $sTable === null ? $this->sTable : $sTable,
+            $aWhere,
+            $sAttr,
+            $sSelect,
+            $bOnlyOne,
+            $iFetchStyle,
+            $mFetchArgs
+        );
     }
 }

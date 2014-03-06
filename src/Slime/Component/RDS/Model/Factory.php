@@ -11,7 +11,7 @@ use Slime\Component\RDS\CURD;
  */
 class Factory
 {
-    public $bAutoCreate     = true;
+    public $bAutoCreate = true;
     public $bCompatibleMode = false;
 
     /** @var Model[] */

@@ -13,7 +13,10 @@ class AopView
 {
     public static function tplBefore(IAdaptor $Obj, $sMethod, array $aArgv, \ArrayObject $Result)
     {
-        Context::getInst()->Log->debug('TPL : {path}', array('path' => $Obj->getBaseDir() . DIRECTORY_SEPARATOR . $Obj->getTpl()));
+        Context::getInst()->Log->debug(
+            'TPL : {path}',
+            array('path' => $Obj->getBaseDir() . DIRECTORY_SEPARATOR . $Obj->getTpl())
+        );
     }
 
     public static function getAopConf()

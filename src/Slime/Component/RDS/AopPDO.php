@@ -8,8 +8,8 @@ class AopPDO
 {
     public static function stmtExecBefore($Obj, $sMethod, array $aArgv, \ArrayObject $Result)
     {
-        $fT1 = microtime(true);
-        $mRS = call_user_func_array(array($Obj, $sMethod), $aArgv);
+        $fT1   = microtime(true);
+        $mRS   = call_user_func_array(array($Obj, $sMethod), $aArgv);
         $fDiff = microtime(true) - $fT1;
         Context::getInst()->Log->info(
             'SQL : {cost}; {sql}; {bind}; ',

@@ -19,7 +19,7 @@ class Sugar
      */
     public static function tryIt($mTryFunc, array $aParam = array(), $iMaxTimes = -1, $iSleepMS = 10)
     {
-        $i     = 0;
+        $i = 0;
         $mData = null;
         while ($iMaxTimes <= 0 || $i < $iMaxTimes) {
             if (($mData = call_user_func_array($mTryFunc, $aParam)) !== null) {
@@ -59,8 +59,12 @@ class Sugar
      * @return object
      * @throws \Exception
      */
-    public static function createObjAdaptor($sNS, array $aClassAndArgs, $sInterface = 'IAdaptor', $sAdaptorClassPre = 'Adaptor_')
-    {
+    public static function createObjAdaptor(
+        $sNS,
+        array $aClassAndArgs,
+        $sInterface = 'IAdaptor',
+        $sAdaptorClassPre = 'Adaptor_'
+    ) {
         if (empty($aClassAndArgs)) {
             throw new \Exception("Param error[aClassAndArgs can not be empty]");
         }

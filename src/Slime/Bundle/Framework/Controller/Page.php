@@ -18,32 +18,32 @@ abstract class Controller_Page extends Controller_ABS
     const RENDER_JUMP = 2;
 
     # is http method get
-    protected $bGet            = true;
+    protected $bGet = true;
 
     # is ajax
-    protected $bAjax           = false;
+    protected $bAjax = false;
 
     # for render
-    protected $sTPL            = null;
-    protected $aData           = array();
+    protected $sTPL = null;
+    protected $aData = array();
 
     # for jump
-    protected $sJumpUrl        = null;
-    protected $iJumpCode       = null;
+    protected $sJumpUrl = null;
+    protected $iJumpCode = null;
 
     # render/jump logic if get
-    private $iRenderType       = self::RENDER_AUTO;
+    private $iRenderType = self::RENDER_AUTO;
 
 
     public function __construct(array $aParam = array())
     {
         parent::__construct($aParam);
 
-        $this->HttpRequest   = $this->Context->HttpRequest;
-        $this->HttpResponse  = $this->Context->HttpResponse;
+        $this->HttpRequest  = $this->Context->HttpRequest;
+        $this->HttpResponse = $this->Context->HttpResponse;
 
-        $this->bGet          = $this->HttpRequest->getRequestMethod()==='GET';
-        $this->bAjax         = $this->HttpRequest->isAjax();
+        $this->bGet  = $this->HttpRequest->getRequestMethod() === 'GET';
+        $this->bAjax = $this->HttpRequest->isAjax();
     }
 
     /**
@@ -118,7 +118,7 @@ abstract class Controller_Page extends Controller_ABS
     protected function getRenderType()
     {
         return $this->iRenderType === self::RENDER_AUTO ?
-            (($this->bGet || $this->bAjax) ? self::RENDER_PAGE : self::RENDER_JUMP):
+            (($this->bGet || $this->bAjax) ? self::RENDER_PAGE : self::RENDER_JUMP) :
             $this->iRenderType;
     }
 }

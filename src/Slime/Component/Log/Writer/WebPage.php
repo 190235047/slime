@@ -33,7 +33,7 @@ class Writer_WebPage implements IWriter
         }
         if (Context::getInst()->HttpRequest->isAjax()) {
             $this->bCouldLog = false;
-            $this->aData = null;
+            $this->aData     = null;
         } else {
             $this->bCouldLog = true;
         }
@@ -49,12 +49,12 @@ class Writer_WebPage implements IWriter
             $aTidyData = array();
             $iAllLevel = 0;
             foreach ($this->aData as $aRow) {
-                $iAllLevel = $iAllLevel | $aRow['iLevel'];
+                $iAllLevel                    = $iAllLevel | $aRow['iLevel'];
                 $aTidyData[$aRow['iLevel']][] = $aRow;
             }
             $bAutoOpen = false;
             if ($iAllLevel <= Logger::LEVEL_INFO) {
-                $sColor = 'green';
+                $sColor    = 'green';
                 $bAutoOpen = false;
             } elseif ($iAllLevel <= Logger::LEVEL_WARNING) {
                 $sColor = 'orange';
@@ -68,7 +68,7 @@ class Writer_WebPage implements IWriter
                 $sLi .= sprintf('<li onclick="_sf_debug_show(this)">%s</li>', Logger::getLevelString($iK));
                 $aHtml = array();
                 foreach ($aRow as $aItem) {
-                    $sHtml = "<div><span class='tip'>{$aItem['sTime']}</span><span>{$aItem['sMessage']}</span></div>";
+                    $sHtml   = "<div><span class='tip'>{$aItem['sTime']}</span><span>{$aItem['sMessage']}</span></div>";
                     $aHtml[] = $sHtml;
                 }
                 $sUl .= '<ul><li>' . implode('</li><li>', $aHtml) . '</li></ul>';

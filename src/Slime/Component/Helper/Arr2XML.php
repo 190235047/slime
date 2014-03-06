@@ -48,7 +48,7 @@ class Arr2XML
     {
         foreach ($mData as $mK => $mV) {
             $sK = is_int($mK) ?
-                ($this->mCBKeySet===null ? $sPreKey : call_user_func($this->mCBKeySet, $sPreKey)) :
+                ($this->mCBKeySet === null ? $sPreKey : call_user_func($this->mCBKeySet, $sPreKey)) :
                 (string)$mK;
 
             if (is_array($mV)) {

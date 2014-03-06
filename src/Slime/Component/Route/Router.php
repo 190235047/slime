@@ -19,7 +19,7 @@ class Router
      */
     public function __construct($sAppNS)
     {
-        $this->sAppNS         = $sAppNS;
+        $this->sAppNS = $sAppNS;
     }
 
     /**
@@ -34,7 +34,7 @@ class Router
     {
         $aCallBack = array();
         foreach ($aRule as $sK => $mV) {
-            $Continue = new \ArrayObject(array('value' => false));
+            $Continue = (object)(array('value' => false));
             if (is_string($sK)) {
                 if (!preg_match($sK, $HttpRequest->getRequestURI(), $aMatched)) {
                     continue;
@@ -125,12 +125,12 @@ class Router
     {
         $aCallBack = array();
         foreach ($aRule as $mV) {
-            $Continue = new \ArrayObject(array('value' => false));
+            $Continue = (object)(array('value' => false));
             $mResult  = call_user_func_array($mV, array($aArg, $Continue, $this->sAppNS, $this->sControllerPre));
             if ($mResult instanceof CallBack) {
                 $aCallBack[] = $mResult;
             }
-            if ($Continue['value'] === false) {
+            if ($Continue->value === false) {
                 break;
             }
         }

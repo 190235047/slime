@@ -48,7 +48,8 @@ class HttpRequest extends HttpCommon
             new Bag_Get($_GET),
             new Bag_Post($_POST),
             new Bag_Cookie($_COOKIE),
-            new Bag_File($_FILES)
+            new Bag_File($_FILES),
+            $_SERVER
         );
     }
 
@@ -57,14 +58,15 @@ class HttpRequest extends HttpCommon
      * The information contained in the URI always take precedence
      * over the other information (server and parameters).
      *
-     * @param string $sMethod     The HTTP method
-     * @param string $sURL        The URL
-     * @param string $sProtocol   协议
-     * @param array  $aHeader     The Header KeyValue pair
-     * @param array  $aParam      The query (GET) or request (POST) parameters
-     * @param array  $aCookie     The request cookies ($_COOKIE)
-     * @param array  $aFile       The request files ($_FILES)
-     * @param string $sContent    The raw body data
+     * @param string $sMethod   The HTTP method
+     * @param string $sURL      The URL
+     * @param string $sProtocol 协议
+     * @param array  $aHeader   The Header KeyValue pair
+     * @param array  $aParam    The query (GET) or request (POST) parameters
+     * @param array  $aCookie   The request cookies ($_COOKIE)
+     * @param array  $aFile     The request files ($_FILES)
+     * @param string $sContent  The raw body data
+     * @param array  $aHttpBuildQueryParam
      *
      * @return HttpRequest A Request instance
      */
@@ -76,7 +78,8 @@ class HttpRequest extends HttpCommon
         $aCookie = array(),
         $aFile = array(),
         $sContent = null,
-        $sProtocol = 'HTTP/1.1'
+        $sProtocol = 'HTTP/1.1',
+        $aHttpBuildQueryParam = array('', '', PHP_QUERY_RFC1738)
     ) {
         $aArr = array_replace(array('port' => 80, 'path' => '/'), parse_url($sURL));
         if (!isset($aHeader['Host'])) {
@@ -101,7 +104,7 @@ class HttpRequest extends HttpCommon
             new Bag_Cookie($aCookie),
             new Bag_File($aFile)
         );
-        $SELF->tidyHeader();
+        $SELF->tidyHeader($aHttpBuildQueryParam);
         return $SELF;
     }
 
@@ -114,7 +117,8 @@ class HttpRequest extends HttpCommon
         Bag_Get $Get,
         Bag_Post $Post,
         Bag_Cookie $Cookie,
-        Bag_File $File
+        Bag_File $File,
+        array $aServerVars = null
     ) {
         $this->sProtocol      = $sProtocol;
         $this->sRequestMethod = strtoupper($sMethod);
@@ -127,10 +131,12 @@ class HttpRequest extends HttpCommon
         $this->Cookie           = $Cookie;
         $this->File             = $File;
         $this->Header['Cookie'] = $Cookie;
+        $this->aServerVars      = $aServerVars;
     }
 
 
     protected $sRequestMethod;
+
     public function getRequestMethod()
     {
         return $this->sRequestMethod;
@@ -180,6 +186,46 @@ class HttpRequest extends HttpCommon
     {
         $this->sProtocol = $sProtocol;
         return $this;
+    }
+
+    public function getClientIP()
+    {
+        do {
+            $sIp = '';
+            if (!empty($this->aServerVars['HTTP_CLIENT_IP'])) {
+                $sIp = $this->aServerVars['HTTP_CLIENT_IP'];
+                break;
+            }
+            if (
+                !empty($this->aServerVars['HTTP_X_FORWARDED_FOR']) &&
+                strcasecmp($this->aServerVars['HTTP_X_FORWARDED_FOR'], 'unknown')
+            ) {
+                $sTmpIp = $this->aServerVars['HTTP_X_FORWARDED_FOR'];
+            } elseif (
+                !empty($this->aServerVars['REMOTE_ADDR']) &&
+                strcasecmp($this->aServerVars['REMOTE_ADDR'], 'unknown')
+            ) {
+                $sTmpIp = $this->aServerVars['REMOTE_ADDR'];
+            } else {
+                $sTmpIp = '';
+            }
+            if ($sTmpIp === '') {
+                break;
+            }
+            $aIp = explode(',', $sTmpIp);
+            if (count($aIp) === 1) {
+                $sIp = $aIp[0];
+                break;
+            }
+            foreach ($aIp as $sOneIp) {
+                if (ip2long($sOneIp) !== false) {
+                    $sIp = $sOneIp;
+                    break;
+                }
+            }
+        } while (0);
+
+        return $sIp;
     }
 
     public function isAjax()
@@ -241,7 +287,7 @@ class HttpRequest extends HttpCommon
         return $mRS;
     }
 
-    protected function tidyHeader()
+    protected function tidyHeader($aPQ)
     {
         # GET LOGIC
         $aArr = parse_url($this->sRequestURI);
@@ -254,10 +300,10 @@ class HttpRequest extends HttpCommon
             parse_str($aArr['query'], $aQ);
             $aQ = array_merge($aQ, $this->Get->toArray());
         }
-        $this->sRequestURI = empty($aQ) ? $aArr['path'] : ($aArr['path'] . '?' . http_build_query($aQ));
+        $this->sRequestURI = empty($aQ) ? $aArr['path'] : ($aArr['path'] . '?' . http_build_query($aQ, $aPQ[0], $aPQ[1], $aPQ[2]));
 
         if ($this->sRequestMethod === 'POST' && count($this->Post) > 0) {
-            $this->sContent = http_build_query($this->Post->toArray());
+            $this->sContent = http_build_query($this->Post->toArray(), $aPQ[0], $aPQ[1], $aPQ[2]);
             if ($this->Header['Content-Type'] === null) {
                 $this->Header['Content-Type'] = 'application/x-www-form-urlencoded';
             }
@@ -278,6 +324,7 @@ class HttpRequest extends HttpCommon
 
     //------------------- call logic -----------------------
     protected $sRemoteServer = null;
+
     public function setRemoteServer($sRemoteServer)
     {
         $this->sRemoteServer = $sRemoteServer;
@@ -294,37 +341,44 @@ class HttpRequest extends HttpCommon
      *
      * @return null|HttpResponse
      */
-    public function call($iConnectTimeOutMS = null, $iCallTimeOutMS = null, array $aOptKVMap = null, $bAsHttps = false, $sCacert = null, $iSSLVerifyHost = 0)
-    {
+    public function call(
+        $iConnectTimeOutMS = null,
+        $iCallTimeOutMS = null,
+        array $aOptKVMap = null,
+        $bAsHttps = false,
+        $sCacert = null,
+        $iSSLVerifyHost = 0
+    ) {
         $rCurl = curl_init(
             sprintf(
                 '%s://%s',
                 $bAsHttps ? 'https' : 'http',
-                ($this->sRemoteServer===null ? $this->Header['Host'] : $this->sRemoteServer) . $this->sRequestURI)
+                ($this->sRemoteServer === null ? $this->Header['Host'] : $this->sRemoteServer) . $this->sRequestURI
+            )
         );
         curl_setopt($rCurl, CURLOPT_HEADER, 1);
         curl_setopt($rCurl, CURLOPT_RETURNTRANSFER, 1);
-        if ($this->sRequestMethod==='POST') {
+        if ($this->sRequestMethod === 'POST') {
             curl_setopt($rCurl, CURLOPT_POSTFIELDS, $this->sContent);
         }
         $aHeader = explode("\r\n", rtrim((string)$this->Header, "\r\n"));
         if (!empty($aHeader)) {
             curl_setopt($rCurl, CURLOPT_HTTPHEADER, $aHeader);
         }
-        if ($iConnectTimeOutMS!==null) {
+        if ($iConnectTimeOutMS !== null) {
             curl_setopt($rCurl, CURLOPT_CONNECTTIMEOUT_MS, (int)$iConnectTimeOutMS);
         }
-        if ($iCallTimeOutMS!==null) {
+        if ($iCallTimeOutMS !== null) {
             curl_setopt($rCurl, CURLOPT_TIMEOUT_MS, (int)$iCallTimeOutMS);;
         }
-        if ($aOptKVMap!==null) {
+        if ($aOptKVMap !== null) {
             foreach ($aOptKVMap as $sK => $sV) {
                 curl_setopt($rCurl, $sK, $sV);
             }
         }
         if ($bAsHttps) {
-            if ($sCacert!==null) {
-                curl_setopt($rCurl, CURLOPT_SSL_VERIFYPEER, true);   // 只信任CA颁布的证书
+            if ($sCacert !== null) {
+                curl_setopt($rCurl, CURLOPT_SSL_VERIFYPEER, true); // 只信任CA颁布的证书
                 curl_setopt($rCurl, CURLOPT_CAINFO, $sCacert);
             } else {
                 curl_setopt($rCurl, CURLOPT_SSL_VERIFYPEER, false);
@@ -341,7 +395,7 @@ class HttpRequest extends HttpCommon
         $mResult = HttpResponse::createFromResponseString($mData);
 
         RET_callByCurl:
-            curl_close($rCurl);
-            return $mResult;
+        curl_close($rCurl);
+        return $mResult;
     }
 }

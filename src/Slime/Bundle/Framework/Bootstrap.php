@@ -33,7 +33,8 @@ class Bootstrap
         $sStr = $iErrNum . ':' . $sErrStr . "\nIn File[$sErrFile]:Line[$iErrLine]";
 
         $Context = Context::getInst();
-        # 在某些对象, 在PHP全局回收时调用析构函数. 此时 Context 已经销毁, 如果析构函数中发生错误, 会拿不到 Context. 尽量避免!
+        # 在某些对象的析构函数中使用了Context, 而对象在脚本执行完成时进入回收阶段, 才调用对象的析构.
+        # 此时 Context 可能已经销毁, 所以会拿不到 Context. 尽量避免!
         if ($Context === null || !$Context->isRegister('Log')) {
             trigger_error($sStr, E_USER_WARNING);
         } else {
@@ -57,26 +58,18 @@ class Bootstrap
      * @param string       $sENV
      * @param string       $sAppNs
      * @param IAdaptor     $Config
-     * @param null|Context $Context
-     * @param null|string  $sAPI
      * @param null|mixed   $mHttpReqOrCliArg
-     * @param string       $sModuleConfigKey
+     * @param null|string  $sAPI
      */
     public function __construct(
         $sENV,
         $sAppNs,
         IAdaptor $Config,
-        $Context = null,
-        $sAPI = null,
         $mHttpReqOrCliArg = null,
-        $sModuleConfigKey = 'module'
+        $sAPI = null
     ) {
-        /** @var Context $Context */
-        if ($Context === null || !$Context instanceof Context) {
-            Context::makeInst();
-            $Context = Context::getInst();
-        }
-        $this->Context = $Context;
+        Context::makeInst();
+        $this->Context = Context::getInst();
 
         # register
         $aMap = array(
@@ -101,7 +94,7 @@ class Bootstrap
             $aMap['HttpResponse'] = HttpResponse::create();
         }
 
-        $Context->registerMulti($aMap);
+        $this->Context->registerMulti($aMap);
     }
 
     /**

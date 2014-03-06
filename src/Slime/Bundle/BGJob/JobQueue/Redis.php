@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\MultiProcessJob;
+namespace Slime\Bundle\BGJob;
 
 /**
  * Class JobQueue_Redis
@@ -29,11 +29,11 @@ class JobQueue_Redis implements IJobQueue
      */
     public function pop(&$iErr = 0, &$sErr = '')
     {
-        $mRS = $this->Redis->rPop($this->sQueueName);
+        $mRS = $this->Redis->brPop($this->sQueueName);
         if ($mRS === false) {
             $iErr = 1;
-            $sErr = 'UnSerialize failed';
-            $mRS = false;
+            $sErr = 'Pop Failed';
+            $mRS  = false;
         }
         return $mRS;
     }
@@ -52,6 +52,7 @@ class JobQueue_Redis implements IJobQueue
         $bRS = $this->Redis->lPush($this->sQueueName, $sJob);
         if ($bRS === false) {
             $iErr = 1;
+            $sErr = 'Push Failed';
         }
     }
 }

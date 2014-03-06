@@ -63,7 +63,7 @@ abstract class Controller_ABS
     {
         # pre
         $sBootstrap = get_class($this->Context->Bootstrap);
-        if ($mLogConfigOrLogObject===null) {
+        if ($mLogConfigOrLogObject === null) {
             $mLogConfigOrLogObject = $this->Log;
         } elseif (is_array($mLogConfigOrLogObject) && !isset($mLogConfigOrLogObject['cli'])) {
             $mLogConfigOrLogObject = array('cli' => $mLogConfigOrLogObject);
@@ -88,11 +88,10 @@ abstract class Controller_ABS
     public function outerCallAsHttp(
         Http\HttpRequest $HttpRequest,
         $mLogConfigOrLogObject = null
-    )
-    {
+    ) {
         # pre
         $sBootstrap = get_class($this->Context->Bootstrap);
-        if ($mLogConfigOrLogObject===null) {
+        if ($mLogConfigOrLogObject === null) {
             $mLogConfigOrLogObject = $this->Log;
         } elseif (is_array($mLogConfigOrLogObject) && !isset($mLogConfigOrLogObject['http'])) {
             $mLogConfigOrLogObject = array('http' => $mLogConfigOrLogObject);

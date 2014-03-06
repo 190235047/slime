@@ -3,6 +3,7 @@ namespace Slime\Component\Http;
 
 /**
  * Class HttpResponse
+ *
  * @package Slime\Component\Http
  * @author  smallslime@gmail.com
  */
@@ -82,11 +83,11 @@ class HttpResponse extends HttpCommon
         $bHttpOnly = null
     ) {
         $this->aPreCookie[$sName] = array(
-            'value' => $sValue,
-            'expire' => $iExpire,
-            'path' => $sPath,
-            'domain' => $sDomain,
-            'is_secure' => $bSecure,
+            'value'       => $sValue,
+            'expire'      => $iExpire,
+            'path'        => $sPath,
+            'domain'      => $sDomain,
+            'is_secure'   => $bSecure,
             'is_httponly' => $bHttpOnly
         );
         return $this;
@@ -111,7 +112,7 @@ class HttpResponse extends HttpCommon
      */
     public function setRedirect($sURL, $iCode = null)
     {
-        if ($iCode!==null) {
+        if ($iCode !== null) {
             $this->iStatus = $iCode;
         }
 

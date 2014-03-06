@@ -56,10 +56,10 @@ class Bag_Bag implements \ArrayAccess, \Iterator, \Countable
     {
         if (!empty($aArr)) {
             $this->aData = $bOverwriteIfExist ?
-                array_replace($this->aData, $aArr):
+                array_replace($this->aData, $aArr) :
                 array_merge($aArr, $this->aData);
-            $this->aMap    = array_keys($this->aData);
-            $this->iLen    = count($this->aData);
+            $this->aMap  = array_keys($this->aData);
+            $this->iLen  = count($this->aData);
         }
         return $this;
     }

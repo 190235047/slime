@@ -13,7 +13,7 @@ class Packer
     const AFTER  = 1;
 
     protected $aAOPCallBack = array();
-    protected $Obj          = null;
+    protected $Obj = null;
 
     /**
      * @param object $mObj         obj to be packed

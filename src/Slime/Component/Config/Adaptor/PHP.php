@@ -22,8 +22,8 @@ class Adaptor_PHP extends Adaptor_ABS
     private $aCachedData;
 
     /**
-     * @param string  $sBaseDir
-     * @param string  $sDefaultBaseDir
+     * @param string $sBaseDir
+     * @param string $sDefaultBaseDir
      */
     public function __construct($sBaseDir, $sDefaultBaseDir)
     {
@@ -64,11 +64,11 @@ class Adaptor_PHP extends Adaptor_ABS
     protected function _get($sKey, $sBaseDir)
     {
         if (strpos($sKey, '.') === false) {
-            $sK = $sKey;
+            $sK    = $sKey;
             $aKeys = null;
         } else {
             $aKeys = explode('.', $sKey);
-            $sK = array_shift($aKeys);
+            $sK    = array_shift($aKeys);
         }
 
         if (!isset($this->aCachedData[$sBaseDir][$sK])) {
@@ -81,7 +81,7 @@ class Adaptor_PHP extends Adaptor_ABS
             $mResult = $this->aCachedData[$sBaseDir][$sK];
         }
 
-        if ($aKeys!==null) {
+        if ($aKeys !== null) {
             foreach ($aKeys as $sKey) {
                 if (!isset($mResult[$sKey])) {
                     $mResult = null;

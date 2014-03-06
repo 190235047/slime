@@ -28,7 +28,7 @@ class Writer_DebugBar implements IWriter
 
     public function acceptData($aRow)
     {
-         if ($this->bCouldLog===null) {
+        if ($this->bCouldLog === null) {
             $sStr = str_replace(
                 array(':sTime', ':iLevel', ':sMessage', ':sGuid'),
                 array($aRow['sTime'], Logger::getLevelString($aRow['iLevel']), $aRow['sMessage'], $aRow['sGuid']),
@@ -47,7 +47,7 @@ class Writer_DebugBar implements IWriter
             }
         }
 
-        if ($this->bCouldLog===false) {
+        if ($this->bCouldLog === false) {
             return;
         } else {
             $sStr = str_replace(
@@ -63,7 +63,7 @@ class Writer_DebugBar implements IWriter
     private function _addMessage($sStr, $sLevel, $sTime)
     {
         $aArr = explode(' : ', $sStr, 2);
-        if (count($aArr)!==2) {
+        if (count($aArr) !== 2) {
             $aArr = array(0 => 'Messages', $sStr);
         }
         try {
@@ -92,9 +92,9 @@ class DebugBar_AllTimeOnly extends DebugBar\DataCollector\TimeDataCollector
     {
         return array(
             "time" => array(
-                "icon" => "time",
+                "icon"    => "time",
                 "tooltip" => "Request Duration",
-                "map" => "time.duration_str",
+                "map"     => "time.duration_str",
                 "default" => "'0ms'"
             )
         );

@@ -11,6 +11,7 @@ abstract class Adaptor_ABS implements IAdaptor
 {
     protected $bParseMode = true;
     protected $bToBeResetParseMode = false;
+
     /**
      * @param bool $bParse
      *
@@ -30,7 +31,7 @@ abstract class Adaptor_ABS implements IAdaptor
     public function setTmpParseMode($bParse = false)
     {
         $this->bToBeResetParseMode = $this->bParseMode;
-        $this->bParseMode = $bParse;
+        $this->bParseMode          = $bParse;
         return $this;
     }
 
@@ -39,8 +40,8 @@ abstract class Adaptor_ABS implements IAdaptor
      */
     public function resetParseMode()
     {
-        if ($this->bToBeResetParseMode!==null) {
-            $this->bParseMode = $this->bToBeResetParseMode;
+        if ($this->bToBeResetParseMode !== null) {
+            $this->bParseMode          = $this->bToBeResetParseMode;
             $this->bToBeResetParseMode = null;
         }
         return $this;

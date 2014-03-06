@@ -42,9 +42,9 @@ class Logger implements LoggerInterface
     );
 
     /**
-     * @param array     $aWriterConf
-     * @param int       $iLogLevel
-     * @param null      $sRequestID
+     * @param array $aWriterConf
+     * @param int   $iLogLevel
+     * @param null  $sRequestID
      */
     public function __construct(
         array $aWriterConf,

@@ -11,8 +11,8 @@ interface IAdaptor
 {
     /**
      * @param string $sKey
-     * @param int    $iExpire   (单位MS); >0:锁过期时间 / other:永不过期(null)
-     * @param int    $iTimeout  (单位MS); 获取锁失败后: 0:立刻返回false / >0 等待时间 / other:永久阻塞(null);
+     * @param int    $iExpire  (单位MS); >0:锁过期时间 / other:永不过期(null)
+     * @param int    $iTimeout (单位MS); 获取锁失败后: 0:立刻返回false / >0 等待时间 / other:永久阻塞(null);
      *
      * @return bool
      */

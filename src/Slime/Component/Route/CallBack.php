@@ -24,9 +24,9 @@ class CallBack
     }
 
     /**
-     * @param mixed $mClassNameOrObject
+     * @param mixed  $mClassNameOrObject
      * @param string $sMethod
-     * @param array $aObjInitParam
+     * @param array  $aObjInitParam
      *
      * @return $this
      */
@@ -34,7 +34,7 @@ class CallBack
     {
         if (is_string($mClassNameOrObject)) {
             $this->aObjInitParam = $aObjInitParam;
-            $this->mCallable = array($this->sNSPre . '\\' . $mClassNameOrObject, $sMethod);
+            $this->mCallable     = array($this->sNSPre . '\\' . $mClassNameOrObject, $sMethod);
         } else {
             $this->mCallable = array($mClassNameOrObject, $sMethod);
         }
@@ -111,7 +111,9 @@ class CallBack
             $sMid = $this->mCallable[1];
             if (!isset($aMethod[$sMid])) {
                 throw new \RuntimeException(
-                    sprintf('There is no method[%s] in class[%s]', $sMid,
+                    sprintf(
+                        'There is no method[%s] in class[%s]',
+                        $sMid,
                         is_object($mClassOrObj) ? get_class($mClassOrObj) : $mClassOrObj
                     )
                 );

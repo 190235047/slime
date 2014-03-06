@@ -36,7 +36,7 @@ class Context
         if (!isset($GLOBALS['__SF_CONTEXT__'])) {
             $GLOBALS['__SF_CONTEXT__'] = array();
         }
-        $Obj = new static();
+        $Obj                         = new static();
         $GLOBALS['__SF_CONTEXT__'][] = $Obj;
         return $Obj;
     }

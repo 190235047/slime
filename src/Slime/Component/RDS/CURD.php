@@ -142,7 +142,7 @@ class CURD
                 //['a'=>'a1', 'b=b+1']
                 $aUpdatePre[] = $sV;
             } else {
-                $sKK = self::addQuote($sK);
+                $sKK           = self::addQuote($sK);
                 $aUpdatePre[]  = "$sKK = ?";
                 $aUpdateData[] = $sV;
             }
@@ -264,11 +264,15 @@ class CURD
                 $sKey = self::addQuote($sKey);
                 $sOP  = trim(strtoupper($sOP));
                 if ($sOP == 'IN' || $sOP == 'NOT IN') {
-                    $aWhereBuild[] = sprintf(
-                        "$sKey $sOP (%s)",
-                        implode(',', array_fill(0, count($mV), '?'))
-                    );
-                    $aArgs         = array_merge($aArgs, $mV);
+                    if (empty($mV)) {
+                        $aWhereBuild[] = '1';
+                    } else {
+                        $aWhereBuild[] = sprintf(
+                            "$sKey $sOP (%s)",
+                            implode(',', array_fill(0, count($mV), '?'))
+                        );
+                        $aArgs         = array_merge($aArgs, $mV);
+                    }
                 } else {
                     $aWhereBuild[] = "$sKey $sOP ?";
                     $aArgs[]       = $mV;

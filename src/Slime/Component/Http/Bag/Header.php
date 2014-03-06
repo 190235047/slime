@@ -12,10 +12,10 @@ class Bag_Header extends Bag_Bag
     public function __toString()
     {
         $sResult = '';
-        $aArr = $this->toArray();
+        $aArr    = $this->toArray();
         foreach ($aArr as $sK => $mV) {
             $sV = (string)$mV;
-            if ($sV!=='') {
+            if ($sV !== '') {
                 $sResult .= "$sK: $sV\r\n";
             }
         }

@@ -14,21 +14,23 @@ class ModelPagination
 {
     /**
      * @param Http\HttpRequest $HttpRequest
-     * @param null|int         $iDefaultNumberPerPage (null: 10)
+     * @param null|int         $iDefaultNumberPerPage      (null: 10)
      * @param null|mixed       $mDefaultPageGetCBOrPageVar (null: page)
-     * @param null|mixed       $mDefaultRender (null, array(self, defaultRender))
+     * @param null|mixed       $mDefaultRender             (null, array(self, defaultRender))
      */
     public function __construct(
         Http\HttpRequest $HttpRequest,
         $iDefaultNumberPerPage = null,
         $mDefaultPageGetCBOrPageVar = null,
         $mDefaultRender = null
-    )
-    {
-        $this->HttpRequest                 = $HttpRequest;
-        $this->iDefaultNumberPerPage      = $iDefaultNumberPerPage===null ? 10 : (int)$iDefaultNumberPerPage;
+    ) {
+        $this->HttpRequest                = $HttpRequest;
+        $this->iDefaultNumberPerPage      = $iDefaultNumberPerPage === null ? 10 : (int)$iDefaultNumberPerPage;
         $this->mDefaultPageGetCBOrPageVar = $mDefaultPageGetCBOrPageVar === null ? 'page' : $mDefaultPageGetCBOrPageVar;
-        $this->mDefaultRender              = $mDefaultRender===null ? array('Slime\\Component\\Pagination\\ModelPagination', 'defaultRender') : $mDefaultRender;
+        $this->mDefaultRender             = $mDefaultRender === null ? array(
+            'Slime\\Component\\Pagination\\ModelPagination',
+            'defaultRender'
+        ) : $mDefaultRender;
     }
 
     public function getListFromRelation(
@@ -44,7 +46,12 @@ class ModelPagination
         return $this->_getList(
             array($Item, "count$sRelationModelName"),
             array($Item, $sRelationModelName),
-            $List, $aWhere, $sOrderBy, $iNumberPerPage, $mPageGetCBOrPageVar, $mRenderCB
+            $List,
+            $aWhere,
+            $sOrderBy,
+            $iNumberPerPage,
+            $mPageGetCBOrPageVar,
+            $mRenderCB
         );
     }
 
@@ -60,7 +67,12 @@ class ModelPagination
         return $this->_getList(
             array($Model, 'findCount'),
             array($Model, 'findMulti'),
-            $List, $aWhere, $sOrderBy, $iNumberPerPage, $mPageGetCBOrPageVar, $mRenderCB
+            $List,
+            $aWhere,
+            $sOrderBy,
+            $iNumberPerPage,
+            $mPageGetCBOrPageVar,
+            $mRenderCB
         );
     }
 
@@ -73,17 +85,16 @@ class ModelPagination
         $iNumberPerPage = null,
         $mPageGetCBOrPageVar = null,
         $mRenderCB = null
-    )
-    {
+    ) {
         # number per page
-        $iNumberPerPage = max(1, $iNumberPerPage===null ? $this->iDefaultNumberPerPage : $iNumberPerPage);
+        $iNumberPerPage = max(1, $iNumberPerPage === null ? $this->iDefaultNumberPerPage : $iNumberPerPage);
 
         # current page
-        if ($mPageGetCBOrPageVar===null) {
+        if ($mPageGetCBOrPageVar === null) {
             $mPageGetCBOrPageVar = $this->mDefaultPageGetCBOrPageVar;
         }
         $iCurrentPage = is_string($mPageGetCBOrPageVar) ?
-            max(1, (int)$this->HttpRequest->getGet($mPageGetCBOrPageVar)):
+            max(1, (int)$this->HttpRequest->getGet($mPageGetCBOrPageVar)) :
             (int)call_user_func($mPageGetCBOrPageVar);
 
         # get total
@@ -94,15 +105,15 @@ class ModelPagination
         $aResult['total_item'] = $iTotalItem;
 
         # get list data
-        $List    = call_user_func($mListCB, $aWhere, $sOrderBy, $iNumberPerPage, ($iCurrentPage - 1) * $iNumberPerPage);
+        $List = call_user_func($mListCB, $aWhere, $sOrderBy, $iNumberPerPage, ($iCurrentPage - 1) * $iNumberPerPage);
 
         # render pagination result
-        if ($mRenderCB===null) {
+        if ($mRenderCB === null) {
             $mRenderCB = $this->mDefaultRender;
         }
         $mRenderCB = $mRenderCB === null ?
-            ($this->mDefaultRender === null ?  array($this, 'defaultRender') : $this->mDefaultRender) : $mRenderCB;
-        $sPage = call_user_func($mRenderCB, $this->HttpRequest, $aResult);
+            ($this->mDefaultRender === null ? array($this, 'defaultRender') : $this->mDefaultRender) : $mRenderCB;
+        $sPage     = call_user_func($mRenderCB, $this->HttpRequest, $aResult);
 
         # result
         return $sPage;
@@ -110,8 +121,8 @@ class ModelPagination
 
     public static function defaultRender(Http\HttpRequest $HttpRequest, $aResult)
     {
-        $sURI = strstr($HttpRequest->getRequestURI(), '?', true);
-        $Get  = $HttpRequest->Get;
+        $sURI             = strstr($HttpRequest->getRequestURI(), '?', true);
+        $Get              = $HttpRequest->Get;
         $sPage            = '<div class="pagination">';
         $aResult['first'] = 1;
         foreach (

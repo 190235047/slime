@@ -251,10 +251,11 @@ class Group implements \ArrayAccess, \Iterator, \Countable
 
     public function __toString()
     {
-        $sStr = '';
+        $sStr = "[\n";
         foreach ($this->aModelItem as $Item) {
-            $sStr .= (string)$Item . "\n";
+            $sStr .= "\t" . (string)$Item . "\n";
         }
+        $sStr = "]";
         return $sStr;
     }
 }

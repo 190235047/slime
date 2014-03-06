@@ -16,10 +16,10 @@ use Slime\Component\Helper\Arr2XML;
 abstract class Controller_Api extends Controller_ABS
 {
     protected $sDefaultRender = '_renderJSON';
-    protected $sJSCBParam     = 'cb';
-    protected $sTPL           = null;
+    protected $sJSCBParam = 'cb';
+    protected $sTPL = null;
 
-    protected $aData          = array();
+    protected $aData = array();
 
     public function __construct(array $aParam = array())
     {
@@ -49,7 +49,7 @@ abstract class Controller_Api extends Controller_ABS
             $sMethodName = $this->sDefaultRender;
         } else {
             $sMethodName = '_render' . strtoupper($this->aParam['__ext__']);
-            if ($this->sDefaultRender!==null && !method_exists($this, $sMethodName)) {
+            if ($this->sDefaultRender !== null && !method_exists($this, $sMethodName)) {
                 $sMethodName = $this->sDefaultRender;
             }
         }
@@ -64,7 +64,7 @@ abstract class Controller_Api extends Controller_ABS
             ->setContent(
                 $this->sTPL === null ?
                     Arr2XML::factory()->Array2XML($this->aData) :
-                    $this->Context->View->setTpl($this->sTPL)->renderAsResult()
+                    $this->Context->View->assignMulti($this->aData)->setTpl($this->sTPL)->renderAsResult()
             );
     }
 
@@ -75,14 +75,14 @@ abstract class Controller_Api extends Controller_ABS
             ->setContent(
                 $this->sTPL === null ?
                     json_encode($this->aData) :
-                    $this->Context->View->setTpl($this->sTPL)->renderAsResult()
+                    $this->Context->View->assignMulti($this->aData)->setTpl($this->sTPL)->renderAsResult()
             );
     }
 
     protected function _renderJSONP()
     {
         $sCB = $this->HttpRequest->getGet($this->sJSCBParam);
-        if ($sCB===null) {
+        if ($sCB === null) {
             $sCB = 'cb';
         }
         $this->HttpResponse
@@ -90,7 +90,7 @@ abstract class Controller_Api extends Controller_ABS
             ->setContent(
                 $this->sTPL === null ?
                     $sCB . '(' . json_encode($this->aData) . ')' :
-                    $this->Context->View->setTpl($this->sTPL)->renderAsResult()
+                    $this->Context->View->assignMulti($this->aData)->setTpl($this->sTPL)->renderAsResult()
             );
     }
 

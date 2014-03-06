@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\MultiProcessJob;
+namespace Slime\Bundle\BGJob;
 
 /**
  * Interface IJobQueue
