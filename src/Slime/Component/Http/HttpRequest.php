@@ -79,7 +79,7 @@ class HttpRequest extends HttpCommon
         $aFile = array(),
         $sContent = null,
         $sProtocol = 'HTTP/1.1',
-        $aHttpBuildQueryParam = array('', '', PHP_QUERY_RFC1738)
+        $aHttpBuildQueryParam = array('', '&', PHP_QUERY_RFC1738)
     ) {
         $aArr = array_replace(array('port' => 80, 'path' => '/'), parse_url($sURL));
         if (!isset($aHeader['Host'])) {
