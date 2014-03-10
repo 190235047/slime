@@ -15,16 +15,16 @@ class Tree_PageNode extends Tree_Node
     public $aChildren = array();
 
     /**
-     * @param Tree_PagePool $Pool
-     * @param string        $sKey
-     * @param array         $aAttr
-     * @param Tree_PageNode $Parent
+     * @param Tree_PagePool        $Pool
+     * @param string               $sKey
+     * @param array                $aAttr
+     * @param Tree_PageNode | null $Parent
      */
     public function __construct(
         $Pool,
         $sKey,
         $aAttr = array(),
-        $Parent
+        $Parent = null
     ) {
         $this->sKey   = $sKey;
         $this->Pool   = $Pool;
