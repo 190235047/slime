@@ -9,10 +9,21 @@ namespace Slime\Component\Pagination;
  */
 class Core
 {
+    /**
+     * @param int      $iTotalItem
+     * @param int      $iNumPerPage
+     * @param int      $iCurrentPage
+     * @param int      $iDisplayBefore
+     * @param int|null $iDisplayAfter
+     *
+     * @return \ArrayObject
+     * @throws \InvalidArgumentException
+     * @throws \LogicException
+     */
     public static function run($iTotalItem, $iNumPerPage, $iCurrentPage, $iDisplayBefore = 3, $iDisplayAfter = null)
     {
         if ($iCurrentPage < 1) {
-            throw new \Exception('Offset can not be less than 1');
+            throw new \InvalidArgumentException('Offset can not be less than 1');
         }
         if ($iTotalItem == 0) {
             return array();
@@ -24,7 +35,7 @@ class Core
 
         $iTotalPage = (int)ceil($iTotalItem / $iNumPerPage);
         if ($iCurrentPage > $iTotalPage) {
-            throw new \Exception('Offset can not be more than total page');
+            throw new \LogicException('Offset can not be more than total page');
         }
 
         # count start

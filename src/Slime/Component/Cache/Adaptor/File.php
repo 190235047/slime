@@ -17,14 +17,14 @@ class Adaptor_File implements IAdaptor
      * @param mixed  $mCBKey2File (callback 回调, 参数为缓存key, 期待返回缓存文件名)
      * @param int    $iCreateMode
      *
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function __construct($sCacheDir, $mCBKey2File = null, $iCreateMode = 0777)
     {
         $this->sCacheDir = rtrim($sCacheDir, '/') . '/';
         if (!file_exists($this->sCacheDir)) {
             if (!@mkdir($this->sCacheDir, $iCreateMode, true)) {
-                throw new \Exception("Create dir[$sCacheDir] failed");
+                throw new \RuntimeException("Create dir[$sCacheDir] failed");
             }
         }
         $this->mCBKey2File = $mCBKey2File;
@@ -39,17 +39,20 @@ class Adaptor_File implements IAdaptor
     {
         $sFile = $this->getFileFromKey($sKey);
 
-        $mData = require $sFile;
-        $aData = is_array($mData) ? $mData : array();
-        if (!isset($aData[$sKey])) {
-            return false;
+        if (!file_exists($sFile)) {
+            return null;
         }
 
-        if (time() - $aData[$sKey]['expire'] > 0) {
-            $this->delete($sKey);
-            return false;
+        $aData = file($sKey);
+        if (count($aData) !== 2) {
+            return null;
         }
-        return json_decode($aData[$sKey]['data']);
+
+        if (time() - $aData[0] > 0) {
+            $this->delete($sKey);
+            return null;
+        }
+        return json_decode($aData[1]);
     }
 
     /**
@@ -61,18 +64,10 @@ class Adaptor_File implements IAdaptor
      */
     public function set($sKey, $mValue, $iExpire)
     {
-        $mValue = json_encode($mValue);
-
-        $sFile = $this->getFileFromKey($sKey);
-
-        $mData        = require $sFile;
-        $aData        = is_array($mData) ? $mData : array();
-        $aData[$sKey] = array(
-            'expire' => time() + $iExpire,
-            'data'   => $mValue
-        );
-
-        return file_put_contents($sFile, '<?php return ' . var_export($aData, true) . ';?>') !== false;
+        return file_put_contents(
+            $this->getFileFromKey($sKey),
+            sprintf("%s\n%s", time() + $iExpire, json_encode($mValue))
+        ) !== false;
     }
 
     /**
@@ -83,13 +78,7 @@ class Adaptor_File implements IAdaptor
     public function delete($sKey)
     {
         $sFile = $this->getFileFromKey($sKey);
-
-        $mData = require $sFile;
-        $aData = is_array($mData) ? $mData : array();
-
-        unset($aData[$sKey]);
-        $sStr = empty($aData) ? 'array()' : var_export($aData, true);
-        return file_put_contents($sFile, '<?php return ' . $sStr . ';?>') !== false;
+        return file_exists($sFile) ? unlink($sFile) : true;
     }
 
     /**
@@ -105,21 +94,15 @@ class Adaptor_File implements IAdaptor
         }
         closedir($rDir);
         return true;
-
     }
 
     private function getFileFromKey($sKey)
     {
-        $sCacheFile = $this->sCacheDir . (
-            $this->mCBKey2File === null ? 'cache.php' : call_user_func($this->mCBKey2File, $sKey)
-            );
-
-        if (!file_exists($sCacheFile)) {
-            if (!@touch($sCacheFile)) {
-                throw new \Exception("Create file[$sCacheFile] failed");
-            }
-        }
-
-        return $sCacheFile;
+        return $this->sCacheDir .
+        (
+        $this->mCBKey2File === null ?
+            md5($sKey) . '.cache.php' :
+            call_user_func($this->mCBKey2File, $sKey)
+        );
     }
 }

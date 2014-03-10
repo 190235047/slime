@@ -1,6 +1,8 @@
 <?php
 namespace Slime\Component\Lock;
 
+use Slime\Component\Helper\Sugar;
+
 /**
  * Class Lock
  *
@@ -12,24 +14,12 @@ final class Lock
     /**
      * @param string $sAdaptor
      *
-     * @throws \Exception
      * @return IAdaptor
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      */
     public static function factory($sAdaptor)
     {
-        if ($sAdaptor[0] === '@') {
-            $sAdaptor = __NAMESPACE__ . '\\Adaptor_' . substr($sAdaptor, 1);
-        }
-        $aParam = array_slice(func_get_args(), 1);
-        if (empty($aParam)) {
-            $Obj = new $sAdaptor();
-        } else {
-            $Ref = new \ReflectionClass($sAdaptor);
-            $Obj = $Ref->newInstanceArgs($aParam);
-        }
-        if (!$Obj instanceof IAdaptor) {
-            throw new \Exception("{$sAdaptor} must implements Slime\\Component\\Lock\\IAdaptor");
-        }
-        return $Obj;
+        return Sugar::createObjAdaptor(__NAMESPACE__, func_get_args());
     }
 }

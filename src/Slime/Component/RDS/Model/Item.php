@@ -99,7 +99,7 @@ class Item implements \ArrayAccess
      * @param bool   $bJoin
      *
      * @return $this|$this[]
-     * @throws \Exception
+     * @throws \OutOfRangeException
      */
     public function relation(
         $sModelName,
@@ -112,7 +112,7 @@ class Item implements \ArrayAccess
         $mResult = null;
 
         if (!isset($this->Model->aRelationConfig[$sModelName])) {
-            throw new \Exception("Can not find relation for [$sModelName]");
+            throw new \OutOfRangeException("Can not find relation for [$sModelName]");
         }
 
         $sMethod = strtolower($this->Model->aRelationConfig[$sModelName]);
@@ -131,10 +131,17 @@ class Item implements \ArrayAccess
         return $mResult;
     }
 
+    /**
+     * @param string     $sModelName
+     * @param array|null $aWhere
+     *
+     * @return int
+     * @throws \OutOfRangeException
+     */
     public function relationCount($sModelName, array $aWhere = null)
     {
         if (!isset($this->Model->aRelationConfig[$sModelName])) {
-            throw new \Exception("Can not find relation for [$sModelName]");
+            throw new \OutOfRangeException("Can not find relation for [$sModelName]");
         }
 
         $sMethod = strtolower($this->Model->aRelationConfig[$sModelName]);

@@ -51,7 +51,7 @@ class Context
 
     public function __get($sVar)
     {
-        throw new \Exception("Please register $sVar first!");
+        return $this->$sVar;
     }
 
     /**
@@ -67,8 +67,6 @@ class Context
     /**
      * @param string $sVarName    标志(唯一, 作为调用时的Key)
      * @param mixed  $mEveryThing 值
-     *
-     * @throws \Exception
      */
     public function register($sVarName, $mEveryThing)
     {

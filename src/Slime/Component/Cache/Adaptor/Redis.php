@@ -1,8 +1,6 @@
 <?php
 namespace Slime\Component\Cache;
 
-use Slime\Component\Redis;
-
 /**
  * Class Adaptor_Redis
  *
@@ -15,14 +13,19 @@ class Adaptor_Redis implements IAdaptor
     public $aConfig;
 
     /** @var \Redis */
-    private $Redis;
+    private $Obj;
 
     /**
-     * @param Redis\Redis $Redis
+     * @param \Slime\Component\Redis\Redis $Redis
      */
-    public function __construct(Redis\Redis $Redis)
+    public function __construct($Redis)
     {
-        $this->Redis = $Redis;
+        $this->Obj = $Redis;
+    }
+
+    public function __call($sMethod, $aParam)
+    {
+        return empty($aParam) ? $this->Obj->$sMethod() : call_user_func_array(array($this->Obj, $sMethod), $aParam);
     }
 
     /**
@@ -32,7 +35,7 @@ class Adaptor_Redis implements IAdaptor
      */
     public function get($sKey)
     {
-        return $this->Redis->get($sKey);
+        return $this->Obj->get($sKey);
     }
 
     /**
@@ -44,7 +47,7 @@ class Adaptor_Redis implements IAdaptor
      */
     public function set($sKey, $mValue, $iExpire)
     {
-        return $this->Redis->set($sKey, $mValue, $iExpire);
+        return $this->Obj->set($sKey, $mValue, $iExpire);
     }
 
     /**
@@ -54,7 +57,7 @@ class Adaptor_Redis implements IAdaptor
      */
     public function delete($sKey)
     {
-        return $this->Redis->delete($sKey);
+        return $this->Obj->delete($sKey);
     }
 
     /**
@@ -62,6 +65,6 @@ class Adaptor_Redis implements IAdaptor
      */
     public function flush()
     {
-        return $this->Redis->flushDB();
+        return $this->Obj->flushDB();
     }
 }

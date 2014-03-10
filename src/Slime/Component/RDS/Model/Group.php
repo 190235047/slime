@@ -12,7 +12,10 @@ class Group implements \ArrayAccess, \Iterator, \Countable
     /** @var Item[] */
     public $aModelItem;
 
-    public function __construct(Model $Model)
+    /**
+     * @param Model $Model
+     */
+    public function __construct($Model)
     {
         $this->Model      = $Model;
         $this->aModelItem = array();
@@ -21,23 +24,30 @@ class Group implements \ArrayAccess, \Iterator, \Countable
         $this->aRelObj    = array();
     }
 
-    public function relation($sModelName, Item $ModelItem = null)
+    /**
+     * @param string $sModelName
+     * @param Item   $ModelItem
+     *
+     * @return mixed
+     * @throws \OutOfRangeException
+     */
+    public function relation($sModelName, $ModelItem = null)
     {
         $aRelConf = $this->Model->aRelationConfig;
         if (!isset($aRelConf[$sModelName])) {
-            throw new \Exception("Relation model $sModelName is not exist");
+            throw new \OutOfRangeException("Relation model $sModelName is not exist");
         }
         $sMethod = $aRelConf[$sModelName];
         return $this->$sMethod($sModelName, $ModelItem);
     }
 
     /**
-     * @param            $sModelName
-     * @param Item       $ModelItem
+     * @param string $sModelName
+     * @param Item   $ModelItem
      *
      * @return Group | Item | null
      */
-    public function hasOne($sModelName, Item $ModelItem = null)
+    public function hasOne($sModelName, $ModelItem = null)
     {
         if ($ModelItem === null && isset($this->aRelation[$sModelName])) {
             return $this->aRelation[$sModelName];
@@ -72,7 +82,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
      *
      * @return Group | Item | null
      */
-    public function belongsTo($sModelName, Item $ModelItem = null)
+    public function belongsTo($sModelName, $ModelItem = null)
     {
         if ($ModelItem === null && isset($this->aRelation[$sModelName])) {
             return $this->aRelation[$sModelName];

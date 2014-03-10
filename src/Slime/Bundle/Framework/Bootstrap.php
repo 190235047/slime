@@ -55,11 +55,11 @@ class Bootstrap
     }
 
     /**
-     * @param string       $sENV
-     * @param string       $sAppNs
-     * @param IAdaptor     $Config
-     * @param null|mixed   $mHttpReqOrCliArg
-     * @param null|string  $sAPI
+     * @param string      $sENV
+     * @param string      $sAppNs
+     * @param IAdaptor    $Config
+     * @param null|mixed  $mHttpReqOrCliArg
+     * @param null|string $sAPI
      */
     public function __construct(
         $sENV,

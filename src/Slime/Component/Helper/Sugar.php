@@ -19,7 +19,7 @@ class Sugar
      */
     public static function tryIt($mTryFunc, array $aParam = array(), $iMaxTimes = -1, $iSleepMS = 10)
     {
-        $i = 0;
+        $i     = 0;
         $mData = null;
         while ($iMaxTimes <= 0 || $i < $iMaxTimes) {
             if (($mData = call_user_func_array($mTryFunc, $aParam)) !== null) {
@@ -57,7 +57,8 @@ class Sugar
      * @param string $sAdaptorClassPre
      *
      * @return object
-     * @throws \Exception
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      */
     public static function createObjAdaptor(
         $sNS,
@@ -66,7 +67,7 @@ class Sugar
         $sAdaptorClassPre = 'Adaptor_'
     ) {
         if (empty($aClassAndArgs)) {
-            throw new \Exception("Param error[aClassAndArgs can not be empty]");
+            throw new \InvalidArgumentException("Param error[aClassAndArgs can not be empty]");
         }
         $sClassName = array_shift($aClassAndArgs);
         if ($sClassName[0] === '@') {
@@ -76,7 +77,7 @@ class Sugar
         if ($sInterface !== null) {
             $sInterface = $sInterface[0] === '\\' ? substr($sInterface, 1) : "$sNS\\$sInterface";
             if (!$Obj instanceof $sInterface) {
-                throw new \Exception("Class[{$sClassName}] must implements [$sInterface]");
+                throw new \UnexpectedValueException("Class[{$sClassName}] must implements [$sInterface]");
             }
         }
         return $Obj;

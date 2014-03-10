@@ -25,12 +25,12 @@ class Arr
      * @param string $sKey
      *
      * @return mixed
-     * @throws \Exception
+     * @throws \OutOfRangeException
      */
     public static function getForce(array $aArr, $sKey)
     {
         if (!array_key_exists($sKey, $aArr)) {
-            throw new \Exception("$sKey is not in array" . json_encode($aArr));
+            throw new \OutOfRangeException("$sKey is not in array" . json_encode($aArr));
         }
         return $aArr[$sKey];
     }

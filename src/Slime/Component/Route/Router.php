@@ -1,8 +1,6 @@
 <?php
 namespace Slime\Component\Route;
 
-use Slime\Component\Http;
-
 /**
  * Class Route
  *
@@ -23,14 +21,14 @@ class Router
     }
 
     /**
-     * @param Http\HttpRequest  $HttpRequest
-     * @param Http\HttpResponse $HttpResponse
-     * @param array             $aRule
+     * @param \Slime\Component\Http\HttpRequest  $HttpRequest
+     * @param \Slime\Component\Http\HttpResponse $HttpResponse
+     * @param array                              $aRule
      *
-     * @throws \Exception
+     * @throws \DomainException
      * @return \Slime\Component\Route\CallBack[]
      */
-    public function generateFromHttp(Http\HttpRequest $HttpRequest, Http\HttpResponse $HttpResponse, $aRule)
+    public function generateFromHttp($HttpRequest, $HttpResponse, $aRule)
     {
         $aCallBack = array();
         foreach ($aRule as $sK => $mV) {
@@ -78,7 +76,7 @@ class Router
                         } elseif (isset($mV['func'])) {
                             $CallBack->setCBFunc($mV['func']);
                         } else {
-                            throw new \Exception('Route rule error. one of [object, class, func] must be used for array key');
+                            throw new \DomainException('Route rule error. one of [object, class, func] must be used for array key');
                         }
                         if (isset($mV['param'])) {
                             $CallBack->setParam($mV['param']);

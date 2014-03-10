@@ -42,7 +42,7 @@ class Logger implements LoggerInterface
     );
 
     /**
-     * @param array $aWriterConf
+     * @param array $aWriterConf ['@File' => ['param1', 'param2'], '@FirePHP']
      * @param int   $iLogLevel
      * @param null  $sRequestID
      */

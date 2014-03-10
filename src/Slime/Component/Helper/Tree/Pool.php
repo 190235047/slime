@@ -20,12 +20,12 @@ class Tree_Pool
      * @param array $aArr
      *
      * @return Tree_Node
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      */
     public static function initFromArrayRecursion(array $aArr)
     {
         if (count($aArr) !== 1) {
-            throw new \Exception('Tree array data must own and only can own one root node');
+            throw new \InvalidArgumentException('Tree array data must own and only can own one root node');
         }
         $sKey  = key($aArr);
         $aData = current($aArr);
@@ -61,7 +61,7 @@ class Tree_Pool
     /**
      * @param Tree_Node $Node
      */
-    public function addNode(Tree_Node $Node)
+    public function addNode($Node)
     {
         $sKey = $Node->sKey;
         if (isset($this->aPool[$sKey])) {
@@ -83,7 +83,7 @@ class Tree_Pool
     }
 
     /**
-     * @param $sKey
+     * @param string $sKey
      *
      * @return Tree_Node|null
      */

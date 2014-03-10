@@ -90,14 +90,14 @@ class Adaptor_PHP implements IAdaptor
     }
 
     /**
-     * @throws \Exception
      * @return string
+     * @throws \RuntimeException
      */
     public function renderAsResult()
     {
         $sFile = $this->sBaseDir . DIRECTORY_SEPARATOR . $this->sTpl;
         if (!file_exists($sFile)) {
-            throw new \Exception("Template file[{$this->sTpl}] is not exist");
+            throw new \RuntimeException("Template file[{$this->sTpl}] is not exist");
         }
         extract($this->aData);
         ob_start();

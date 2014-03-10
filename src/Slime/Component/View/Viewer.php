@@ -15,7 +15,8 @@ final class Viewer
      * @param string $sAdaptor
      *
      * @return IAdaptor
-     * @throws \Exception
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      */
     public static function factory($sAdaptor)
     {

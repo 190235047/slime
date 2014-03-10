@@ -46,14 +46,14 @@ class Factory
         if (($sModel = substr($sModel, 3)) !== false) {
             return $this->get($sModel);
         }
-        throw new \Exception("Call $sModel error");
+        throw new \BadMethodCallException("Call $sModel error");
     }
 
     /**
      * @param string $sModelName
      *
      * @return Model
-     * @throws \Exception
+     * @throws \ErrorException
      */
     public function get($sModelName)
     {
@@ -68,7 +68,7 @@ class Factory
             $aConf = $this->aModelConf[$sModelName];
             $sDB   = $aConf['db'];
             if (!isset($this->aCURD[$sDB])) {
-                throw new \Exception("There is no database config [$sDB] exist");
+                throw new \ErrorException("There is no database config [$sDB] exist");
             }
 
             $sModelClassName = isset($aConf['model_class']) ?

@@ -15,8 +15,9 @@ final class Configure
     /**
      * @param string $sAdaptor
      *
-     * @throws \Exception
      * @return IAdaptor
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      */
     public static function factory($sAdaptor)
     {
@@ -25,7 +26,7 @@ final class Configure
 
     public static function parseRecursion($mResult, IAdaptor $Config)
     {
-        if (is_string($mResult)) {
+        if (is_string($mResult) && $mResult !== '') {
             switch ($mResult[0]) {
                 case '@':
                     $mResult = $Config->get(substr($mResult, 1));

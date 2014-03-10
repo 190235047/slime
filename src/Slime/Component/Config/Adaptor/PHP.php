@@ -37,7 +37,7 @@ class Adaptor_PHP extends Adaptor_ABS
      * @param mixed  $mDefaultValue
      * @param bool   $bForce
      *
-     * @throws \Exception
+     * @throws \OutOfRangeException
      * @return mixed
      */
     public function get($sKey, $mDefaultValue = null, $bForce = false)
@@ -56,7 +56,7 @@ class Adaptor_PHP extends Adaptor_ABS
                 );
         }
         if ($mResult === null && $bForce) {
-            throw new \Exception("Config [{$sKey}] is not found");
+            throw new \OutOfRangeException("Config [{$sKey}] is not found");
         }
         return $mResult;
     }

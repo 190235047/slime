@@ -2,7 +2,6 @@
 namespace Slime\Component\Pagination;
 
 use Slime\Component\RDS\Model;
-use Slime\Component\Http;
 
 /**
  * Class Automatic
@@ -13,13 +12,13 @@ use Slime\Component\Http;
 class ModelPagination
 {
     /**
-     * @param Http\HttpRequest $HttpRequest
-     * @param null|int         $iDefaultNumberPerPage      (null: 10)
-     * @param null|mixed       $mDefaultPageGetCBOrPageVar (null: page)
-     * @param null|mixed       $mDefaultRender             (null, array(self, defaultRender))
+     * @param \Slime\Component\Http\HttpRequest $HttpRequest
+     * @param null|int                          $iDefaultNumberPerPage      (null: 10)
+     * @param null|mixed                        $mDefaultPageGetCBOrPageVar (null: page)
+     * @param null|mixed                        $mDefaultRender             (null, array(self, defaultRender))
      */
     public function __construct(
-        Http\HttpRequest $HttpRequest,
+        $HttpRequest,
         $iDefaultNumberPerPage = null,
         $mDefaultPageGetCBOrPageVar = null,
         $mDefaultRender = null
@@ -119,8 +118,18 @@ class ModelPagination
         return $sPage;
     }
 
-    public static function defaultRender(Http\HttpRequest $HttpRequest, $aResult)
+    /**
+     * @param \Slime\Component\Http\HttpRequest $HttpRequest
+     * @param                                   $aResult
+     *
+     * @return string
+     */
+    public static function defaultRender($HttpRequest, $aResult)
     {
+        if (empty($aResult['list'])) {
+            return '';
+        }
+
         $sURI             = strstr($HttpRequest->getRequestURI(), '?', true);
         $Get              = $HttpRequest->Get;
         $sPage            = '<div class="pagination">';
@@ -164,7 +173,13 @@ class ModelPagination
         return $sPage;
     }
 
-    public static function noRender(Http\HttpRequest $HttpRequest, $aResult)
+    /**
+     * @param \Slime\Component\Http\HttpRequest $HttpRequest
+     * @param array                             $aResult
+     *
+     * @return array
+     */
+    public static function noRender($HttpRequest, $aResult)
     {
         return array('total_page' => $aResult['total'], 'total_item' => $aResult['total_item']);
     }

@@ -14,8 +14,9 @@ final class Cache
     /**
      * @param string $sAdaptor
      *
-     * @throws \Exception
      * @return IAdaptor
+     * @throws \InvalidArgumentException
+     * @throws \UnexpectedValueException
      */
     public static function factory($sAdaptor)
     {

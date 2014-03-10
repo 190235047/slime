@@ -1,13 +1,13 @@
 <?php
-namespace Slime\Bundle\BGJob;
+namespace Slime\Bundle\Framework\BGJob;
 
 /**
- * Interface IJobQueue
+ * Interface IQueue
  *
  * @package Slime\Component\MultiProcessJob
  * @author  smallslime@gmail.com
  */
-interface IJobQueue
+interface IQueue
 {
     /**
      * Pop an job from queue

@@ -1,19 +1,19 @@
 <?php
-namespace Slime\Bundle\BGJob;
+namespace Slime\Bundle\Framework\BGJob;
 
 /**
- * Class JobQueue_Redis
+ * Class Queue_Redis
  *
- * @package Slime\Component\BackGroundJob
+ * @package Slime\Bundle\Framework\BGJob
  * @author  smallslime@gmail.com
  */
-class JobQueue_Redis implements IJobQueue
+class Queue_Redis implements IQueue
 {
     /**
      * @param \Redis $Redis      Redis instance
      * @param string $sQueueName queue name
      */
-    public function __construct(\Redis $Redis, $sQueueName)
+    public function __construct($Redis, $sQueueName)
     {
         $this->Redis      = $Redis;
         $this->sQueueName = $sQueueName;

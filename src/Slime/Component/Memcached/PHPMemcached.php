@@ -22,7 +22,9 @@ class PHPMemcached
 
     public function __call($sMethodName, $aArg)
     {
-        return call_user_func_array(array($this->getInstance(), $sMethodName), $aArg);
+        return empty($aArg) ?
+            $this->getInstance()->$sMethodName() :
+            call_user_func_array(array($this->getInstance(), $sMethodName), $aArg);
     }
 
     /**

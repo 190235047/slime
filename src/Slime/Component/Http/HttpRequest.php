@@ -108,16 +108,28 @@ class HttpRequest extends HttpCommon
         return $SELF;
     }
 
+    /**
+     * @param string     $sProtocol
+     * @param string     $sMethod
+     * @param string     $sRequestURI
+     * @param Bag_Header $Header
+     * @param string     $sContent
+     * @param Bag_Get    $Get
+     * @param Bag_Post   $Post
+     * @param Bag_Cookie $Cookie
+     * @param Bag_File   $File
+     * @param array      $aServerVars
+     */
     public function __construct(
         $sProtocol,
         $sMethod,
         $sRequestURI,
         $Header,
         $sContent,
-        Bag_Get $Get,
-        Bag_Post $Post,
-        Bag_Cookie $Cookie,
-        Bag_File $File,
+        $Get,
+        $Post,
+        $Cookie,
+        $File,
         array $aServerVars = null
     ) {
         $this->sProtocol      = $sProtocol;
@@ -300,7 +312,12 @@ class HttpRequest extends HttpCommon
             parse_str($aArr['query'], $aQ);
             $aQ = array_merge($aQ, $this->Get->toArray());
         }
-        $this->sRequestURI = empty($aQ) ? $aArr['path'] : ($aArr['path'] . '?' . http_build_query($aQ, $aPQ[0], $aPQ[1], $aPQ[2]));
+        $this->sRequestURI = empty($aQ) ? $aArr['path'] : ($aArr['path'] . '?' . http_build_query(
+                $aQ,
+                $aPQ[0],
+                $aPQ[1],
+                $aPQ[2]
+            ));
 
         if ($this->sRequestMethod === 'POST' && count($this->Post) > 0) {
             $this->sContent = http_build_query($this->Post->toArray(), $aPQ[0], $aPQ[1], $aPQ[2]);

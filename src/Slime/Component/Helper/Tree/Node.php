@@ -14,11 +14,17 @@ class Tree_Node
      */
     public $aChildren = array();
 
+    /**
+     * @param Tree_Pool $Pool
+     * @param string    $sKey
+     * @param array     $aAttr
+     * @param Tree_Node $Parent
+     */
     public function __construct(
-        Tree_Pool $Pool,
+        $Pool,
         $sKey,
         $aAttr = array(),
-        Tree_Node $Parent = null
+        $Parent
     ) {
         $this->sKey   = $sKey;
         $this->Pool   = $Pool;
@@ -37,11 +43,20 @@ class Tree_Node
         return isset($this->aAttr[$sKey]) ? $this->aAttr[$sKey] : null;
     }
 
+    /**
+     * @return Tree_Node[]
+     */
     public function getChildren()
     {
         return $this->aChildren;
     }
 
+    /**
+     * @param string $sKey
+     * @param array  $aAttr
+     *
+     * @return Tree_Node
+     */
     public function bornChild($sKey, $aAttr = array())
     {
         /** @var Tree_Node $Node */
@@ -51,6 +66,9 @@ class Tree_Node
         return $Node;
     }
 
+    /**
+     * @return void
+     */
     public function deleteChildren()
     {
         foreach ($this->aChildren as $Child) {
@@ -59,7 +77,10 @@ class Tree_Node
         unset($this->aChildren);
     }
 
-    public function changeParent(Tree_Node $Parent = null)
+    /**
+     * @param Tree_Node $Parent
+     */
+    public function changeParent($Parent)
     {
         if ($this->Parent !== null) {
             unset($this->Parent->aChildren[$this->sKey]);
