@@ -21,32 +21,33 @@ class Router
     }
 
     /**
-     * @param \Slime\Component\Http\HttpRequest  $HttpRequest
-     * @param \Slime\Component\Http\HttpResponse $HttpResponse
+     * @param \Slime\Component\Http\HttpRequest  $REQ
+     * @param \Slime\Component\Http\HttpResponse $RES
      * @param array                              $aRule
+     * @param bool                               $bHitMain
      *
      * @throws \DomainException
      * @return \Slime\Component\Route\CallBack[]
      */
-    public function generateFromHttp($HttpRequest, $HttpResponse, $aRule)
+    public function generateFromHttp($REQ, $RES, $aRule, &$bHitMain)
     {
-        $aCallBack = array();
+        $bHitMain    = false;
+        $aCallBack   = array();
+        $HitMode = new HitMode();
         foreach ($aRule as $sK => $mV) {
-            $Continue = (object)(array('value' => false));
+            $HitMode->setAsCommon();
             if (is_string($sK)) {
-                if (!preg_match($sK, $HttpRequest->getRequestURI(), $aMatched)) {
-                    continue;
-                } else {
+                if (!preg_match($sK, $REQ->getRequestURI(), $aMatched)) {
                     if (is_callable($mV)) {
                         // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
-                        // value: function($a, $b, $c, $d){}
+                        // value: function($REQ, $RES, $aMatched, $Continue, $Hit, $sAppNS, $sCtrlPre){}
                         $mResult = call_user_func_array(
                             $mV,
                             array(
-                                $HttpRequest,
-                                $HttpResponse,
+                                $REQ,
+                                $RES,
                                 $aMatched,
-                                $Continue,
+                                $HitMode,
                                 $this->sAppNS,
                                 $this->sControllerPre
                             )
@@ -59,9 +60,8 @@ class Router
                         // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
                         // value: array('object' => $1, 'method' => $3, 'param' => array('id' => $2, 'status' => $4))
                         // value: array('func' => $1_$3, 'param' => array('id' => $2, 'status' => $4), '_continue'=>false)
-                        if (isset($mV['_continue'])) {
-                            $Continue['value'] = ($mV['_continue'] !== false);
-                            unset($mV['_continue']);
+                        if (!empty($mV['__interceptor__'])) {
+                            $HitMode->setMode($mV['__interceptor__']);
                         }
                         $aSearch = $aReplace = array();
                         foreach ($aMatched as $iK => $sV) {
@@ -88,9 +88,9 @@ class Router
                 $mResult = call_user_func_array(
                     $mV,
                     array(
-                        $HttpRequest,
-                        $HttpResponse,
-                        $Continue,
+                        $REQ,
+                        $RES,
+                        $HitMode,
                         $this->sAppNS,
                         $this->sControllerPre
                     )
@@ -99,11 +99,14 @@ class Router
                     $aCallBack[] = $mResult;
                 }
             }
-            if ($Continue->value === false) {
+
+            if ($bHitMain === false && $HitMode->isMainLogic()) {
+                $bHitMain = true;
+            }
+            if (!$HitMode->ifNeedGoOn()) {
                 break;
             }
         }
-
         return $aCallBack;
     }
 
@@ -116,19 +119,25 @@ class Router
     /**
      * @param array $aArg
      * @param array $aRule
+     * @param bool  $bHitMain
      *
      * @return \Slime\Component\Route\CallBack[]
      */
-    public function generateFromCli(array $aArg, array $aRule)
+    public function generateFromCli(array $aArg, array $aRule, &$bHitMain)
     {
-        $aCallBack = array();
+        $bHitMain    = false;
+        $aCallBack   = array();
+        $Interceptor = new HitMode();
         foreach ($aRule as $mV) {
-            $Continue = (object)(array('value' => false));
-            $mResult  = call_user_func_array($mV, array($aArg, $Continue, $this->sAppNS, $this->sControllerPre));
+            $Interceptor->setAsCommon();
+            $mResult = call_user_func_array($mV, array($aArg, $Interceptor, $this->sAppNS, $this->sControllerPre));
             if ($mResult instanceof CallBack) {
                 $aCallBack[] = $mResult;
             }
-            if ($Continue->value === false) {
+            if ($bHitMain === false && $Interceptor->isMainLogic()) {
+                $bHitMain = true;
+            }
+            if (!$Interceptor->ifNeedGoOn()) {
                 break;
             }
         }

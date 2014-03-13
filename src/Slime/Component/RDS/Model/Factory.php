@@ -53,7 +53,7 @@ class Factory
      * @param string $sModelName
      *
      * @return Model
-     * @throws \ErrorException
+     * @throws \OutOfRangeException
      */
     public function get($sModelName)
     {
@@ -68,7 +68,7 @@ class Factory
             $aConf = $this->aModelConf[$sModelName];
             $sDB   = $aConf['db'];
             if (!isset($this->aCURD[$sDB])) {
-                throw new \ErrorException("There is no database config [$sDB] exist");
+                throw new \OutOfRangeException("There is no database config [$sDB] exist");
             }
 
             $sModelClassName = isset($aConf['model_class']) ?

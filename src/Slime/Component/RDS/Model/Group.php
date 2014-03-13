@@ -265,7 +265,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
         foreach ($this->aModelItem as $Item) {
             $sStr .= "\t" . (string)$Item . "\n";
         }
-        $sStr = "]";
+        $sStr .= "]\n";
         return $sStr;
     }
 }

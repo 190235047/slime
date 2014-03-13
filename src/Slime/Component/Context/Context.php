@@ -19,7 +19,7 @@ class Context
     /**
      * 获取当前请求的上下文对象
      *
-     * @return self 有可能为NULL
+     * @return $this 有可能为NULL
      */
     public static function getInst()
     {
@@ -29,7 +29,7 @@ class Context
     /**
      * 生成上下文
      *
-     * @return self
+     * @return $this
      */
     public static function makeInst()
     {
@@ -49,8 +49,15 @@ class Context
         array_pop($GLOBALS['__SF_CONTEXT__']);
     }
 
+
+    /** @var array */
+    protected $__aVarKey__;
+
     public function __get($sVar)
     {
+        if (!isset($this->__aVarKey__[$sVar])) {
+            throw new \OutOfRangeException("$sVar is not register before");
+        }
         return $this->$sVar;
     }
 
@@ -61,7 +68,7 @@ class Context
      */
     public function isRegister($sVarName)
     {
-        return property_exists($this, $sVarName);
+        return isset($this->__aVarKey__[$sVarName]);
     }
 
     /**
@@ -70,12 +77,17 @@ class Context
      */
     public function register($sVarName, $mEveryThing)
     {
+        $this->__aVarKey__[$sVarName] = true;
         $this->$sVarName = $mEveryThing;
     }
 
+    /**
+     * @param array $aKVMap [k:v, ...]
+     */
     public function registerMulti(array $aKVMap)
     {
         foreach ($aKVMap as $sK => $mV) {
+            $this->__aVarKey__[$sK] = true;
             $this->$sK = $mV;
         }
     }

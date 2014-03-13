@@ -17,7 +17,9 @@ abstract class Controller_Api extends Controller_ABS
 {
     protected $sDefaultRender = '_renderJSON';
     protected $sJSCBParam = 'cb';
-    protected $sTPL = null;
+    protected $sXmlTPL = null;
+    protected $sJsonTPL = null;
+    protected $sJsonPTPL = null;
 
     protected $aData = array();
 
@@ -62,9 +64,9 @@ abstract class Controller_Api extends Controller_ABS
         $this->HttpResponse
             ->setHeader('Content-Type', 'text/xml', false)
             ->setContent(
-                $this->sTPL === null ?
+                $this->sXmlTPL === null ?
                     Arr2XML::factory()->Array2XML($this->aData) :
-                    $this->Context->View->assignMulti($this->aData)->setTpl($this->sTPL)->renderAsResult()
+                    $this->Context->View->assignMulti($this->aData)->setTpl($this->sXmlTPL)->renderAsResult()
             );
     }
 
@@ -73,9 +75,9 @@ abstract class Controller_Api extends Controller_ABS
         $this->HttpResponse
             ->setHeader('Content-Type', 'text/javascript', false)
             ->setContent(
-                $this->sTPL === null ?
+                $this->sJsonTPL === null ?
                     json_encode($this->aData) :
-                    $this->Context->View->assignMulti($this->aData)->setTpl($this->sTPL)->renderAsResult()
+                    $this->Context->View->assignMulti($this->aData)->setTpl($this->sJsonTPL)->renderAsResult()
             );
     }
 
@@ -88,9 +90,9 @@ abstract class Controller_Api extends Controller_ABS
         $this->HttpResponse
             ->setHeader('Content-Type', 'text/javascript', false)
             ->setContent(
-                $this->sTPL === null ?
+                $this->sJsonPTPL === null ?
                     $sCB . '(' . json_encode($this->aData) . ')' :
-                    $this->Context->View->assignMulti($this->aData)->setTpl($this->sTPL)->renderAsResult()
+                    $this->Context->View->assignMulti($this->aData)->setTpl($this->sJsonPTPL)->renderAsResult()
             );
     }
 

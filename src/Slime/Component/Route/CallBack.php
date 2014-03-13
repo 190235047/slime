@@ -110,7 +110,7 @@ class CallBack
             # find method
             $sMid = $this->mCallable[1];
             if (!isset($aMethod[$sMid])) {
-                throw new \RuntimeException(
+                throw new RouteFailException(
                     sprintf(
                         'There is no method[%s] in class[%s]',
                         $sMid,

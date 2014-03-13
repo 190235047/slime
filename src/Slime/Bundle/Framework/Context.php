@@ -3,6 +3,7 @@ namespace Slime\Bundle\Framework;
 
 use Slime\Component\Config\Configure;
 use Slime\Component\Helper\Packer;
+use Slime\Component\Context\Context as ContextCore;
 
 /**
  * Class Context
@@ -23,62 +24,67 @@ use Slime\Component\Helper\Packer;
  * @property-read array                                      $aArgv        本次CLI请求的参数数组
  * @property-read \Slime\Component\I18N\I18N                 $I18N         多语言对象
  * @property-read \Slime\Component\View\IAdaptor             $View         模板对象
+ * @property-read mixed                                      $mCBErrPage   错误页回调
  */
-class Context extends \Slime\Component\Context\Context
+class Context extends ContextCore
 {
     protected $__aModuleConf__;
 
     public function __get($sVarName)
     {
-        # get all conf and tidy
-        if ($this->__aModuleConf__ === null) {
-            if (!$this->isRegister('Config')) {
-                throw new \Exception("Can not dy register because of module Config is not been register before");
-            }
-            $aAllCFG = $this->Config->setTmpParseMode(false)->get("module");
-            $this->Config->resetParseMode();
-            $sRunMode = $this->sRunMode;
-            foreach ($aAllCFG as $aItem) {
-                if (!empty($aItem['run_mode']) && $aItem['run_mode'] !== $sRunMode) {
-                    continue;
-                }
-                $this->__aModuleConf__[$aItem['module']] = $aItem;
-            }
-        }
-
-        # get conf
-        if (empty($this->__aModuleConf__[$sVarName])) {
-            throw new \Exception("Module config[module.$sVarName] is not exists");
-        }
-
-        $aModuleConfig = $this->__aModuleConf__[$sVarName];
-        $aModuleConfig = Configure::parseRecursion($aModuleConfig, $this->Config);
-
-        # create instance
-        if (!isset($aModuleConfig['params'])) {
-            $aModuleConfig['params'] = array();
-        }
-        if (!empty($aModuleConfig['factory'])) {
-            $Obj = call_user_func_array(
-                array($aModuleConfig['class'], $aModuleConfig['factory']),
-                $aModuleConfig['params']
-            );
+        if ($this->isRegister($sVarName)) {
+            return $this->$sVarName;
         } else {
-            if (empty($aModuleConfig['params'])) {
-                $Obj = new $aModuleConfig['class']();
-            } else {
-                $Ref = new \ReflectionClass($aModuleConfig['class']);
-                $Obj = $Ref->newInstanceArgs($aModuleConfig['params']);
+            # get all conf and tidy only once
+            if ($this->__aModuleConf__ === null) {
+                if (!$this->isRegister('Config')) {
+                    throw new \DomainException("Auto register[$sVarName] failed. Please register Config before");
+                }
+                $aAllCFG = $this->Config->setTmpParseMode(false)->get("module");
+                $this->Config->resetParseMode();
+                $sRunMode = $this->sRunMode;
+                foreach ($aAllCFG as $aItem) {
+                    if (!empty($aItem['run_mode']) && $aItem['run_mode'] !== $sRunMode) {
+                        continue;
+                    }
+                    $this->__aModuleConf__[$aItem['module']] = $aItem;
+                }
             }
-        }
 
-        # if packer
-        if (!empty($aModuleConfig['packer'])) {
-            $Obj = new Packer($Obj, $aModuleConfig['packer']);
-        }
+            # get conf
+            if (empty($this->__aModuleConf__[$sVarName])) {
+                throw new \DomainException("Module config[module.$sVarName] is not exists");
+            }
+            $aModuleConfig = $this->__aModuleConf__[$sVarName];
+            $aModuleConfig = Configure::parseRecursion($aModuleConfig, $this->Config);
 
-        # register
-        $this->$sVarName = $Obj;
-        return $Obj;
+            # create instance
+            if (!isset($aModuleConfig['params'])) {
+                $aModuleConfig['params'] = array();
+            }
+            if (!empty($aModuleConfig['factory'])) {
+                $Obj = call_user_func_array(
+                    array($aModuleConfig['class'], $aModuleConfig['factory']),
+                    $aModuleConfig['params']
+                );
+            } else {
+                if (empty($aModuleConfig['params'])) {
+                    $Obj = new $aModuleConfig['class']();
+                } else {
+                    $Ref = new \ReflectionClass($aModuleConfig['class']);
+                    $Obj = $Ref->newInstanceArgs($aModuleConfig['params']);
+                }
+            }
+
+            # if packer
+            if (!empty($aModuleConfig['packer'])) {
+                $Obj = new Packer($Obj, $aModuleConfig['packer']);
+            }
+
+            # register
+            $this->$sVarName = $Obj;
+            $this->__aVarKey__[$sVarName] = true;
+            return $Obj;
+        }
     }
 }

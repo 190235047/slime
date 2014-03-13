@@ -13,24 +13,24 @@ use Slime\Component\Http\HttpResponse;
 class Mode
 {
     /**
-     * @param HttpRequest  $Request
-     * @param HttpResponse $Response
-     * @param Object       $Continue
-     * @param string       $sAppNs
-     * @param string       $sControllerPre
+     * @param HttpRequest   $REQ
+     * @param HttpResponse  $RES
+     * @param HitMode       $HitMode
+     * @param string        $sAppNs
+     * @param string | null $sControllerPre
      *
      * @return CallBack
      */
     public static function slimeHttp(
-        HttpRequest $Request,
-        HttpResponse $Response,
-        $Continue,
+        $REQ,
+        $RES,
+        $HitMode,
         $sAppNs,
         $sControllerPre = null
     ) {
         $sControllerPre === null && $sControllerPre = 'ControllerHttp_';
 
-        $aUrl      = parse_url($Request->getRequestURI());
+        $aUrl      = parse_url($REQ->getRequestURI());
         $aUrlBlock = explode('/', strtolower(substr($aUrl['path'], 1)));
 
         $iLastIndex = count($aUrlBlock) - 1;
@@ -50,7 +50,7 @@ class Mode
         list($sAction, $sExt) = array_replace(array('', 'html'), explode('.', $sAction, 2));
         $sAction = 'action' . implode('', array_map('ucfirst', explode('_', $sAction)));
 
-        $sRequestMethod = $Request->getRequestMethod();
+        $sRequestMethod = $REQ->getRequestMethod();
         if ($sRequestMethod !== 'GET') {
             $sAction .= '_' . $sRequestMethod;
         }
@@ -66,24 +66,24 @@ class Mode
     }
 
     /**
-     * @param HttpRequest  $Request
-     * @param HttpResponse $Response
-     * @param Object       $Continue
+     * @param HttpRequest  $REQ
+     * @param HttpResponse $RES
+     * @param HitMode      $HitMode
      * @param string       $sAppNs
      * @param string       $sControllerPre
      *
      * @return CallBack
      */
     public static function slimeApi(
-        HttpRequest $Request,
-        HttpResponse $Response,
-        $Continue,
+        $REQ,
+        $RES,
+        $HitMode,
         $sAppNs,
         $sControllerPre = null
     ) {
         $sControllerPre === null && $sControllerPre = 'ControllerAPI_';
 
-        $aURI  = parse_url($Request->getRequestURI());
+        $aURI  = parse_url($REQ->getRequestURI());
         $aPath = explode('/', trim($aURI['path'], '/'));
         if (count($aPath) < 2) {
             return null;
@@ -105,7 +105,7 @@ class Mode
             }
         }
         $aParam['__ext__'] = $sExt;
-        $sMethod           = strtolower($Request->getRequestMethod());
+        $sMethod           = strtolower($REQ->getRequestMethod());
         $sController       = $sControllerPre . $Version . '_' . implode(
                 '',
                 array_map(
@@ -122,14 +122,14 @@ class Mode
     }
 
     /**
-     * @param array  $aArg
-     * @param object $Continue
-     * @param string $sAppNs
-     * @param string $sControllerPre
+     * @param array     $aArg
+     * @param HitMode   $HitMode
+     * @param string    $sAppNs
+     * @param string    $sControllerPre
      *
      * @return CallBack
      */
-    public static function slimeCli($aArg, $Continue, $sAppNs, $sControllerPre = null)
+    public static function slimeCli($aArg, $HitMode, $sAppNs, $sControllerPre = null)
     {
         $sControllerPre === null && $sControllerPre = 'ControllerCli_';
         if (strpos($aArg[1], '.') === false) {
