@@ -33,7 +33,7 @@ class Model
      * @param array   $aConfig
      * @param Factory $Factory
      */
-    public function __construct($sModelName, CURD $CURD, $aConfig, Factory $Factory)
+    public function __construct($sModelName, $CURD, $aConfig, $Factory)
     {
         $this->sModelName      = $sModelName;
         $this->CURD            = $CURD;
@@ -115,12 +115,12 @@ class Model
      */
     public function update($mPKOrWhere, $aKVMap)
     {
-        $Model = $this->find($mPKOrWhere);
-        if ($Model === null) {
+        $Item = $this->find($mPKOrWhere);
+        if ($Item === null) {
             return false;
         }
-        $Model->set($aKVMap);
-        return $Model->update();
+        $Item->set($aKVMap);
+        return $Item->update();
     }
 
     /**
@@ -139,7 +139,9 @@ class Model
             '',
             true
         );
-        return empty($aItem) ? null : new $this->sItemClassName($aItem, $this);
+        return empty($aItem) ?
+            ($this->Factory->isCompatibleMode() ? new CompatibleItem() : null) :
+            new $this->sItemClassName($aItem, $this);
     }
 
     /**

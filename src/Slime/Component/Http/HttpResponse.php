@@ -100,7 +100,7 @@ class HttpResponse extends HttpCommon
     {
         $this->setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         $this->setHeader('Pragma', 'no-cache');
-        $this->setHeader('Expires', '0');
+        $this->setHeader('Expires', 'Expires: Mon, 26 Jul 1997 05:00:00 GMT');
         return $this;
     }
 

@@ -10,7 +10,7 @@ namespace Slime\Component\Config;
 abstract class Adaptor_ABS implements IAdaptor
 {
     protected $bParseMode = true;
-    protected $bToBeResetParseMode = false;
+    private $bToBeResetParseMode = false;
 
     /**
      * @param bool $bParse

@@ -2,6 +2,7 @@
 namespace Slime\Component\View;
 
 use Slime\Bundle\Framework\Context;
+use Slime\Component\Log\Logger;
 
 /**
  * Class AopPDO
@@ -11,12 +12,15 @@ use Slime\Bundle\Framework\Context;
  */
 class AopView
 {
-    public static function tplBefore(IAdaptor $Obj, $sMethod, array $aArgv, \ArrayObject $Result)
+    public static function tplBefore(IAdaptor $Obj, $sMethod, array $aArgv, \stdClass $Result)
     {
-        Context::getInst()->Log->debug(
-            'TPL : {path}',
-            array('path' => $Obj->getBaseDir() . DIRECTORY_SEPARATOR . $Obj->getTpl())
-        );
+        $Log = Context::getInst()->Log;
+        if ($Log->needLog(Logger::LEVEL_DEBUG)) {
+            $Log->debug(
+                'TPL : {path}',
+                array('path' => $Obj->getBaseDir() . DIRECTORY_SEPARATOR . $Obj->getTpl())
+            );
+        }
     }
 
     public static function getAopConf()

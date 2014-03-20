@@ -1,8 +1,6 @@
 <?php
 namespace Slime\Component\Pagination;
 
-use Slime\Component\RDS\Model;
-
 /**
  * Class Automatic
  *
@@ -32,8 +30,20 @@ class ModelPagination
         ) : $mDefaultRender;
     }
 
+    /**
+     * @param \Slime\Component\RDS\Model\Model $Item
+     * @param string                           $sRelationModelName
+     * @param mixed                            $List
+     * @param array                            $aWhere
+     * @param null                             $sOrderBy
+     * @param null                             $iNumberPerPage
+     * @param null                             $mPageGetCBOrPageVar
+     * @param null                             $mRenderCB
+     *
+     * @return mixed
+     */
     public function getListFromRelation(
-        Model\Item $Item,
+        $Item,
         $sRelationModelName,
         &$List,
         $aWhere = array(),
@@ -54,8 +64,19 @@ class ModelPagination
         );
     }
 
+    /**
+     * @param \Slime\Component\RDS\Model\Model $Model
+     * @param mixed                            $List
+     * @param array                            $aWhere
+     * @param null                             $sOrderBy
+     * @param null                             $iNumberPerPage
+     * @param null                             $mPageGetCBOrPageVar
+     * @param null                             $mRenderCB
+     *
+     * @return mixed
+     */
     public function getList(
-        Model\Model $Model,
+        $Model,
         &$List,
         $aWhere = array(),
         $sOrderBy = null,
@@ -120,7 +141,7 @@ class ModelPagination
 
     /**
      * @param \Slime\Component\Http\HttpRequest $HttpRequest
-     * @param                                   $aResult
+     * @param array                             $aResult
      *
      * @return string
      */

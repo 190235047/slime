@@ -99,6 +99,12 @@ class Bootstrap
         }
     }
 
+
+    /**
+     * @var \Slime\Bundle\Framework\Context
+     */
+    public $Context;
+
     /**
      * @param string      $sENV
      * @param string      $sAppNs

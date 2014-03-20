@@ -3,32 +3,38 @@ namespace Slime\Component\RDS;
 
 use Slime\Bundle\Framework\Context;
 use Slime\Component\Helper\Packer;
+use Slime\Component\Log\Logger;
 
 class AopPDO
 {
-    public static function stmtExecBefore($Obj, $sMethod, array $aArgv, \ArrayObject $Result)
+    public static function stmtExecBefore($Obj, $sMethod, array $aArgv, \stdClass $Result)
     {
-        $fT1   = microtime(true);
-        $mRS   = call_user_func_array(array($Obj, $sMethod), $aArgv);
-        $fDiff = microtime(true) - $fT1;
-        Context::getInst()->Log->info(
-            'SQL : {cost}; {sql}; {bind}; ',
-            array(
-                'sql'  => $Obj->queryString,
-                'bind' => empty($aArgv[0]) ? '' : json_encode($aArgv[0]),
-                'cost' => sprintf('%.2f ms', $fDiff * 1000)
-            )
-        );
+        $Log = Context::getInst()->Log;
+        if ($Log->needLog(Logger::LEVEL_INFO)) {
+            $fT1   = microtime(true);
+            $mRS   = call_user_func_array(array($Obj, $sMethod), $aArgv);
+            $fDiff = microtime(true) - $fT1;
+            $Log->info(
+                '[SQL] : {cost}; {sql}; {bind}; ',
+                array(
+                    'sql'  => $Obj->queryString,
+                    'bind' => empty($aArgv[0]) ? '' : json_encode($aArgv[0]),
+                    'cost' => sprintf('%.2f ms', $fDiff * 1000)
+                )
+            );
+        } else {
+            $mRS = call_user_func_array(array($Obj, $sMethod), $aArgv);
+        }
 
-        $Result['value'] = $mRS;
-        return false;
+
+        $Result->value = $mRS;
     }
 
-    public static function pdoAfter($Obj, $sMethod, array $aArgv, \ArrayObject $Result)
+    public static function pdoAfter($Obj, $sMethod, array $aArgv, \stdClass $Result)
     {
-        $Obj = $Result['value'];
+        $Obj = $Result->value;
         if ($Obj instanceof \PDOStatement) {
-            $Result['value'] = new Packer($Obj,
+            $Result->value = new Packer($Obj,
                 array(
                     'execute.before' => array(
                         array('Slime\Component\RDS\AopPDO', 'stmtExecBefore')

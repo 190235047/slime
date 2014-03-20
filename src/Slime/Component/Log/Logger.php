@@ -64,14 +64,14 @@ class Logger implements LoggerInterface
     public static function createWriter($aWriterConf)
     {
         $aWriter = array();
-        foreach ($aWriterConf as $sK => $aParam) {
+        foreach ($aWriterConf as $sK => $mParam) {
             $aClassAndArgs = array();
             if (is_int($sK)) {
-                $aClassAndArgs[] = (string)$aParam;
+                $aClassAndArgs[] = (string)$mParam;
             } else {
                 $aClassAndArgs[] = $sK;
-                if (!empty($aParam) && is_array($aParam)) {
-                    $aClassAndArgs = array_merge($aClassAndArgs, $aParam);
+                if (!empty($mParam) && is_array($mParam)) {
+                    $aClassAndArgs = array_merge($aClassAndArgs, $mParam);
                 }
             }
             $aWriter[] = Sugar::createObjAdaptor(__NAMESPACE__, $aClassAndArgs, 'IWriter', 'Writer_');
@@ -197,7 +197,7 @@ class Logger implements LoggerInterface
      * @param string $sMessage
      * @param array  $aContext
      *
-     * @return null
+     * @return void
      */
     public function log($iLevel, $sMessage, array $aContext = array())
     {
@@ -213,6 +213,16 @@ class Logger implements LoggerInterface
         foreach ($this->aWriter as $Writer) {
             $Writer->acceptData($aRow);
         }
+    }
+
+    /**
+     * @param int $iLevel
+     *
+     * @return bool
+     */
+    public function needLog($iLevel)
+    {
+        return (bool)($iLevel & $this->iLogLevel);
     }
 
     public static function getLevelString($iLevel)

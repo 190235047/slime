@@ -9,19 +9,19 @@ namespace Slime\Component\RDS\Model;
  */
 class Group implements \ArrayAccess, \Iterator, \Countable
 {
-    /** @var Item[] */
-    public $aModelItem;
+    /** @var Item[] Read-only */
+    public $aModelItem = array();
+
+    private $aMapPK2PK = array();
+    private $aRelation = array();
+    private $aRelObj = array();
 
     /**
      * @param Model $Model
      */
     public function __construct($Model)
     {
-        $this->Model      = $Model;
-        $this->aModelItem = array();
-        $this->aMapPK2PK  = array();
-        $this->aRelation  = array();
-        $this->aRelObj    = array();
+        $this->Model = $Model;
     }
 
     /**
@@ -231,8 +231,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
      */
     public function offsetUnset($offset)
     {
-        unset($this->aMapPK2PK[$offset]);
-        unset($this->aModelItem[$offset]);
+        unset($this->aMapPK2PK[$offset], $this->aModelItem[$offset]);
     }
 
     /**
@@ -265,7 +264,6 @@ class Group implements \ArrayAccess, \Iterator, \Countable
         foreach ($this->aModelItem as $Item) {
             $sStr .= "\t" . (string)$Item . "\n";
         }
-        $sStr .= "]\n";
-        return $sStr;
+        return ($sStr . "]\n");
     }
 }

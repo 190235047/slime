@@ -47,13 +47,7 @@ class Adaptor_PHP extends Adaptor_ABS
         } else {
             $mDefaultResult    = $this->_get($sKey, $this->sDefaultBaseDir);
             $mCurrentENVResult = $this->_get($sKey, $this->sBaseDir);
-            $mResult           = $mCurrentENVResult === null ?
-                $mDefaultResult :
-                (
-                is_array($mDefaultResult) ?
-                    array_merge($mDefaultResult, $mCurrentENVResult) :
-                    $mCurrentENVResult
-                );
+            $mResult           = $mCurrentENVResult === null ? $mDefaultResult : $mCurrentENVResult;
         }
         if ($mResult === null && $bForce) {
             throw new \OutOfRangeException("Config [{$sKey}] is not found");

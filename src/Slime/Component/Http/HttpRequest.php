@@ -202,41 +202,40 @@ class HttpRequest extends HttpCommon
 
     public function getClientIP()
     {
-        do {
-            $sIp = '';
-            if (!empty($this->aServerVars['HTTP_CLIENT_IP'])) {
-                $sIp = $this->aServerVars['HTTP_CLIENT_IP'];
+        $sIp = '';
+        if (!empty($this->aServerVars['HTTP_CLIENT_IP'])) {
+            $sIp = $this->aServerVars['HTTP_CLIENT_IP'];
+            goto RET;
+        }
+        if (
+            !empty($this->aServerVars['HTTP_X_FORWARDED_FOR']) &&
+            strcasecmp($this->aServerVars['HTTP_X_FORWARDED_FOR'], 'unknown')
+        ) {
+            $sTmpIp = $this->aServerVars['HTTP_X_FORWARDED_FOR'];
+        } elseif (
+            !empty($this->aServerVars['REMOTE_ADDR']) &&
+            strcasecmp($this->aServerVars['REMOTE_ADDR'], 'unknown')
+        ) {
+            $sTmpIp = $this->aServerVars['REMOTE_ADDR'];
+        } else {
+            $sTmpIp = '';
+        }
+        if ($sTmpIp === '') {
+            goto RET;
+        }
+        $aIp = explode(',', $sTmpIp);
+        if (count($aIp) === 1) {
+            $sIp = $aIp[0];
+            goto RET;
+        }
+        foreach ($aIp as $sOneIp) {
+            if (ip2long($sOneIp) !== false) {
+                $sIp = $sOneIp;
                 break;
             }
-            if (
-                !empty($this->aServerVars['HTTP_X_FORWARDED_FOR']) &&
-                strcasecmp($this->aServerVars['HTTP_X_FORWARDED_FOR'], 'unknown')
-            ) {
-                $sTmpIp = $this->aServerVars['HTTP_X_FORWARDED_FOR'];
-            } elseif (
-                !empty($this->aServerVars['REMOTE_ADDR']) &&
-                strcasecmp($this->aServerVars['REMOTE_ADDR'], 'unknown')
-            ) {
-                $sTmpIp = $this->aServerVars['REMOTE_ADDR'];
-            } else {
-                $sTmpIp = '';
-            }
-            if ($sTmpIp === '') {
-                break;
-            }
-            $aIp = explode(',', $sTmpIp);
-            if (count($aIp) === 1) {
-                $sIp = $aIp[0];
-                break;
-            }
-            foreach ($aIp as $sOneIp) {
-                if (ip2long($sOneIp) !== false) {
-                    $sIp = $sOneIp;
-                    break;
-                }
-            }
-        } while (0);
+        }
 
+        RET:
         return $sIp;
     }
 
@@ -406,13 +405,27 @@ class HttpRequest extends HttpCommon
 
         if ($mData === false) {
             $mResult = null;
-            goto RET_callByCurl;
+            goto RET;
         }
 
         $mResult = HttpResponse::createFromResponseString($mData);
 
-        RET_callByCurl:
+        RET:
         curl_close($rCurl);
         return $mResult;
+    }
+
+    public function __toString()
+    {
+        return sprintf(
+            'protocol:%s; req_method:%s; req_uri:%s; p_get:%s; p_post:%s, header:%s; body:%s',
+            $this->sProtocol,
+            $this->sRequestMethod,
+            $this->sRequestURI,
+            (string)$this->Get,
+            (string)$this->Post,
+            (string)$this->Header,
+            strlen($this->sContent) < 100 ? $this->sContent : substr($this->sContent, 0, 10) . substr($this->sContent, -10)
+        );
     }
 }

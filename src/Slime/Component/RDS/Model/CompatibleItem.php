@@ -18,4 +18,9 @@ class CompatibleItem
     {
         return null;
     }
+
+    public function __toString()
+    {
+        return '';
+    }
 }

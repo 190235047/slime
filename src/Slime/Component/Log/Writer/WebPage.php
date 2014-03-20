@@ -25,18 +25,18 @@ class Writer_WebPage implements IWriter
 
     public function acceptData($aRow)
     {
-        if ($this->bCouldLog === false) {
+        if ($this->bCouldLog === null) {
+            if (Context::getInst()->HttpRequest->isAjax()) {
+                $this->bCouldLog = false;
+                $this->aData     = null;
+            } else {
+                $this->bCouldLog = true;
+            }
+        } elseif ($this->bCouldLog === false) {
             return;
         }
-        if (!Context::getInst()->isRegister('HttpRequest')) {
-            $this->aData[] = $aRow;
-        }
-        if (Context::getInst()->HttpRequest->isAjax()) {
-            $this->bCouldLog = false;
-            $this->aData     = null;
-        } else {
-            $this->bCouldLog = true;
-        }
+
+        $this->aData[] = $aRow;
     }
 
     public function __destruct()

@@ -11,14 +11,25 @@ use Slime\Component\RDS\CURD;
  */
 class Factory
 {
-    public $bAutoCreate = true;
-    public $bCompatibleMode = false;
+    /** @var string | null  null means disable auto_create function */
+    public $sDefaultDB = 'default';
+
+    protected $aCURD              = array();
+    protected $bCompatibleMode    = false;
+    protected $bTmpCompatibleMode = null;
 
     /** @var Model[] */
     protected $aModel = array();
 
     protected $sDefaultModelClass;
 
+    /**
+     * @param array  $aDBConfigAll
+     * @param array  $aModelConfig
+     * @param string $sAppModelNS
+     * @param string $sDefaultModelClass
+     * @param array  $aAOP
+     */
     public function __construct(
         $aDBConfigAll,
         $aModelConfig,
@@ -59,10 +70,10 @@ class Factory
     {
         if (!isset($this->aModel[$sModelName])) {
             if (
-                $this->bAutoCreate &&
+                $this->sDefaultDB !== null &&
                 (!isset($this->aModelConf[$sModelName]) || !isset($this->aModelConf[$sModelName]['db']))
             ) {
-                $this->aModelConf[$sModelName]['db'] = 'default';
+                $this->aModelConf[$sModelName]['db'] = $this->sDefaultDB;
             }
 
             $aConf = $this->aModelConf[$sModelName];
@@ -84,5 +95,67 @@ class Factory
         }
 
         return $this->aModel[$sModelName];
+    }
+
+    /**
+     * @param bool $bCompatibleMode
+     *
+     * @return void
+     */
+    public function setTmpCompatibleMode($bCompatibleMode = true)
+    {
+        if ($bCompatibleMode !== $this->bCompatibleMode) {
+            $this->bTmpCompatibleMode = $this->bCompatibleMode;
+            $this->bCompatibleMode    = $bCompatibleMode;
+        }
+    }
+
+    /**
+     * @return void
+     */
+    public function resetCompatibleMode()
+    {
+        if ($this->bTmpCompatibleMode !== null) {
+            $this->bCompatibleMode    = $this->bTmpCompatibleMode;
+            $this->bTmpCompatibleMode = null;
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCompatibleMode()
+    {
+        return (bool)$this->bCompatibleMode;
+    }
+
+    /**
+     * @param bool $b
+     * @return void
+     */
+    public function setCompatibleMode($b = true)
+    {
+        $this->bCompatibleMode = $b;
+    }
+
+    /**
+     * @param Item | CompatibleItem | Group | null $mData
+     * @return bool
+     */
+    public static function isModelDataEmpty($mData)
+    {
+        if ($mData===null ||
+            $mData instanceof CompatibleItem ||
+            ($mData instanceof Group && $mData->count() == 0)
+        ) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function __get($sVar)
+    {
+        return $this->$sVar;
     }
 }

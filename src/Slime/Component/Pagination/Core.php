@@ -16,7 +16,7 @@ class Core
      * @param int      $iDisplayBefore
      * @param int|null $iDisplayAfter
      *
-     * @return \ArrayObject
+     * @return \ArrayObject [pre:int list:int[] next:int total:int] If pre||list[]||next < 0, it means abs(value) is current page
      * @throws \InvalidArgumentException
      * @throws \LogicException
      */

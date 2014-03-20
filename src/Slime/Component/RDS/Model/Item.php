@@ -24,7 +24,12 @@ class Item implements \ArrayAccess
     /** @var array */
     public $aOldData = array();
 
-    public function __construct(array $aData, Model $Model, $Group = null)
+    /**
+     * @param array        $aData
+     * @param Model        $Model
+     * @param Group | null $Group
+     */
+    public function __construct(array $aData, $Model, $Group = null)
     {
         $this->aData = $aData;
         $this->Model = $Model;
@@ -38,7 +43,7 @@ class Item implements \ArrayAccess
 
     public function __set($sKey, $mValue)
     {
-        $this->_set($sKey, $mValue);
+        $this->doSet($sKey, $mValue);
     }
 
     /**
@@ -49,23 +54,35 @@ class Item implements \ArrayAccess
      */
     public function set($mKeyOrKVMap, $mValue = null)
     {
-        if (!is_array($mKeyOrKVMap)) {
-            $this->_set($mKeyOrKVMap, $mValue);
-        } else {
-            foreach ($mKeyOrKVMap as $sKey => $mValue) {
-                $this->_set($sKey, $mValue);
-            }
-        }
+        $this->doSet($mKeyOrKVMap, $mValue);
         return $this;
     }
 
-    private function _set($sKey, $mValue)
+    protected function doSet($mK, $mV = null)
     {
-        if (isset($this->aData[$sKey]) && $this->aData[$sKey] == $mValue) {
-            return;
+        if (is_array($mK)) {
+            foreach ($mK as $sKey => $sValue) {
+                if (array_key_exists($sKey, $this->aData)) {
+                    if ($this->aData[$sKey] !== $sValue) {
+                        $this->aOldData[$sKey] = $this->aData[$sKey];
+                        $this->aData[$sKey]    = $sValue;
+                    }
+                } else {
+                    $this->aOldData[$sKey] = '';
+                    $this->aData[$sKey]    = $sValue;
+                }
+            }
+        } else {
+            if (array_key_exists($mK, $this->aData)) {
+                if ($this->aData[$mK] !== $mV) {
+                    $this->aOldData[$mK] = $this->aData[$mK];
+                    $this->aData[$mK]    = $mV;
+                }
+            } else {
+                $this->aOldData[$mK] = '';
+                $this->aData[$mK]    = $mV;
+            }
         }
-        $this->aOldData[$sKey] = isset($this->aData[$sKey]) ? $this->aData[$sKey] : null;
-        $this->aData[$sKey]    = $mValue;
     }
 
     /**
@@ -124,7 +141,7 @@ class Item implements \ArrayAccess
             $mResult = $this->$sMethod($sModelName, $aWhere, $sOrderBy, $iLimit, $iOffset, $bJoin);
         }
 
-        if ($mResult === null && $this->Model->Factory->bCompatibleMode === true) {
+        if ($mResult === null && $this->Model->Factory->isCompatibleMode()) {
             $mResult = new CompatibleItem();
         }
 
@@ -413,7 +430,7 @@ class Item implements \ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        $this->_set($offset, $value);
+        $this->doSet($offset, $value);
     }
 
     /**
