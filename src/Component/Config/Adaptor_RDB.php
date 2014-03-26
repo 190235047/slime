@@ -48,7 +48,7 @@ class Adaptor_RDB extends Adaptor_ABS
         }
         if (!isset($this->aData[$sKey])) {
             if ($bForce) {
-                throw new \OutOfRangeException("Key[$sKey] is not exist");
+                throw new \OutOfRangeException("[CONFIG] : Key[$sKey] is not exist");
             } else {
                 $mRS = $mDefaultValue;
                 goto RET;

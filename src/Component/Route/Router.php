@@ -71,7 +71,7 @@ class Router
                         } elseif (isset($mV['func'])) {
                             $CallBack->setCBFunc($mV['func']);
                         } else {
-                            throw new \DomainException('Route rule error. one of [object, class, func] must be used for array key');
+                            throw new \DomainException('[ROUTE] : Route rule error. one of [object, class, func] must be used for array key');
                         }
                         if (isset($mV['param'])) {
                             $CallBack->setParam($mV['param']);

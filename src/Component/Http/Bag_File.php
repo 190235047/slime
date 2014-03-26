@@ -21,11 +21,11 @@ class Bag_File extends Bag_Base
     {
         if (!file_exists($sDir)) {
             if (!mkdir($sDir)) {
-                throw new \RuntimeException("Create upload dir $sDir failed");
+                throw new \RuntimeException("[REQ_FILE] : Create upload dir $sDir failed");
             }
         }
         if (!is_writable($sDir)) {
-            throw new \RuntimeException("Upload dir $sDir is not writable");
+            throw new \RuntimeException("[REQ_FILE] : Upload dir $sDir is not writable");
         }
         $aData = $mCBFilter === null ? $this->aData : array_filter($this->aData, $mCBFilter);
 

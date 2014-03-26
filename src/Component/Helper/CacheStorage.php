@@ -102,7 +102,7 @@ class CacheStorage
         $CacheWrite = null
     ) {
         if (!isset($this->aMap[$sKey])) {
-            throw new \OutOfRangeException("$sKey is not set before");
+            throw new \OutOfRangeException("[CACHE_ST] : $sKey is not set before");
         }
 
         $aQ          = $this->aMap[$sKey];
@@ -152,7 +152,7 @@ class CacheStorage
     public function setData($sKey, $mData, $IMode = self::SET_BOTH, $CacheWrite = null, $StorageWrite = null)
     {
         if (!isset($this->aMap[$sKey])) {
-            throw new \OutOfRangeException("$sKey is not set before");
+            throw new \OutOfRangeException("[CACHE_ST] : $sKey is not set before");
         }
 
         $aQ           = $this->aMap[$sKey];
@@ -189,7 +189,7 @@ class CacheStorage
     public function deleteData($sKey, $IMode = self::DELETE_CACHE, $CacheWrite = null, $StorageWrite = null)
     {
         if (!isset($this->aMap[$sKey])) {
-            throw new \OutOfRangeException("$sKey is not set before");
+            throw new \OutOfRangeException("[CACHE_ST] : $sKey is not set before");
         }
 
         $aQ           = $this->aMap[$sKey];

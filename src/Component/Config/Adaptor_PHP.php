@@ -50,7 +50,7 @@ class Adaptor_PHP extends Adaptor_ABS
             $mResult           = $mCurrentENVResult === null ? $mDefaultResult : $mCurrentENVResult;
         }
         if ($mResult === null && $bForce) {
-            throw new \OutOfRangeException("Config [{$sKey}] is not found");
+            throw new \OutOfRangeException("[CONFIG] : Key [{$sKey}] is not exsi");
         }
         return $mResult;
     }

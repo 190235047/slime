@@ -35,7 +35,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
     {
         $aRelConf = $this->Model->aRelationConfig;
         if (!isset($aRelConf[$sModelName])) {
-            throw new \OutOfRangeException("Relation model $sModelName is not exist");
+            throw new \OutOfRangeException("[MODEL] : Relation model $sModelName is not exist");
         }
         $sMethod = $aRelConf[$sModelName];
         return $this->$sMethod($sModelName, $ModelItem);

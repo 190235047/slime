@@ -115,7 +115,7 @@ abstract class Controller_ABS
             return $this->aParam[$sK];
         } else {
             if ($bForce) {
-                throw new \Exception("Key[$sK] is not in param");
+                throw new \Exception("[CTRL] : Key[$sK] is not in param");
             } else {
                 return $mDefault;
             }

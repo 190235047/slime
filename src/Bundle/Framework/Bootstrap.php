@@ -162,7 +162,7 @@ class Bootstrap
                         $bHitMain
                     );
                     if (!$bHitMain) {
-                        throw new RouteFailException("Current request is not hit any router");
+                        throw new RouteFailException("[MAIN] : Current request is not hit any router");
                     }
 
                     if (!empty($aCallBack)) {
@@ -183,7 +183,7 @@ class Bootstrap
                         $bHitMain
                     );
                     if (!$bHitMain) {
-                        throw new RouteFailException("Current request is not hit any router");
+                        throw new RouteFailException("[MAIN] : Current request is not hit any router");
                     }
                     if (!empty($aCallBack)) {
                         foreach ($aCallBack as $CallBack) {

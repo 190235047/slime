@@ -25,7 +25,7 @@ class Pool
     public static function initFromArrayRecursion(array $aArr)
     {
         if (count($aArr) !== 1) {
-            throw new \InvalidArgumentException('Tree array data must own and only can own one root node');
+            throw new \InvalidArgumentException('[TREE] : Tree array data must own and only can own one root node');
         }
         $sKey  = key($aArr);
         $aData = current($aArr);

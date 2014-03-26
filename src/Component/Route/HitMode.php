@@ -24,7 +24,7 @@ class HitMode
     {
         // write this way for easy
         if (!is_int($iMode) || $iMode < 1 || $iMode > 4) {
-            throw new \InvalidArgumentException("param must be HitMode::MODE_STOP_AS_*");
+            throw new \InvalidArgumentException("[ROUTE] Param must be HitMode::M_*");
         }
         $this->iMode = $iMode;
     }

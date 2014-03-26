@@ -112,7 +112,7 @@ class CallBack
             if (!isset($aMethod[$sMid])) {
                 throw new RouteFailException(
                     sprintf(
-                        'There is no method[%s] in class[%s]',
+                        '[ROUTE] : There is no method[%s] in class[%s]',
                         $sMid,
                         is_object($mClassOrObj) ? get_class($mClassOrObj) : $mClassOrObj
                     )

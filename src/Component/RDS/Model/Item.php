@@ -129,7 +129,7 @@ class Item implements \ArrayAccess
         $mResult = null;
 
         if (!isset($this->Model->aRelationConfig[$sModelName])) {
-            throw new \OutOfRangeException("Can not find relation for [$sModelName]");
+            throw new \OutOfRangeException("[MODEL] : Can not find relation for [$sModelName]");
         }
 
         $sMethod = strtolower($this->Model->aRelationConfig[$sModelName]);
@@ -158,7 +158,7 @@ class Item implements \ArrayAccess
     public function relationCount($sModelName, array $aWhere = null)
     {
         if (!isset($this->Model->aRelationConfig[$sModelName])) {
-            throw new \OutOfRangeException("Can not find relation for [$sModelName]");
+            throw new \OutOfRangeException("[MODEL] : Can not find relation for [$sModelName]");
         }
 
         $sMethod = strtolower($this->Model->aRelationConfig[$sModelName]);

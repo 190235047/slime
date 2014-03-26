@@ -30,7 +30,7 @@ class Arr
     public static function getForce(array $aArr, $sKey)
     {
         if (!array_key_exists($sKey, $aArr)) {
-            throw new \OutOfRangeException("$sKey is not in array" . json_encode($aArr));
+            throw new \OutOfRangeException("[ARR] : $sKey is not in array" . json_encode($aArr));
         }
         return $aArr[$sKey];
     }

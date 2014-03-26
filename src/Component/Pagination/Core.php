@@ -23,7 +23,7 @@ class Core
     public static function run($iTotalItem, $iNumPerPage, $iCurrentPage, $iDisplayBefore = 3, $iDisplayAfter = null)
     {
         if ($iCurrentPage < 1) {
-            throw new \InvalidArgumentException('Offset can not be less than 1');
+            throw new \InvalidArgumentException('[PAG] : Offset can not be less than 1');
         }
         if ($iTotalItem == 0) {
             return array();
@@ -35,7 +35,7 @@ class Core
 
         $iTotalPage = (int)ceil($iTotalItem / $iNumPerPage);
         if ($iCurrentPage > $iTotalPage) {
-            throw new \LogicException('Offset can not be more than total page');
+            throw new \LogicException('[PAG] : Offset can not be more than total page');
         }
 
         # count start

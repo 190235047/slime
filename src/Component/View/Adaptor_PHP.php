@@ -97,7 +97,7 @@ class Adaptor_PHP implements IAdaptor
     {
         $sFile = $this->sBaseDir . DIRECTORY_SEPARATOR . $this->sTpl;
         if (!file_exists($sFile)) {
-            throw new \RuntimeException("Template file[{$this->sTpl}] is not exist");
+            throw new \RuntimeException("[VIEW] : Template file[{$sFile}] is not exist");
         }
         extract($this->aData);
         ob_start();
