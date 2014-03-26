@@ -1,8 +1,5 @@
 {
     "name": "slime/slime",
-    "require": {
-        "psr/log": "1.0.0"
-    },
     "license": "GNU GENERAL PUBLIC LICENSE V2.0",
     "authors": [
         {
