@@ -76,9 +76,10 @@ abstract class Controller_Page extends Controller_ABS
 
     protected function getDefaultTPL()
     {
-        return sprintf('%s_%s.php',
+        return sprintf('%s_%s.%sphp',
             str_replace($this->Context->sControllerPre, '', get_called_class()),
-            substr($this->Context->CallBack->mCallable[1], count($this->Context->sActionPre))
+            substr($this->Context->CallBack->mCallable[1], count($this->Context->sActionPre)),
+            ($sExt = $this->getParam('__ext__', 'html') === 'html') ? '' : "$sExt."
         );
     }
 
