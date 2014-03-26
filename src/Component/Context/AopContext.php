@@ -25,7 +25,7 @@ class AopContext
     {
         $C    = C::getInst();
         $sStr = sprintf('Context Reg: %s', $aArgv[0]);
-        if (!$C->isRegister('Log')) {
+        if (!$C->isRegistered('Log')) {
             self::$aCacheData[] = $sStr;
         } else {
             $Log = $C->Log;

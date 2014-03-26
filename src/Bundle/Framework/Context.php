@@ -1,10 +1,6 @@
 <?php
 namespace Slime\Bundle\Framework;
 
-use Slime\Component\Config\Configure;
-use Slime\Component\Helper\Packer;
-use Slime\Component\Context\Context as ContextCore;
-
 /**
  * Class Context
  *
@@ -26,6 +22,6 @@ use Slime\Component\Context\Context as ContextCore;
  * @property-read \Slime\Component\View\IAdaptor             $View         模板对象
  * @property-read mixed                                      $mCBErrPage   错误页回调
  */
-class Context extends ContextCore
+class Context extends \Slime\Component\Context\Context
 {
 }

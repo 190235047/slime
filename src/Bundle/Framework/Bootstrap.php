@@ -57,14 +57,14 @@ class Bootstrap
         $sStr = $E->getMessage();
         # 在某些对象的析构函数中使用了Context, 而对象在脚本执行完成时进入回收阶段, 才调用对象的析构.
         # 此时 Context 可能已经销毁, 所以会拿不到 Context. 尽量避免!
-        if ($C === null || !$C->isRegister('Log')) {
+        if ($C === null || !$C->isRegistered('Log')) {
             trigger_error($sStr, E_USER_ERROR);
         } else {
             if ($C->sRunMode==='http') {
                 if ($C->HttpResponse->iStatus < 400) {
                     $C->HttpResponse->iStatus = 500;
                 }
-                if ($C->isRegister('mCBErrPage')) {
+                if ($C->isRegistered('mCBErrPage')) {
                     call_user_func($C->mCBErrPage, $E);
                 }
                 $C->HttpResponse->send();
@@ -82,7 +82,7 @@ class Bootstrap
         $C = Context::getInst();
         # 在某些对象的析构函数中使用了Context, 而对象在脚本执行完成时进入回收阶段, 才调用对象的析构.
         # 此时 Context 可能已经销毁, 所以会拿不到 Context. 尽量避免!
-        if ($C === null || !$C->isRegister('Log')) {
+        if ($C === null || !$C->isRegistered('Log')) {
             trigger_error($sStr, E_USER_WARNING);
         } else {
             switch ($iErrNum) {
@@ -192,6 +192,8 @@ class Bootstrap
                         }
                     }
                     break;
+                default:
+                    throw new \RuntimeException("[MAIN] : RunMode {$this->Context->sRunMode} is not supported");
             }
         } catch (RouteFailException $E) {
             $this->Context->HttpResponse->iStatus = 404;
