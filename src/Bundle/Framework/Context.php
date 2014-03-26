@@ -9,8 +9,8 @@ namespace Slime\Bundle\Framework;
  *
  * @property-read string                                     $sENV           当前环境(例如 publish:生产环境; development:开发环境)
  * @property-read string                                     $sRunMode       PHP运行方式, 当前支持 (cli||http)
- * @property-read string                                     $sAppNS         当前应用的命名空间
- * @property-read string                                     $sControllerPre 当前应用控制器前缀
+ * @property-read string                                     $sControllerPre 当前控制器类前缀
+ * @property-read string                                     $sActionPre     当前控制器方法前缀
  * @property-read Bootstrap                                  $Bootstrap      框架核心基础对象
  * @property-read \Slime\Component\Config\IAdaptor           $Config         配置对象
  * @property-read \Slime\Component\Log\Logger                $Log            日志对象

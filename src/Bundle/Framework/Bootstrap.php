@@ -115,16 +115,12 @@ class Bootstrap
     /**
      * @param IAdaptor    $Config
      * @param string      $sENV
-     * @param string      $sAppNS
-     * @param string      $sControllerPre
      * @param mixed       $mHttpReqOrCliArg
      * @param null|string $sAPI
      */
     public function __construct(
         $Config,
         $sENV,
-        $sAppNS,
-        $sControllerPre = '',
         $mHttpReqOrCliArg = null,
         $sAPI = null
     ) {
@@ -135,10 +131,8 @@ class Bootstrap
         $aMap = array(
             'Bootstrap'      => $this,
             'sENV'           => $sENV,
-            'sAppNS'         => $sAppNS,
-            'sControllerPre' => $sControllerPre,
             'Config'         => $Config,
-            'Route'          => new Router($sAppNS, $sControllerPre),
+            'Route'          => new Router($this->Context),
             'sRunMode'       => $sAPI === null ?
                     (strtolower(PHP_SAPI) === 'cli' ? 'cli' : 'http') :
                     (strtolower($sAPI) === 'cli' ? 'cli' : 'http'),
@@ -177,12 +171,9 @@ class Bootstrap
                     if (!$bHitMain) {
                         throw new RouteFailException("[MAIN] : Current request is not hit any router");
                     }
-
-                    if (!empty($aCallBack)) {
-                        foreach ($aCallBack as $CallBack) {
-                            $C->register('CallBack', $CallBack);
-                            $CallBack->call();
-                        }
+                    foreach ($aCallBack as $CallBack) {
+                        $C->register('CallBack', $CallBack);
+                        $CallBack->call();
                     }
 
                     # response
@@ -198,11 +189,9 @@ class Bootstrap
                     if (!$bHitMain) {
                         throw new RouteFailException("[MAIN] : Current request is not hit any router");
                     }
-                    if (!empty($aCallBack)) {
-                        foreach ($aCallBack as $CallBack) {
-                            $C->register('CallBack', $CallBack);
-                            $CallBack->call();
-                        }
+                    foreach ($aCallBack as $CallBack) {
+                        $C->register('CallBack', $CallBack);
+                        $CallBack->call();
                     }
                     break;
                 default:

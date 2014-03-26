@@ -11,16 +11,17 @@ class CallBack
 {
     public $mCallable;
     public $aParam;
-    public $sNSPre;
     public $aObjInitParam = null;
     public $bAsFunc = false;
 
     /**
-     * @param string $sNSPre
+     * @param string $sClassPre   eg: NS\SubNS\Controller_
+     * @param string $sMethodPre  eg: Action_  |  FunctionNS\
      */
-    public function __construct($sNSPre)
+    public function __construct($sClassPre = '', $sMethodPre = '')
     {
-        $this->sNSPre = $sNSPre;
+        $this->$sClassPre = $sClassPre;
+        $this->sMethodPre = $sMethodPre;
     }
 
     /**
@@ -34,9 +35,9 @@ class CallBack
     {
         if (is_string($mClassNameOrObject)) {
             $this->aObjInitParam = $aObjInitParam;
-            $this->mCallable     = array($this->sNSPre . '\\' . $mClassNameOrObject, $sMethod);
+            $this->mCallable     = array($this->sClassPre . $mClassNameOrObject, $this->sMethodPre . $sMethod);
         } else {
-            $this->mCallable = array($mClassNameOrObject, $sMethod);
+            $this->mCallable = array($mClassNameOrObject, $this->sMethodPre . $sMethod);
         }
         return $this;
     }
@@ -49,7 +50,7 @@ class CallBack
      */
     public function setCBClass($sClassName, $sMethod)
     {
-        $this->mCallable = array($this->sNSPre . '\\' . $sClassName, $sMethod);
+        $this->mCallable = array($this->sClassPre . $sClassName, $this->sMethodPre . $sMethod);
         return $this;
     }
 
@@ -64,7 +65,7 @@ class CallBack
         if ($mFuncNameOrClosure instanceof \Closure) {
             $this->mCallable = $mFuncNameOrClosure;
         } else {
-            $this->mCallable = $this->sNSPre . '\\' . $mFuncNameOrClosure;
+            $this->mCallable = $this->sMethodPre . $mFuncNameOrClosure;
         }
         return $this;
     }

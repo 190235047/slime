@@ -76,20 +76,10 @@ abstract class Controller_Page extends Controller_ABS
 
     protected function getDefaultTPL()
     {
-        $CB        = $this->Context->CallBack;
-        $aCallable = $CB->mCallable;
-        $sTPL      = str_replace(
-            '_',
-            DIRECTORY_SEPARATOR,
-            str_replace($CB->sNSPre . '\ControllerHttp_', '', get_class($aCallable[0]))
+        return sprintf('%s_%s.php',
+            str_replace($this->Context->sControllerPre, '', get_called_class()),
+            substr($this->Context->CallBack->mCallable[1], count($this->Context->sActionPre))
         );
-        $sMethod   = substr($aCallable[1], 6);
-        if ($sMethod !== 'Default') {
-            $sTPL .= "_$sMethod";
-        }
-        $sExt = $this->getParam('__ext__', 'html');
-        $sExt = $sExt === 'html' ? '' : ".$sExt";
-        return "{$sTPL}{$sExt}.php";
     }
 
     protected function setRenderMode_Auto()
