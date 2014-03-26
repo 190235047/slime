@@ -1,6 +1,8 @@
 <?php
 namespace Slime\Component\Route;
 
+use Slime\Component\Helper\Arr;
+
 /**
  * Class Route
  *
@@ -9,17 +11,6 @@ namespace Slime\Component\Route;
  */
 class Router
 {
-    public $sAppNS;
-    public $sControllerPre;
-
-    /**
-     * @param string $sAppNS
-     */
-    public function __construct($sAppNS)
-    {
-        $this->sAppNS = $sAppNS;
-    }
-
     /**
      * @param \Slime\Component\Http\HttpRequest  $REQ
      * @param \Slime\Component\Http\HttpResponse $RES
@@ -31,6 +22,10 @@ class Router
      */
     public function generateFromHttp($REQ, $RES, $aRule, &$bHitMain)
     {
+        $sControllerNS  = Arr::getForce($aRule, '__controller_ns__');
+        $sControllerPre = Arr::getForce($aRule, '__controller_pre__');
+        unset($aRule['__controller_ns__'], $aRule['__controller_pre__']);
+
         $bHitMain    = false;
         $aCallBack   = array();
         $HitMode = new HitMode();
@@ -48,15 +43,15 @@ class Router
                                 $RES,
                                 $aMatched,
                                 $HitMode,
-                                $this->sAppNS,
-                                $this->sControllerPre
+                                $sControllerNS,
+                                $sControllerPre
                             )
                         );
                         if ($mResult instanceof CallBack) {
                             $aCallBack[] = $mResult;
                         }
                     } elseif (is_array($mV)) {
-                        $CallBack = new CallBack($this->sAppNS);
+                        $CallBack = new CallBack($sControllerNS);
                         // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
                         // value: array('object' => $1, 'method' => $3, 'param' => array('id' => $2, 'status' => $4))
                         // value: array('func' => $1_$3, 'param' => array('id' => $2, 'status' => $4), '_continue'=>false)
@@ -91,8 +86,8 @@ class Router
                         $REQ,
                         $RES,
                         $HitMode,
-                        $this->sAppNS,
-                        $this->sControllerPre
+                        $sControllerNS,
+                        $sControllerPre
                     )
                 );
                 if ($mResult instanceof CallBack) {

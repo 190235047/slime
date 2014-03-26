@@ -107,14 +107,12 @@ class Bootstrap
 
     /**
      * @param string      $sENV
-     * @param string      $sAppNs
      * @param IAdaptor    $Config
      * @param null|mixed  $mHttpReqOrCliArg
      * @param null|string $sAPI
      */
     public function __construct(
         $sENV,
-        $sAppNs,
         $Config,
         $mHttpReqOrCliArg = null,
         $sAPI = null
@@ -126,22 +124,21 @@ class Bootstrap
         $aMap = array(
             'Bootstrap' => $this,
             'sENV'      => $sENV,
-            'sNS'       => $sAppNs,
             'Config'    => $Config,
-            'Route'     => new Router($sAppNs),
+            'Route'     => new Router(),
             'sRunMode'  => $sAPI === null ?
                     (strtolower(PHP_SAPI) === 'cli' ? 'cli' : 'http') :
                     (strtolower($sAPI) === 'cli' ? 'cli' : 'http'),
         );
 
         if ($aMap['sRunMode'] === 'cli') {
-            $aMap['aArgv'] = is_array($mHttpReqOrCliArg) ?
-                $mHttpReqOrCliArg :
-                $GLOBALS['argv'];
+            $aMap['aArgv'] = $mHttpReqOrCliArg===null ?
+                $GLOBALS['argv']:
+                $mHttpReqOrCliArg;
         } else {
-            $aMap['HttpRequest']  = $mHttpReqOrCliArg instanceof HttpRequest ?
-                $mHttpReqOrCliArg :
-                HttpRequest::createFromGlobals();
+            $aMap['HttpRequest']  = $mHttpReqOrCliArg === null ?
+                HttpRequest::createFromGlobals():
+                $mHttpReqOrCliArg;
             $aMap['HttpResponse'] = HttpResponse::create();
         }
 
@@ -150,17 +147,52 @@ class Bootstrap
 
     /**
      * @param string $sRouteKey      Route file name using by get from config
-     * @param string $sControllerPre Null means default and string means custom
      */
-    public function run($sRouteKey = null, $sControllerPre = null)
+    public function run($sRouteKey = null)
     {
-        $sMethod = 'run' . $this->Context->sRunMode;
-        if ($sControllerPre !== null) {
-            $this->Context->Route->sControllerPre = (string)$sControllerPre;
-        }
-
         try {
-            $this->$sMethod($sRouteKey);
+            switch ($this->Context->sRunMode) {
+                case 'http':
+                    # run route
+                    $C = $this->Context;
+                    $aCallBack = $C->Route->generateFromHttp(
+                        $C->HttpRequest,
+                        $C->HttpResponse,
+                        $C->Config->get($sRouteKey === null ? 'route.http' : $sRouteKey),
+                        $bHitMain
+                    );
+                    if (!$bHitMain) {
+                        throw new RouteFailException("Current request is not hit any router");
+                    }
+
+                    if (!empty($aCallBack)) {
+                        foreach ($aCallBack as $CallBack) {
+                            $C->register('CallBack', $CallBack);
+                            $CallBack->call();
+                        }
+                    }
+
+                    # response
+                    $C->HttpResponse->send();
+                    break;
+                case 'cli':
+                    $C = $this->Context;
+                    $aCallBack = $C->Route->generateFromCli(
+                        $C->aArgv,
+                        $C->Config->get($sRouteKey === null ? 'route.cli' : $sRouteKey),
+                        $bHitMain
+                    );
+                    if (!$bHitMain) {
+                        throw new RouteFailException("Current request is not hit any router");
+                    }
+                    if (!empty($aCallBack)) {
+                        foreach ($aCallBack as $CallBack) {
+                            $C->register('CallBack', $CallBack);
+                            $CallBack->call();
+                        }
+                    }
+                    break;
+            }
         } catch (RouteFailException $E) {
             $this->Context->HttpResponse->iStatus = 404;
             call_user_func(self::$mCBUncaughtException, $E);
@@ -168,50 +200,6 @@ class Bootstrap
         } catch (\Exception $E) {
             call_user_func(self::$mCBUncaughtException, $E);
             exit(1);
-        }
-    }
-
-    protected function runHttp($sRouteKey)
-    {
-        # run route
-        $C = $this->Context;
-        $aCallBack = $C->Route->generateFromHttp(
-            $C->HttpRequest,
-            $C->HttpResponse,
-            $C->Config->get($sRouteKey === null ? 'route.http' : $sRouteKey),
-            $bHitMain
-        );
-        if (!$bHitMain) {
-            throw new RouteFailException("Current request is not hit any router");
-        }
-
-        if (!empty($aCallBack)) {
-            foreach ($aCallBack as $CallBack) {
-                $C->register('CallBack', $CallBack);
-                $CallBack->call();
-            }
-        }
-
-        # response
-        $C->HttpResponse->send();
-    }
-
-    protected function runCli($sRouteKey)
-    {
-        $C = $this->Context;
-        $aCallBack = $C->Route->generateFromCli(
-            $C->aArgv,
-            $C->Config->get($sRouteKey === null ? 'route.cli' : $sRouteKey),
-            $bHitMain
-        );
-        if (!$bHitMain) {
-            throw new RouteFailException("Current request is not hit any router");
-        }
-        if (!empty($aCallBack)) {
-            foreach ($aCallBack as $CallBack) {
-                $C->register('CallBack', $CallBack);
-                $CallBack->call();
-            }
         }
     }
 }

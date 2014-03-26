@@ -16,7 +16,7 @@ class Mode
      * @param HttpRequest   $REQ
      * @param HttpResponse  $RES
      * @param HitMode       $HitMode
-     * @param string        $sAppNs
+     * @param string        $sControllerNS
      * @param string | null $sControllerPre
      *
      * @return CallBack
@@ -25,11 +25,9 @@ class Mode
         $REQ,
         $RES,
         $HitMode,
-        $sAppNs,
-        $sControllerPre = null
+        $sControllerNS,
+        $sControllerPre
     ) {
-        $sControllerPre === null && $sControllerPre = 'ControllerHttp_';
-
         $aUrl      = parse_url($REQ->getRequestURI());
         $aUrlBlock = explode('/', strtolower(substr($aUrl['path'], 1)));
 
@@ -55,7 +53,7 @@ class Mode
             $sAction .= '_' . $sRequestMethod;
         }
 
-        $CallBack = new CallBack($sAppNs);
+        $CallBack = new CallBack($sControllerNS);
         $CallBack->setCBObject(
             $sControllerPre . implode('_', $aUrlBlock),
             $sAction,
@@ -69,20 +67,18 @@ class Mode
      * @param HttpRequest  $REQ
      * @param HttpResponse $RES
      * @param HitMode      $HitMode
-     * @param string       $sAppNs
+     * @param string       $sControllerNS
      * @param string       $sControllerPre
      *
      * @return CallBack
      */
-    public static function slimeApi(
+    public static function slimeREST(
         $REQ,
         $RES,
         $HitMode,
-        $sAppNs,
-        $sControllerPre = null
+        $sControllerNS,
+        $sControllerPre
     ) {
-        $sControllerPre === null && $sControllerPre = 'ControllerAPI_';
-
         $aURI  = parse_url($REQ->getRequestURI());
         $aPath = explode('/', trim($aURI['path'], '/'));
         if (count($aPath) < 2) {
@@ -115,7 +111,7 @@ class Mode
                     explode('_', $sEntity)
                 )
             );
-        $CallBack          = new CallBack($sAppNs);
+        $CallBack          = new CallBack($sControllerNS);
         $CallBack->setCBObject($sController, $sMethod, array($aParam));
 
         return $CallBack;
@@ -124,14 +120,13 @@ class Mode
     /**
      * @param array     $aArg
      * @param HitMode   $HitMode
-     * @param string    $sAppNs
+     * @param string    $sControllerNS
      * @param string    $sControllerPre
      *
      * @return CallBack
      */
-    public static function slimeCli($aArg, $HitMode, $sAppNs, $sControllerPre = null)
+    public static function slimeCli($aArg, $HitMode, $sControllerNS, $sControllerPre = null)
     {
-        $sControllerPre === null && $sControllerPre = 'ControllerCli_';
         if (strpos($aArg[1], '.') === false) {
             $aBlock = array($aArg[1], 'Default');
         } else {
@@ -141,7 +136,7 @@ class Mode
             array() :
             json_decode($aArg[2], true);
 
-        $CallBack = new CallBack($sAppNs);
+        $CallBack = new CallBack($sControllerNS);
         $CallBack->setCBObject("{$sControllerPre}{$aBlock[0]}", "action{$aBlock[1]}", array($aParam));
 
         return $CallBack;
