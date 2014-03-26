@@ -78,7 +78,7 @@ abstract class Controller_Page extends Controller_ABS
     {
         return sprintf('%s_%s.%sphp',
             str_replace($this->Context->sControllerPre, '', get_called_class()),
-            substr($this->Context->CallBack->mCallable[1], count($this->Context->sActionPre)),
+            str_replace($this->Context->sActionPre, '', $this->Context->CallBack->mCallable[1]),
             ($sExt = $this->getParam('__ext__', 'html') === 'html') ? '' : "$sExt."
         );
     }
