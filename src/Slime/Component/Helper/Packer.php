@@ -45,7 +45,7 @@ class Packer
             if ($sKey{0} == '/' || $sKey{0} == '#') {
                 $iPos      = strrpos($sKey, '.');
                 $sPosition = substr($sKey, $iPos + 1);
-                $sPreg     = substr($sKey, 0, $iPos - 1);
+                $sPreg     = substr($sKey, 0, $iPos);
                 if ($sPosition === 'both') {
                     $this->aAOPMatchCallBack[self::BEFORE][$sPreg] = $mCB;
                     $this->aAOPMatchCallBack[self::AFTER][$sPreg]  = $mCB;

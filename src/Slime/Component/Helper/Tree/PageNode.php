@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\Helper;
+namespace Slime\Component\Helper\Tree;
 
 /**
  * Class PageNode
@@ -7,18 +7,18 @@ namespace Slime\Component\Helper;
  * @package Slime\Component\Helper
  * @author  smallslime@gmail.com
  */
-class Tree_PageNode extends Tree_Node
+class PageNode extends Node
 {
     /**
-     * @var Tree_PageNode[]
+     * @var PageNode[]
      */
     public $aChildren = array();
 
     /**
-     * @param Tree_PagePool        $Pool
+     * @param PagePool        $Pool
      * @param string               $sKey
      * @param array                $aAttr
-     * @param Tree_PageNode | null $Parent
+     * @param PageNode | null $Parent
      */
     public function __construct(
         $Pool,

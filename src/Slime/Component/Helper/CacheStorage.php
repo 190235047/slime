@@ -38,11 +38,10 @@ class CacheStorage
         $StorageWriteDefault = null
     ) {
         $this->aMap = $aMap;
-
-        $this->CR = $CacheReadDefault;
-        $this->CW = $CacheWriteDefault;
-        $this->SR = $StorageReadDefault;
-        $this->SW = $StorageWriteDefault;
+        $this->CR   = $CacheReadDefault;
+        $this->CW   = $CacheWriteDefault;
+        $this->SR   = $StorageReadDefault;
+        $this->SW   = $StorageWriteDefault;
     }
 
     /**
@@ -58,7 +57,7 @@ class CacheStorage
      * @param null | Object $StorageGet
      * @param null | Object $StorageSet
      */
-    public function addItem(
+    public function register(
         $sKey,
         $mGetCache,
         $mSetCache,
@@ -113,25 +112,25 @@ class CacheStorage
 
         switch ($IMode) {
             case self::GET_BOTH:
-                if (($mResult = call_user_func($aQ[0], $CacheRead)) === null) {
-                    $mResult = call_user_func($aQ[3], $StorageRead);
+                if (($mResult = call_user_func($aQ[0], $CacheRead, $sKey)) === null) {
+                    $mResult = call_user_func($aQ[3], $StorageRead, $sKey);
                 }
                 break;
             case self::GET_ONLY_CACHE:
-                $mResult = call_user_func($aQ[0], $CacheRead);
+                $mResult = call_user_func($aQ[0], $CacheRead, $sKey);
                 break;
             case self::GET_ONLY_STORAGE:
-                $mResult = call_user_func($aQ[3], $StorageRead);
+                $mResult = call_user_func($aQ[3], $StorageRead, $sKey);
                 break;
             case self::GET_ONLY_STORAGE_AND_SET_CACHE:
-                if (($mResult = call_user_func($aQ[3], $StorageRead)) !== null) {
-                    $mResult = call_user_func($aQ[1], $mResult, $CacheWrite);
+                if (($mResult = call_user_func($aQ[3], $StorageRead, $sKey)) !== null) {
+                    $mResult = call_user_func($aQ[1], $CacheWrite, $mResult, $sKey);
                 }
                 break;
             default:
                 if (($mResult = call_user_func($aQ[0], $CacheRead)) === null) {
-                    if (($mResult = call_user_func($aQ[3], $StorageRead)) !== null) {
-                        $mResult = call_user_func($aQ[1], $mResult, $CacheWrite);
+                    if (($mResult = call_user_func($aQ[3], $StorageRead, $sKey)) !== null) {
+                        $mResult = call_user_func($aQ[1], $CacheWrite, $mResult, $sKey);
                     }
                 }
                 break;
@@ -162,15 +161,15 @@ class CacheStorage
 
         switch ($IMode) {
             case self::SET_STORAGE:
-                $mResult = call_user_func($aQ[4], $mData, $StorageWrite);
+                $mResult = call_user_func($aQ[4], $StorageWrite, $mData, $sKey);
                 break;
             case self::SET_CACHE:
-                $mResult = call_user_func($aQ[1], $mData, $CacheWrite);
+                $mResult = call_user_func($aQ[1], $CacheWrite, $mData, $sKey);
                 break;
             default:
                 $mResult = array(
-                    call_user_func($aQ[1], $mData, $CacheWrite),
-                    call_user_func($aQ[4], $mData, $StorageWrite)
+                    call_user_func($aQ[1], $CacheWrite, $mData, $sKey),
+                    call_user_func($aQ[4], $StorageWrite, $mData, $sKey)
                 );
                 break;
         }
@@ -199,13 +198,16 @@ class CacheStorage
 
         switch ($IMode) {
             case self::SET_STORAGE:
-                $mResult = call_user_func($aQ[5], $CacheWrite);
+                $mResult = call_user_func($aQ[5], $CacheWrite, $sKey);
                 break;
             case self::SET_CACHE:
-                $mResult = call_user_func($aQ[2], $StorageWrite);
+                $mResult = call_user_func($aQ[2], $StorageWrite, $sKey);
                 break;
             default:
-                $mResult = array(call_user_func($aQ[2], $CacheWrite), call_user_func($aQ[5], $StorageWrite));
+                $mResult = array(
+                    call_user_func($aQ[2], $CacheWrite, $sKey),
+                    call_user_func($aQ[5], $StorageWrite, $sKey)
+                );
                 break;
         }
 

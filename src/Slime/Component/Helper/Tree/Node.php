@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\Helper;
+namespace Slime\Component\Helper\Tree;
 
 /**
  * Class Node
@@ -7,18 +7,18 @@ namespace Slime\Component\Helper;
  * @package Slime\Component\DataStructure\Tree
  * @author  smallslime@gmail.com
  */
-class Tree_Node
+class Node
 {
     /**
-     * @var Tree_Node[]
+     * @var Node[]
      */
     public $aChildren = array();
 
     /**
-     * @param Tree_Pool $Pool
+     * @param Pool $Pool
      * @param string    $sKey
      * @param array     $aAttr
-     * @param Tree_Node $Parent
+     * @param Node $Parent
      */
     public function __construct(
         $Pool,
@@ -44,7 +44,7 @@ class Tree_Node
     }
 
     /**
-     * @return Tree_Node[]
+     * @return Node[]
      */
     public function getChildren()
     {
@@ -55,11 +55,11 @@ class Tree_Node
      * @param string $sKey
      * @param array  $aAttr
      *
-     * @return Tree_Node
+     * @return Node
      */
     public function bornChild($sKey, $aAttr = array())
     {
-        /** @var Tree_Node $Node */
+        /** @var Node $Node */
         $Node = new static($this->Pool, $sKey, $aAttr, $this);
         $this->Pool->addNode($Node);
         $this->aChildren[$Node->sKey] = $Node;
@@ -78,7 +78,7 @@ class Tree_Node
     }
 
     /**
-     * @param Tree_Node $Parent
+     * @param Node $Parent
      */
     public function changeParent($Parent)
     {
@@ -95,7 +95,7 @@ class Tree_Node
         $this->updateLevel($this, $iLevel);
     }
 
-    private function updateLevel(Tree_Node $Node, $iLevel)
+    private function updateLevel(Node $Node, $iLevel)
     {
         if (isset($this->Pool->aaPoolLevel[$Node->iLevel][$Node->sKey])) {
             unset($this->Pool->aaPoolLevel[$Node->iLevel][$Node->sKey]);
@@ -150,7 +150,7 @@ class Tree_Node
         return $sStr;
     }
 
-    private function __treeString(Tree_Node $Node, $iIndent, &$sStr)
+    private function __treeString(Node $Node, $iIndent, &$sStr)
     {
         $sStr .= '|' . str_repeat('----', $iIndent) . '[' . get_class($Node) . ']' . (string)$Node . PHP_EOL;
         if (!empty($Node->aChildren)) {

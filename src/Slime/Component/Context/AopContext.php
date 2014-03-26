@@ -13,6 +13,12 @@ use Slime\Component\Log\Logger;
  */
 class AopContext
 {
+    public static $aAopCTXRegDebug = array(
+        'prepare.renderAsResult' => array(
+            array('Slime\Component\Context\AopContext', 'registerBefore')
+        )
+    );
+
     private static $aCacheData = array();
 
     public static function registerBefore($Obj, $sMethod, array $aArgv, \stdClass $Result)
@@ -33,14 +39,5 @@ class AopContext
                 $C->Log->debug($sStr);
             }
         }
-    }
-
-    public static function getAopConf()
-    {
-        return array(
-            'prepare.renderAsResult' => array(
-                array('Slime\Component\Context\AopContext', 'registerBefore')
-            )
-        );
     }
 }

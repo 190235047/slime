@@ -425,7 +425,10 @@ class HttpRequest extends HttpCommon
             (string)$this->Get,
             (string)$this->Post,
             (string)$this->Header,
-            strlen($this->sContent) < 100 ? $this->sContent : substr($this->sContent, 0, 10) . substr($this->sContent, -10)
+            strlen($this->sContent) < 100 ? $this->sContent : substr($this->sContent, 0, 10) . substr(
+                    $this->sContent,
+                    -10
+                )
         );
     }
 }

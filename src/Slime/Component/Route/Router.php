@@ -37,7 +37,7 @@ class Router
         foreach ($aRule as $sK => $mV) {
             $HitMode->setAsCommon();
             if (is_string($sK)) {
-                if (!preg_match($sK, $REQ->getRequestURI(), $aMatched)) {
+                if (preg_match($sK, $REQ->getRequestURI(), $aMatched)) {
                     if (is_callable($mV)) {
                         // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
                         // value: function($REQ, $RES, $aMatched, $Continue, $Hit, $sAppNS, $sCtrlPre){}

@@ -7,6 +7,12 @@ use Slime\Component\Log\Logger;
 
 class AopPDO
 {
+    public static $aAopPreExecCost = array(
+        'prepare.after' => array(
+            array('Slime\Component\RDS\AopPDO', 'pdoAfter')
+        )
+    );
+
     public static function stmtExecBefore($Obj, $sMethod, array $aArgv, \stdClass $Result)
     {
         $Log = Context::getInst()->Log;
@@ -42,14 +48,5 @@ class AopPDO
                 )
             );
         }
-    }
-
-    public static function getAopConf()
-    {
-        return array(
-            'prepare.after' => array(
-                array('Slime\Component\RDS\AopPDO', 'pdoAfter')
-            )
-        );
     }
 }

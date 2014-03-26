@@ -1,11 +1,17 @@
 <?php
-namespace Slime\Component\Http;
+namespace Slime\Component\Redis;
 
 use Slime\Bundle\Framework\Context;
 use Slime\Component\Log\Logger;
 
-class AopHttpRequest
+class AopRedis
 {
+    public static $aAopAllCMDCost = array(
+        '/.*/.before' => array(
+            array('Slime\Component\Redis\AopRedis', 'RedisCMD')
+        )
+    );
+
     public static function RedisCMD($Obj, $sMethod, array $aArgv, \stdClass $Result)
     {
         $Log   = Context::getInst()->Log;
@@ -26,14 +32,5 @@ class AopHttpRequest
         }
 
         $Result->value = $mRS;
-    }
-
-    public static function getAopConf()
-    {
-        return array(
-            '/.*/.before' => array(
-                array('Slime\Component\Redis\AopRedis', 'RedisCMD')
-            )
-        );
     }
 }

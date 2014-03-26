@@ -12,6 +12,12 @@ use Slime\Component\Log\Logger;
  */
 class AopView
 {
+    public static $aAopHttpCost = array(
+        'prepare.renderAsResult' => array(
+            array('Slime\Component\RDS\AopView', 'TplBefore')
+        )
+    );
+
     public static function tplBefore(IAdaptor $Obj, $sMethod, array $aArgv, \stdClass $Result)
     {
         $Log = Context::getInst()->Log;
@@ -21,14 +27,5 @@ class AopView
                 array('path' => $Obj->getBaseDir() . DIRECTORY_SEPARATOR . $Obj->getTpl())
             );
         }
-    }
-
-    public static function getAopConf()
-    {
-        return array(
-            'prepare.renderAsResult' => array(
-                array('Slime\Component\RDS\AopView', 'TplBefore')
-            )
-        );
     }
 }

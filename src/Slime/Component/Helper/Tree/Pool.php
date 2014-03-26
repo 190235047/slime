@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\Helper;
+namespace Slime\Component\Helper\Tree;
 
 /**
  * Class Pool
@@ -7,10 +7,10 @@ namespace Slime\Component\Helper;
  * @package Slime\Component\Helper
  * @author  smallslime@gmail.com
  */
-class Tree_Pool
+class Pool
 {
     /**
-     * @var Tree_Node[]
+     * @var Node[]
      */
     public $aPool = array();
 
@@ -19,7 +19,7 @@ class Tree_Pool
     /**
      * @param array $aArr
      *
-     * @return Tree_Node
+     * @return Node
      * @throws \InvalidArgumentException
      */
     public static function initFromArrayRecursion(array $aArr)
@@ -30,17 +30,17 @@ class Tree_Pool
         $sKey  = key($aArr);
         $aData = current($aArr);
         if (empty($aData[0])) {
-            $RootNode = new Tree_Node(new self(), $sKey, $aData);
+            $RootNode = new Node(new self(), $sKey, $aData);
         } else {
             $aChildren = $aData[0];
             unset($aData[0]);
-            $RootNode = new Tree_Node(new self(), $sKey, $aData);
+            $RootNode = new Node(new self(), $sKey, $aData);
             self::_initFromArrayRecursion($aChildren, $RootNode);
         }
         return $RootNode;
     }
 
-    protected static function _initFromArrayRecursion($aArr, Tree_Node $Parent)
+    protected static function _initFromArrayRecursion($aArr, Node $Parent)
     {
         foreach ($aArr as $sK => $aData) {
             if (isset($aData[0])) {
@@ -59,7 +59,7 @@ class Tree_Pool
     }
 
     /**
-     * @param Tree_Node $Node
+     * @param Node $Node
      */
     public function addNode($Node)
     {
@@ -75,7 +75,7 @@ class Tree_Pool
     /**
      * @param $iLevel
      *
-     * @return Tree_Node[]
+     * @return Node[]
      */
     public function findNodesByLevel($iLevel)
     {
@@ -85,7 +85,7 @@ class Tree_Pool
     /**
      * @param string $sKey
      *
-     * @return Tree_Node|null
+     * @return Node|null
      */
     public function findNode($sKey)
     {
