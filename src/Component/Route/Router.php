@@ -1,8 +1,6 @@
 <?php
 namespace Slime\Component\Route;
 
-use Slime\Component\Helper\Arr;
-
 /**
  * Class Route
  *
@@ -11,6 +9,12 @@ use Slime\Component\Helper\Arr;
  */
 class Router
 {
+    public function __construct($sAppNS, $sControllerPre)
+    {
+        $this->sAppNS         = $sAppNS;
+        $this->sControllerPre = $sControllerPre;
+    }
+
     /**
      * @param \Slime\Component\Http\HttpRequest  $REQ
      * @param \Slime\Component\Http\HttpResponse $RES
@@ -22,13 +26,9 @@ class Router
      */
     public function generateFromHttp($REQ, $RES, $aRule, &$bHitMain)
     {
-        $sControllerNS  = Arr::getForce($aRule, '__controller_ns__');
-        $sControllerPre = Arr::getForce($aRule, '__controller_pre__');
-        unset($aRule['__controller_ns__'], $aRule['__controller_pre__']);
-
-        $bHitMain    = false;
-        $aCallBack   = array();
-        $HitMode = new HitMode();
+        $bHitMain  = false;
+        $aCallBack = array();
+        $HitMode   = new HitMode();
         foreach ($aRule as $sK => $mV) {
             $HitMode->setAsCommon();
             if (is_string($sK)) {
@@ -43,20 +43,20 @@ class Router
                                 $RES,
                                 $aMatched,
                                 $HitMode,
-                                $sControllerNS,
-                                $sControllerPre
+                                $this->sAppNS,
+                                $this->sControllerPre
                             )
                         );
                         if ($mResult instanceof CallBack) {
                             $aCallBack[] = $mResult;
                         }
                     } elseif (is_array($mV)) {
-                        $CallBack = new CallBack($sControllerNS);
+                        $CallBack = new CallBack($this->sAppNS);
                         // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
                         // value: array('object' => $1, 'method' => $3, 'param' => array('id' => $2, 'status' => $4))
                         // value: array('func' => $1_$3, 'param' => array('id' => $2, 'status' => $4), '_continue'=>false)
-                        if (!empty($mV['__interceptor__'])) {
-                            $HitMode->setMode($mV['__interceptor__']);
+                        if (!empty($mV['__HitMode__'])) {
+                            $HitMode->setMode($mV['__HitMode__']);
                         }
                         $aSearch = $aReplace = array();
                         foreach ($aMatched as $iK => $sV) {
@@ -86,8 +86,8 @@ class Router
                         $REQ,
                         $RES,
                         $HitMode,
-                        $sControllerNS,
-                        $sControllerPre
+                        $this->sAppNS,
+                        $this->sControllerPre
                     )
                 );
                 if ($mResult instanceof CallBack) {

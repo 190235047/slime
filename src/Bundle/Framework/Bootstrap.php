@@ -12,14 +12,17 @@ class Bootstrap
     # error deal
     private static $mCBUncaughtException = array('Slime\\Bundle\\Framework\\Bootstrap', 'handleUncaughtException');
 
-    public static function setHandle($mCBErrorHandle = array('Slime\\Bundle\\Framework\\Bootstrap', 'handleError'), $iErrType = null, $mCBUncaughtException = null)
-    {
+    public static function setHandle(
+        $mCBErrorHandle = array('Slime\\Bundle\\Framework\\Bootstrap', 'handleError'),
+        $iErrType = null,
+        $mCBUncaughtException = null
+    ) {
         set_error_handler(
             $mCBErrorHandle,
             $iErrType === null ? (E_ALL | E_STRICT) : (int)$iErrType
         );
 
-        if ($mCBUncaughtException!==null) {
+        if ($mCBUncaughtException !== null) {
             self::$mCBUncaughtException = $mCBUncaughtException;
         }
     }
@@ -27,40 +30,44 @@ class Bootstrap
     public static function setDEVErrorPage()
     {
         $C = Context::getInst();
-        if ($C->sRunMode!='http') {
+        if ($C->sRunMode != 'http') {
             return;
         }
         $RES = $C->HttpResponse;
-        $C->register('mCBErrPage',
-            function(\Exception $E)use($RES)
-            {
+        $C->register(
+            'mCBErrPage',
+            function (\Exception $E) use ($RES) {
                 $aArr = $E->getTrace();
                 foreach ($aArr as $iK => $aItem) {
                     if (isset($aItem['args'])) {
                         unset($aArr[$iK]['args']);
                     }
                 }
-                $RES->setContent(sprintf(
+                $RES->setContent(
+                    sprintf(
                         '<h1>%s</h1><h2>%d:%s</h2><h3>File:%s;Line:%s</h3><div><pre>%s</pre></div>',
                         get_class($E),
-                        $E->getCode(), $E->getMessage(),
-                        $E->getFile(), $E->getLine(),
+                        $E->getCode(),
+                        $E->getMessage(),
+                        $E->getFile(),
+                        $E->getLine(),
                         var_export($aArr, true)
-                    ));
+                    )
+                );
             }
         );
     }
 
     public static function handleUncaughtException(\Exception $E)
     {
-        $C = Context::getInst();
+        $C    = Context::getInst();
         $sStr = $E->getMessage();
         # 在某些对象的析构函数中使用了Context, 而对象在脚本执行完成时进入回收阶段, 才调用对象的析构.
         # 此时 Context 可能已经销毁, 所以会拿不到 Context. 尽量避免!
         if ($C === null || !$C->isRegistered('Log')) {
             trigger_error($sStr, E_USER_ERROR);
         } else {
-            if ($C->sRunMode==='http') {
+            if ($C->sRunMode === 'http') {
                 if ($C->HttpResponse->iStatus < 400) {
                     $C->HttpResponse->iStatus = 500;
                 }
@@ -106,14 +113,18 @@ class Bootstrap
     public $Context;
 
     /**
-     * @param string      $sENV
      * @param IAdaptor    $Config
-     * @param null|mixed  $mHttpReqOrCliArg
+     * @param string      $sENV
+     * @param string      $sAppNS
+     * @param string      $sControllerPre
+     * @param mixed       $mHttpReqOrCliArg
      * @param null|string $sAPI
      */
     public function __construct(
-        $sENV,
         $Config,
+        $sENV,
+        $sAppNS,
+        $sControllerPre = '',
         $mHttpReqOrCliArg = null,
         $sAPI = null
     ) {
@@ -122,22 +133,24 @@ class Bootstrap
 
         # register
         $aMap = array(
-            'Bootstrap' => $this,
-            'sENV'      => $sENV,
-            'Config'    => $Config,
-            'Route'     => new Router(),
-            'sRunMode'  => $sAPI === null ?
+            'Bootstrap'      => $this,
+            'sENV'           => $sENV,
+            'sAppNS'         => $sAppNS,
+            'sControllerPre' => $sControllerPre,
+            'Config'         => $Config,
+            'Route'          => new Router($sAppNS, $sControllerPre),
+            'sRunMode'       => $sAPI === null ?
                     (strtolower(PHP_SAPI) === 'cli' ? 'cli' : 'http') :
                     (strtolower($sAPI) === 'cli' ? 'cli' : 'http'),
         );
 
         if ($aMap['sRunMode'] === 'cli') {
-            $aMap['aArgv'] = $mHttpReqOrCliArg===null ?
-                $GLOBALS['argv']:
+            $aMap['aArgv'] = $mHttpReqOrCliArg === null ?
+                $GLOBALS['argv'] :
                 $mHttpReqOrCliArg;
         } else {
             $aMap['HttpRequest']  = $mHttpReqOrCliArg === null ?
-                HttpRequest::createFromGlobals():
+                HttpRequest::createFromGlobals() :
                 $mHttpReqOrCliArg;
             $aMap['HttpResponse'] = HttpResponse::create();
         }
@@ -146,7 +159,7 @@ class Bootstrap
     }
 
     /**
-     * @param string $sRouteKey      Route file name using by get from config
+     * @param string $sRouteKey Route file name using by get from config
      */
     public function run($sRouteKey = null)
     {
@@ -154,7 +167,7 @@ class Bootstrap
             switch ($this->Context->sRunMode) {
                 case 'http':
                     # run route
-                    $C = $this->Context;
+                    $C         = $this->Context;
                     $aCallBack = $C->Route->generateFromHttp(
                         $C->HttpRequest,
                         $C->HttpResponse,
@@ -176,7 +189,7 @@ class Bootstrap
                     $C->HttpResponse->send();
                     break;
                 case 'cli':
-                    $C = $this->Context;
+                    $C         = $this->Context;
                     $aCallBack = $C->Route->generateFromCli(
                         $C->aArgv,
                         $C->Config->get($sRouteKey === null ? 'route.cli' : $sRouteKey),
