@@ -20,7 +20,7 @@ class CallBack
      */
     public function __construct($sClassPre = '', $sMethodPre = '')
     {
-        $this->$sClassPre = $sClassPre;
+        $this->sClassPre  = $sClassPre;
         $this->sMethodPre = $sMethodPre;
     }
 

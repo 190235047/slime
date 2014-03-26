@@ -13,11 +13,11 @@ use Slime\Component\Http\HttpResponse;
 class Mode
 {
     /**
-     * @param HttpRequest   $REQ
-     * @param HttpResponse  $RES
-     * @param HitMode       $HitMode
-     * @param string        $sControllerNS
-     * @param string | null $sControllerPre
+     * @param HttpRequest  $REQ
+     * @param HttpResponse $RES
+     * @param HitMode      $HitMode
+     * @param string       $sControllerPre
+     * @param string       $sActionPre
      *
      * @return CallBack
      */
@@ -25,8 +25,8 @@ class Mode
         $REQ,
         $RES,
         $HitMode,
-        $sControllerNS,
-        $sControllerPre
+        $sControllerPre,
+        $sActionPre
     ) {
         $aUrl      = parse_url($REQ->getRequestURI());
         $aUrlBlock = explode('/', strtolower(substr($aUrl['path'], 1)));
@@ -46,16 +46,16 @@ class Mode
         }
 
         list($sAction, $sExt) = array_replace(array('', 'html'), explode('.', $sAction, 2));
-        $sAction = 'action' . implode('', array_map('ucfirst', explode('_', $sAction)));
+        $sAction = implode('', array_map('ucfirst', explode('_', $sAction)));
 
         $sRequestMethod = $REQ->getRequestMethod();
         if ($sRequestMethod !== 'GET') {
             $sAction .= '_' . $sRequestMethod;
         }
 
-        $CallBack = new CallBack($sControllerNS);
+        $CallBack = new CallBack($sControllerPre, $sActionPre);
         $CallBack->setCBObject(
-            $sControllerPre . implode('_', $aUrlBlock),
+            implode('_', $aUrlBlock),
             $sAction,
             array(array('__ext__' => strtolower($sExt)))
         );
@@ -67,8 +67,8 @@ class Mode
      * @param HttpRequest  $REQ
      * @param HttpResponse $RES
      * @param HitMode      $HitMode
-     * @param string       $sControllerNS
      * @param string       $sControllerPre
+     * @param string       $sActionPre
      *
      * @return CallBack
      */
@@ -76,8 +76,8 @@ class Mode
         $REQ,
         $RES,
         $HitMode,
-        $sControllerNS,
-        $sControllerPre
+        $sControllerPre,
+        $sActionPre
     ) {
         $aURI  = parse_url($REQ->getRequestURI());
         $aPath = explode('/', trim($aURI['path'], '/'));
@@ -102,7 +102,7 @@ class Mode
         }
         $aParam['__ext__'] = $sExt;
         $sMethod           = strtolower($REQ->getRequestMethod());
-        $sController       = $sControllerPre . $Version . '_' . implode(
+        $sController       = $Version . '_' . implode(
                 '',
                 array_map(
                     function ($sPart) {
@@ -111,21 +111,21 @@ class Mode
                     explode('_', $sEntity)
                 )
             );
-        $CallBack          = new CallBack($sControllerNS);
+        $CallBack          = new CallBack($sControllerPre, $sActionPre);
         $CallBack->setCBObject($sController, $sMethod, array($aParam));
 
         return $CallBack;
     }
 
     /**
-     * @param array     $aArg
-     * @param HitMode   $HitMode
-     * @param string    $sControllerNS
-     * @param string    $sControllerPre
+     * @param array   $aArg
+     * @param HitMode $HitMode
+     * @param string  $sControllerPre
+     * @param string  $sActionPre
      *
      * @return CallBack
      */
-    public static function slimeCli($aArg, $HitMode, $sControllerNS, $sControllerPre = null)
+    public static function slimeCli($aArg, $HitMode, $sControllerPre = '', $sActionPre = '')
     {
         if (strpos($aArg[1], '.') === false) {
             $aBlock = array($aArg[1], 'Default');
@@ -136,8 +136,8 @@ class Mode
             array() :
             json_decode($aArg[2], true);
 
-        $CallBack = new CallBack($sControllerNS);
-        $CallBack->setCBObject("{$sControllerPre}{$aBlock[0]}", "action{$aBlock[1]}", array($aParam));
+        $CallBack = new CallBack($sControllerPre, $sActionPre);
+        $CallBack->setCBObject($aBlock[0], $aBlock[1], array($aParam));
 
         return $CallBack;
     }

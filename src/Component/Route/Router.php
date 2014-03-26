@@ -82,7 +82,8 @@ class Router
                             $RES,
                             $aMatched,
                             $HitMode,
-                            $sControllerPre
+                            $sControllerPre,
+                            $sActionPre
                         )
                     );
                 }
@@ -93,7 +94,8 @@ class Router
                         $REQ,
                         $RES,
                         $HitMode,
-                        $sControllerPre
+                        $sControllerPre,
+                        $sActionPre
                     )
                 );
             }
