@@ -11,8 +11,8 @@ use Slime\Component\RDS\CURD;
  */
 class Model
 {
-    protected $sItemClassNS = 'Slime\\Component\\RDS\\Model';
-    protected $sItemClassPartName = 'Item';
+    protected $sItemClassNS = null;
+    protected $sItemClassPartName = null;
 
     private $sItemClassName;
 
@@ -32,6 +32,8 @@ class Model
      * @param CURD    $CURD
      * @param array   $aConfig
      * @param Factory $Factory
+     *
+     * @throws \RuntimeException
      */
     public function __construct($sModelName, $CURD, $aConfig, $Factory)
     {
@@ -42,7 +44,29 @@ class Model
         $this->sFKName         = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
         $this->aRelationConfig = isset($aConfig['relation']) ? $aConfig['relation'] : array();
         $this->Factory         = $Factory;
-        $this->sItemClassName  = $this->sItemClassNS . '\\' . $this->sItemClassPartName;
+
+        # auto generate item class
+        $sCalledClassName = trim(get_called_class(), '\\');
+        $iPos             = strrpos($sCalledClassName, '\\');
+        if ($iPos === false) {
+            $sCalledNS = $sCalledPartClassName = '';
+        } else {
+            $sCalledNS            = substr($sCalledClassName, 0, $iPos);
+            $sCalledPartClassName = substr($sCalledClassName, $iPos + 1);
+        }
+        if ($this->sItemClassNS === null) {
+            $this->sItemClassNS = $sCalledNS;
+        }
+        if ($this->sItemClassPartName === null) {
+            if ($sCalledNS==='Slime\\Component\\RDS\\Model' && $sCalledPartClassName === 'Model') {
+                $this->sItemClassPartName = 'Item';
+            } elseif (substr($sCalledPartClassName, 0, 6) === 'Model_') {
+                $this->sItemClassPartName = 'Item_' . substr($sCalledPartClassName, 6);
+            } else {
+                throw new \RuntimeException('[MODEL] : Can not parse item class name through both automatic and defined');
+            }
+        }
+        $this->sItemClassName = $this->sItemClassNS . '\\' . $this->sItemClassPartName;
     }
 
     /**
