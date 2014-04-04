@@ -50,6 +50,9 @@ class Redis
                     $this->Redis->setOption($mK, $mV);
                 }
             }
+            if (!empty($this->aConfig['db'])) {
+                $this->Redis->select($this->aConfig['db']);
+            }
         }
         return $this->Redis;
     }
