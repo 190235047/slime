@@ -81,14 +81,15 @@ class Router
                             array(
                                 $REQ,
                                 $RES,
-                                $aMatched,
                                 $HitMode,
                                 $sControllerPre,
-                                $sActionPre
+                                $sActionPre,
+                                $aMatched
                             )
                         );
                     }
                 } else {
+                    # preg no hit
                     $HitMode->setMode(HitMode::M_NOT_MAIN_GOON);
                     $mResult = null;
                 }
