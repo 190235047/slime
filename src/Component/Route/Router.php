@@ -43,49 +43,54 @@ class Router
                 $this->Context->register('sActionPre', $sActionPre);
             }
             $HitMode->setAsCommon();
-            if (is_string($siK) && preg_match($siK, $REQ->getRequestURI(), $aMatched)) {
-                if (is_array($mV) && !isset($mV[0])) {
-                    // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
-                    // value: array('object' => $1, 'method' => $3, 'param' => array('id' => $2, 'status' => $4))
-                    // value: array('func' => $1_$3, 'param' => array('id' => $2, 'status' => $4), '__interceptor__'=>HitMode::M_MAIN_STOP)
-                    $mResult = new CallBack($sControllerPre, $sActionPre);
-                    if (!empty($mV['__interceptor__'])) {
-                        $HitMode->setMode($mV['__interceptor__']);
-                    }
-                    $aSearch = $aReplace = array();
-                    foreach ($aMatched as $iK => $sV) {
-                        $aSearch[$iK]  = '$' . $iK;
-                        $aReplace[$iK] = $sV;
-                    }
-                    $mV = self::replaceRecursive($mV, $aSearch, $aReplace);
-                    if (isset($mV['object']) && isset($mV['method'])) {
-                        $mResult->setCBObject($mV['object'], $mV['method']);
-                    } elseif (isset($mV['class']) && $mV['method']) {
-                        $mResult->setCBClass($mV['class'], $mV['method']);
-                    } elseif (isset($mV['func'])) {
-                        $mResult->setCBFunc($mV['func']);
+            if (is_string($siK)) {
+                if (preg_match($siK, $REQ->getRequestURI(), $aMatched)) {
+                    if (is_array($mV) && !isset($mV[0])) {
+                        // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
+                        // value: array('object' => $1, 'method' => $3, 'param' => array('id' => $2, 'status' => $4))
+                        // value: array('func' => $1_$3, 'param' => array('id' => $2, 'status' => $4), '__interceptor__'=>HitMode::M_MAIN_STOP)
+                        $mResult = new CallBack($sControllerPre, $sActionPre);
+                        if (!empty($mV['__interceptor__'])) {
+                            $HitMode->setMode($mV['__interceptor__']);
+                        }
+                        $aSearch = $aReplace = array();
+                        foreach ($aMatched as $iK => $sV) {
+                            $aSearch[$iK]  = '$' . $iK;
+                            $aReplace[$iK] = $sV;
+                        }
+                        $mV = self::replaceRecursive($mV, $aSearch, $aReplace);
+                        if (isset($mV['object']) && isset($mV['method'])) {
+                            $mResult->setCBObject($mV['object'], $mV['method']);
+                        } elseif (isset($mV['class']) && $mV['method']) {
+                            $mResult->setCBClass($mV['class'], $mV['method']);
+                        } elseif (isset($mV['func'])) {
+                            $mResult->setCBFunc($mV['func']);
+                        } else {
+                            throw new \DomainException('[ROUTE] : Route rule error. one of [object, class, func] must be used for array key');
+                        }
+                        if (isset($mV['param'])) {
+                            $mResult->setParam($mV['param']);
+                        }
                     } else {
-                        throw new \DomainException('[ROUTE] : Route rule error. one of [object, class, func] must be used for array key');
-                    }
-                    if (isset($mV['param'])) {
-                        $mResult->setParam($mV['param']);
+                        // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
+                        // value: function($REQ, $RES, $aMatched, $HitMode, $sControllerPre){}
+                        // value: array(cbClass/cbObj, cbMethod)
+                        // value: cbFunction
+                        $mResult = call_user_func_array(
+                            $mV,
+                            array(
+                                $REQ,
+                                $RES,
+                                $aMatched,
+                                $HitMode,
+                                $sControllerPre,
+                                $sActionPre
+                            )
+                        );
                     }
                 } else {
-                    // key:   #^(book|article)/(\d+?)/(status)/(\d+?)$#
-                    // value: function($REQ, $RES, $aMatched, $HitMode, $sControllerPre){}
-                    // value: array(cbClass/cbObj, cbMethod)
-                    // value: cbFunction
-                    $mResult = call_user_func_array(
-                        $mV,
-                        array(
-                            $REQ,
-                            $RES,
-                            $aMatched,
-                            $HitMode,
-                            $sControllerPre,
-                            $sActionPre
-                        )
-                    );
+                    $HitMode->setMode(HitMode::M_NOT_MAIN_GOON);
+                    $mResult = null;
                 }
             } else {
                 $mResult = call_user_func_array(
