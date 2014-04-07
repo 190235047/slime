@@ -50,7 +50,8 @@ function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $
             $b = file_put_contents(
                 $sTargetFile,
                 str_replace(
-                    array('{{{NS}}}', '{{{APP_NAME}}}', '{{{AUTHOR}}}'), array($sNS, $sAppName, $sAuthorName),
+                    array('{{{NS}}}', '{{{APP_NAME}}}', '{{{AUTHOR}}}', '{{{TIME_ZONE}}}'),
+                    array($sNS, $sAppName, $sAuthorName, $sTimeZone),
                     file_get_contents($sTargetFile)
                 )
             );
