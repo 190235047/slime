@@ -18,9 +18,6 @@ $sTargetDir = $argv[2];
 $sMode = empty($argv[3]) ? 'standard' : $argv[3];
 $sTimeZone = empty($argv[4]) ? 'PRC' : $argv[4];
 
-if (is_dir($sTargetDir)) {
-    exit("Dir $sTargetDir has been exist\n");
-}
 generate_app(__DIR__ . "/app_tpl/$sMode", $sTargetDir, $sAuthorName, $sAppName, $sNS, $sTimeZone);
 
 function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $sTimeZone, $i = 0)
@@ -41,6 +38,10 @@ function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $
         if (is_file($sSourceFile)) {
             $sTargetFile = $sTargetDir . '/' . substr($sFile, 0, strlen($sFile) - 4);
 
+            if (file_exists($sTargetFile)) {
+                echo str_repeat("\t", $i) . "File $sTargetFile has been exists\n";
+                continue;
+            }
             if (copy($sSourceFile, $sTargetFile)) {
                 echo str_repeat("\t", $i) . "Copy to $sTargetFile ok\n";
             } else {

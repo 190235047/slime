@@ -21,7 +21,7 @@ class Mode
      *
      * @return CallBack
      */
-    public static function slimeHttp(
+    public static function slimeHttp_Page(
         $REQ,
         $RES,
         $HitMode,
@@ -72,7 +72,7 @@ class Mode
      *
      * @return CallBack
      */
-    public static function slimeREST(
+    public static function slimeHttp_REST(
         $REQ,
         $RES,
         $HitMode,
@@ -125,7 +125,7 @@ class Mode
      *
      * @return CallBack
      */
-    public static function slimeCli($aArg, $HitMode, $sControllerPre = '', $sActionPre = '')
+    public static function slimeCli($aArg, $HitMode, $sControllerPre, $sActionPre)
     {
         if (strpos($aArg[1], '.') === false) {
             $aBlock = array($aArg[1], 'Default');
