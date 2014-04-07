@@ -82,7 +82,7 @@ function HJump($sUrl = null)
 }
 
 /**
- * @param $sString
+ * @param string $sString
  *
  * @return string
  */
@@ -92,21 +92,11 @@ function __($sString)
 }
 
 /**
- * @return \{{{NS}}}\Model\Model_User
+ * @param string $sTpl
+ * @param array  $aData
+ *
+ * @return string
  */
-function M_User()
-{
-    return Context::getinst()->ModelFactory->get('User');
-}
-
-/**
- * @return \{{{NS}}}\Model\Model_Soft
- */
-function M_Soft()
-{
-    return context::getinst()->ModelFactory->get('Soft');
-}
-
 function subRender($sTpl, $aData = array())
 {
     return Context::getInst()->View->subRender($sTpl, $aData);
