@@ -1,5 +1,5 @@
 <?php
-namespace {{{NS}}}\ControllerHTTP;
+namespace {{{NS}}}\ControllerPage;
 
 use {{{NS}}}\System\Controller\Page_Base;
 

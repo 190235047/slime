@@ -61,4 +61,14 @@ return array(
         'class'  => 'Slime\\Component\\Lock\\Adaptor_Redis',
         'params' => array(':Redis')
     ),
+    array(
+        'module' => 'I18N',
+        'class'  => 'Slime\\Component\\I18N\\I18N',
+        'params' => array(
+            DIR_LANGUAGE,
+            ':HttpRequest',
+            'english',
+            'lang'
+        ),
+    ),
 );
