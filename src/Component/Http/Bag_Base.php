@@ -208,4 +208,9 @@ class Bag_Base implements \ArrayAccess, \Iterator, \Countable
     {
         return $this->aData;
     }
+
+    public function __toString()
+    {
+        return json_encode($this->aData);
+    }
 }

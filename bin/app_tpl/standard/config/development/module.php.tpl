@@ -70,5 +70,6 @@ return array(
             'english',
             'lang'
         ),
+        'factory' => 'createFromHttp'
     ),
 );
