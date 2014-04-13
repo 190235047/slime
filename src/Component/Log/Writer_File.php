@@ -11,41 +11,62 @@ class Writer_File implements IWriter
 {
     public $sFormat = '[:iLevel] : :sTime , :sGuid , :sMessage';
 
-    public $iBuffer;
-    public $sFilePath;
-
     protected $aData;
+    protected $iNumber;
 
-    public function __construct($sFilePath, $iBuffer = 50)
+    public function __construct(
+        $sFilePathFormat,
+        $iBuffer = 50,
+        $aLevelMap = array(
+            Logger::DESC_DEBUG => 'access',
+            Logger::DESC_INFO  => 'access',
+            -1                 => 'error'
+        ),
+        $mCBPath = null
+    )
     {
-        $this->sFilePath = $sFilePath;
-        $this->iBuffer   = $iBuffer;
+        $this->sFilePathFormat = $sFilePathFormat;
+        $this->iBuffer         = $iBuffer;
+        $this->aLevelMap       = $aLevelMap;
+        $this->mCBPath         = $mCBPath;
     }
 
     public function acceptData($aRow)
     {
-        $this->aData[] = str_replace(
+        $sFilePath = $this->mCBPath === null ?
+            sprintf(
+                $this->sFilePathFormat,
+                date('Y-m-d'),
+                (isset($this->aLevelMap[$aRow['iLevel']]) ? $this->aLevelMap[$aRow['iLevel']] : $this->aLevelMap[-1])
+            ) :
+            call_user_func($this->mCBPath, $this->sFilePathFormat, $this->aLevelMap, $aRow);
+
+        $this->aData[$sFilePath][] = str_replace(
                 array(':sTime', ':iLevel', ':sMessage', ':sGuid'),
                 array($aRow['sTime'], Logger::getLevelString($aRow['iLevel']), $aRow['sMessage'], $aRow['sGuid']),
                 $this->sFormat
             ) . PHP_EOL;
+        $this->iNumber++;
 
-        if (count($this->aData) >= $this->iBuffer) {
+        if ($this->iNumber >= $this->iBuffer) {
             $this->flush2File();
         }
     }
 
     public function flush2File()
     {
-        if (!empty($this->aData)) {
-            $sFilePath = is_callable($this->sFilePath) ? call_user_func($this->sFilePath) : $this->sFilePath;
-            file_put_contents($sFilePath, implode(PHP_EOL, $this->aData) . PHP_EOL, FILE_APPEND);
-            $this->aData = array();
+        foreach ($this->aData as $sFilePath => $aData) {
+            file_put_contents($sFilePath, implode(PHP_EOL, $aData) . PHP_EOL, FILE_APPEND);
+            $this->aData[$sFilePath] = array();
         }
+
+        $this->iNumber = 0;
     }
 
     public function __destruct()
     {
-        $this->flush2File();
+        if ($this->iNumber > 0) {
+            $this->flush2File();
+        }
     }
 }

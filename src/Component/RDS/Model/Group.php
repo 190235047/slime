@@ -24,6 +24,34 @@ class Group implements \ArrayAccess, \Iterator, \Countable
         $this->Model = $Model;
     }
 
+    public function getFieldArr($sField)
+    {
+        if ($sField == $this->Model->sPKName) {
+            return array_keys($this->aModelItem);
+        } else {
+            $aRS = array();
+            foreach ($this->aModelItem as $Item) {
+                $aRS[] = $Item->$sField;
+            }
+            return $aRS;
+        }
+    }
+
+    /**
+     * @param string $sFiled
+     * @param Model  $Model
+     *
+     * @return Group
+     * @throws \InvalidArgumentException
+     */
+    public function fetchMultiFromField($sFiled, $Model)
+    {
+        if ($Model === null) {
+            throw new \InvalidArgumentException('Param model and cb can not either be null');
+        }
+        return $Model->findMulti(array($Model->sPKName . ' IN' => $this->getFieldArr($sFiled)));
+    }
+
     /**
      * @param string $sModelName
      * @param Item   $ModelItem

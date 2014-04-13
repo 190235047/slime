@@ -35,10 +35,11 @@ class ModelPagination
      * @param string                           $sRelationModelName
      * @param mixed                            $List
      * @param array                            $aWhere
-     * @param null                             $sOrderBy
-     * @param null                             $iNumberPerPage
-     * @param null                             $mPageGetCBOrPageVar
-     * @param null                             $mRenderCB
+     * @param null | string                    $sOrderBy
+     * @param null | int                       $iNumberPerPage
+     * @param null | mixed                     $mPageGetCBOrPageVar
+     * @param null | mixed                     $mRenderCB
+     * @param mixed                            $iTotal
      *
      * @return mixed
      */
@@ -50,9 +51,10 @@ class ModelPagination
         $sOrderBy = null,
         $iNumberPerPage = null,
         $mPageGetCBOrPageVar = null,
-        $mRenderCB = null
+        $mRenderCB = null,
+        &$iTotal = null
     ) {
-        return $this->_getList(
+        return $this->getListFromCB(
             array($Item, "count$sRelationModelName"),
             array($Item, $sRelationModelName),
             $List,
@@ -60,7 +62,8 @@ class ModelPagination
             $sOrderBy,
             $iNumberPerPage,
             $mPageGetCBOrPageVar,
-            $mRenderCB
+            $mRenderCB,
+            $iTotal
         );
     }
 
@@ -68,10 +71,11 @@ class ModelPagination
      * @param \Slime\Component\RDS\Model\Model $Model
      * @param mixed                            $List
      * @param array                            $aWhere
-     * @param null                             $sOrderBy
-     * @param null                             $iNumberPerPage
-     * @param null                             $mPageGetCBOrPageVar
-     * @param null                             $mRenderCB
+     * @param null | string                    $sOrderBy
+     * @param null | int                       $iNumberPerPage
+     * @param null | mixed                     $mPageGetCBOrPageVar
+     * @param null | mixed                     $mRenderCB
+     * @param mixed                            $iTotal
      *
      * @return mixed
      */
@@ -82,9 +86,10 @@ class ModelPagination
         $sOrderBy = null,
         $iNumberPerPage = null,
         $mPageGetCBOrPageVar = null,
-        $mRenderCB = null
+        $mRenderCB = null,
+        $iTotal = null
     ) {
-        return $this->_getList(
+        return $this->getListFromCB(
             array($Model, 'findCount'),
             array($Model, 'findMulti'),
             $List,
@@ -92,11 +97,12 @@ class ModelPagination
             $sOrderBy,
             $iNumberPerPage,
             $mPageGetCBOrPageVar,
-            $mRenderCB
+            $mRenderCB,
+            $iTotal
         );
     }
 
-    protected function _getList(
+    public function getListFromCB(
         $mCountCB,
         $mListCB,
         &$List,
@@ -104,7 +110,8 @@ class ModelPagination
         $sOrderBy = null,
         $iNumberPerPage = null,
         $mPageGetCBOrPageVar = null,
-        $mRenderCB = null
+        $mRenderCB = null,
+        &$iToTal = null
     ) {
         # number per page
         $iNumberPerPage = max(1, $iNumberPerPage === null ? $this->iDefaultNumberPerPage : $iNumberPerPage);
@@ -119,6 +126,7 @@ class ModelPagination
 
         # get total
         $iTotalItem = call_user_func($mCountCB, $aWhere);
+        $iToTal = $iTotalItem;
 
         # get pagination data
         $aResult               = Core::run($iTotalItem, $iNumberPerPage, $iCurrentPage);
@@ -202,6 +210,6 @@ class ModelPagination
      */
     public static function noRender($HttpRequest, $aResult)
     {
-        return array('total_page' => $aResult['total'], 'total_item' => $aResult['total_item']);
+        return $aResult;
     }
 }

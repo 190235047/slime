@@ -151,7 +151,7 @@ class Router
                 $this->Context->register('sActionPre', $sActionPre);
             }
             $HitMode->setAsCommon();
-            $mResult = call_user_func_array($mV, array($aArg, $HitMode, $sControllerPre));
+            $mResult = call_user_func_array($mV, array($aArg, $HitMode, $sControllerPre, $sActionPre));
             if ($mResult instanceof CallBack) {
                 $aCallBack[] = $mResult;
             }
