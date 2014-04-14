@@ -6,9 +6,7 @@ return array(
         'module'   => 'Log',
         'class'    => 'Slime\\Component\\Log\\Logger',
         'params'   => array(
-            array(
-                '@File' => array(function () {return '/tmp/{{{APP_NAME}}}_cli_' . date('Y-m-d') . '.log';},1)
-            ),
+            array('@File' => array('/tmp/{{{APP_NAME}}}_cli_%s_%s'))
             Logger::LEVEL_ALL ^ Logger::LEVEL_DEBUG
         ),
         'run_mode' => 'cli'
@@ -17,9 +15,7 @@ return array(
         'module'   => 'Log',
         'class'    => 'Slime\\Component\\Log\\Logger',
         'params'   => array(
-            array(
-                '@File' => array(function () {return sprintf('/tmp/{{{APP_NAME}}}_%s.log', date('Y-m-d'));})
-            ),
+            array('@File' => array('/tmp/{{{APP_NAME}}}_http_%s_%s')),
             Logger::LEVEL_ALL ^ Logger::LEVEL_DEBUG
         ),
         'run_mode' => 'http'
@@ -31,7 +27,7 @@ return array(
     ),
     array(
         'module' => 'ModelFactory',
-        'class'  => 'Slime\\Component\\RDS\\Model\\Factory',
+        'class'  => '{{{NS}}}\\System\\Model\\Factory_Base',
         'params' => array(
             '@database',
             '@model',

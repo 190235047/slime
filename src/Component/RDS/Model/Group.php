@@ -38,21 +38,6 @@ class Group implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
-     * @param string $sFiled
-     * @param Model  $Model
-     *
-     * @return Group
-     * @throws \InvalidArgumentException
-     */
-    public function fetchMultiFromField($sFiled, $Model)
-    {
-        if ($Model === null) {
-            throw new \InvalidArgumentException('Param model and cb can not either be null');
-        }
-        return $Model->findMulti(array($Model->sPKName . ' IN' => $this->getFieldArr($sFiled)));
-    }
-
-    /**
      * @param string $sModelName
      * @param Item   $ModelItem
      *

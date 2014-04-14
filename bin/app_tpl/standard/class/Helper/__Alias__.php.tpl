@@ -1,6 +1,4 @@
 <?php
-use Slime\Bundle\Framework\Context;
-
 /**
  * @param string $sKey
  * @param mixed  $mDefaultValue
@@ -17,7 +15,7 @@ function CFG($sKey, $mDefaultValue = null, $bForce = false)
  * @param string | array $mKeyOrKeys
  * @param bool           $bXssFilter
  *
- * @return array|null|string
+ * @return array | string | null
  */
 function G($mKeyOrKeys, $bXssFilter = false)
 {
@@ -28,7 +26,7 @@ function G($mKeyOrKeys, $bXssFilter = false)
  * @param string | array $mKeyOrKeys
  * @param bool           $bXssFilter
  *
- * @return array|null|string
+ * @return array | string | null
  */
 function P($mKeyOrKeys, $bXssFilter = false)
 {
@@ -40,7 +38,7 @@ function P($mKeyOrKeys, $bXssFilter = false)
  * @param bool           $bGetFirst
  * @param bool           $bXssFilter
  *
- * @return array|null|string
+ * @return array | string | null
  */
 function GP($mKeyOrKeys, $bGetFirst = true, $bXssFilter = false)
 {
@@ -51,7 +49,7 @@ function GP($mKeyOrKeys, $bGetFirst = true, $bXssFilter = false)
  * @param string | array $mKeyOrKeys
  * @param bool           $bXssFilter
  *
- * @return array|string
+ * @return array | string | null
  */
 function C($mKeyOrKeys, $bXssFilter = false)
 {
@@ -59,11 +57,21 @@ function C($mKeyOrKeys, $bXssFilter = false)
 }
 
 /**
+* @param string | array $mKeyOrKVMap
+
+* @return string | null
+*/
+function REQ_H($sKey)
+{
+    Context::getInst()->HttpRequest->Header[$sKey];
+}
+
+/**
  * @param string | array $mKeyOrKVMap
  * @param string | null  $sValue
  * @param bool           $bOverWrite
  */
-function H($mKeyOrKVMap, $sValue = null, $bOverWrite = true)
+function RES_H($mKeyOrKVMap, $sValue = null, $bOverWrite = true)
 {
     Context::getInst()->HttpResponse->setHeader($mKeyOrKVMap, $sValue, $bOverWrite);
 }
@@ -71,7 +79,7 @@ function H($mKeyOrKVMap, $sValue = null, $bOverWrite = true)
 /**
  * @param string | null $sUrl
  */
-function HJump($sUrl = null)
+function RES_HJump($sUrl = null)
 {
     $CTX = Context::getInst();
     if ($sUrl === null) {
@@ -100,4 +108,15 @@ function __($sString)
 function subRender($sTpl, $aData = array())
 {
     return Context::getInst()->View->subRender($sTpl, $aData);
+}
+
+/**
+ * @param string $sTpl
+ * @param array  $aData
+ *
+ * @return \{{{NS}}}\System\Model\Factory_Base
+ */
+function MF()
+{
+    return Context::getInst()->ModelFactory;
 }

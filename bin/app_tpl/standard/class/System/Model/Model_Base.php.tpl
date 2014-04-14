@@ -6,7 +6,7 @@ use Slime\Component\RDS\Model\Model;
 /**
  * Class Model_Base
  *
- * @package {{{NS}}}\System
+ * @package {{{NS}}}\System\Model
  *
  * @method Item_Base createItem() createItem(array $aData)
  * @method Item_Base find() find(mixed $mPKOrWhere)
