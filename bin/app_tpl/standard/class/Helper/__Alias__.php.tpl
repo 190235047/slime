@@ -65,13 +65,12 @@ function C($mKeyOrKeys, $bXssFilter = false)
 }
 
 /**
-* @param string | array $mKeyOrKVMap
-
-* @return string | null
-*/
+ * @param string $sKey
+ * @return string | null
+ */
 function REQ_H($sKey)
 {
-    CTX()->HttpRequest->Header[$sKey];
+    CTX()->HttpRequest->getHeader($sKey);
 }
 
 /**
