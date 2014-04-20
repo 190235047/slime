@@ -129,11 +129,11 @@ class Bootstrap
 
         # register
         $aMap = array(
-            'Bootstrap'      => $this,
-            'sENV'           => $sENV,
-            'Config'         => $Config,
-            'Route'          => new Router($this->Context),
-            'sRunMode'       => $sAPI === null ?
+            'Bootstrap' => $this,
+            'sENV'      => $sENV,
+            'Config'    => $Config,
+            'Route'     => new Router($this->Context),
+            'sRunMode'  => $sAPI === null ?
                     (strtolower(PHP_SAPI) === 'cli' ? 'cli' : 'http') :
                     (strtolower($sAPI) === 'cli' ? 'cli' : 'http'),
         );
@@ -157,14 +157,20 @@ class Bootstrap
      */
     public function run($sRouteKey = null)
     {
+        $fT1 = microtime(true);
         try {
-            switch ($this->Context->sRunMode) {
+            $C = $this->Context;
+            $Log = $C->Log;
+            switch ($C->sRunMode) {
                 case 'http':
+                    $REQ = $C->HttpRequest;
+                    $RES = $C->HttpResponse;
+                    # add log
+                    $Log->info(sprintf('RUN_START : %s : %s', $REQ->getRequestMethod(), $REQ->getRequestURI()));
                     # run route
-                    $C         = $this->Context;
                     $aCallBack = $C->Route->generateFromHttp(
-                        $C->HttpRequest,
-                        $C->HttpResponse,
+                        $REQ,
+                        $RES,
                         $C->Config->get($sRouteKey === null ? 'route.http' : $sRouteKey),
                         $bHitMain
                     );
@@ -177,10 +183,11 @@ class Bootstrap
                     }
 
                     # response
-                    $C->HttpResponse->send();
+                    $RES->send();
                     break;
                 case 'cli':
-                    $C         = $this->Context;
+                    # add log
+                    $Log->info('RUN_START');
                     $aCallBack = $C->Route->generateFromCli(
                         $C->aArgv,
                         $C->Config->get($sRouteKey === null ? 'route.cli' : $sRouteKey),
@@ -205,5 +212,6 @@ class Bootstrap
             call_user_func(self::$mCBUncaughtException, $E);
             exit(1);
         }
+        $Log->info('RUN_END : ' . microtime(true) - $fT1);
     }
 }

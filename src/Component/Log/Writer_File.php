@@ -9,7 +9,7 @@ namespace Slime\Component\Log;
  */
 class Writer_File implements IWriter
 {
-    public $sFormat = '[:iLevel] : :sTime , :sGuid , :sMessage';
+    public $sFormat = '[:iLevel] : :sTime ; :sGuid ; :sMessage';
 
     protected $aData;
     protected $iNumber;
@@ -18,9 +18,9 @@ class Writer_File implements IWriter
         $sFilePathFormat,
         $iBuffer = 50,
         $aLevelMap = array(
-            Logger::DESC_DEBUG => 'access',
-            Logger::DESC_INFO  => 'access',
-            -1                 => 'error'
+            Logger::LEVEL_DEBUG => 'access',
+            Logger::LEVEL_INFO  => 'access',
+            -1                  => 'error'
         ),
         $mCBPath = null
     )
