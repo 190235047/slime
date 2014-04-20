@@ -1,5 +1,13 @@
 <?php
 /**
+ * @return {{{NS}}}\System\Context\Context
+ */
+function CTX()
+{
+    return end($GLOBALS['__SF_CONTEXT__']);
+}
+
+/**
  * @param string $sKey
  * @param mixed  $mDefaultValue
  * @param bool   $bForce
@@ -8,7 +16,7 @@
  */
 function CFG($sKey, $mDefaultValue = null, $bForce = false)
 {
-    return Context::getInst()->Config->get($sKey, $mDefaultValue, $bForce);
+    return CTX()->Config->get($sKey, $mDefaultValue, $bForce);
 }
 
 /**
@@ -19,7 +27,7 @@ function CFG($sKey, $mDefaultValue = null, $bForce = false)
  */
 function G($mKeyOrKeys, $bXssFilter = false)
 {
-    return Context::getInst()->HttpRequest->getGetPost($mKeyOrKeys, $bXssFilter);
+    return CTX()->HttpRequest->getGetPost($mKeyOrKeys, $bXssFilter);
 }
 
 /**
@@ -30,7 +38,7 @@ function G($mKeyOrKeys, $bXssFilter = false)
  */
 function P($mKeyOrKeys, $bXssFilter = false)
 {
-    return Context::getInst()->HttpRequest->getGetPost($mKeyOrKeys, $bXssFilter);
+    return CTX()->HttpRequest->getGetPost($mKeyOrKeys, $bXssFilter);
 }
 
 /**
@@ -42,7 +50,7 @@ function P($mKeyOrKeys, $bXssFilter = false)
  */
 function GP($mKeyOrKeys, $bGetFirst = true, $bXssFilter = false)
 {
-    return Context::getInst()->HttpRequest->getGetPost($mKeyOrKeys, $bGetFirst, $bXssFilter);
+    return CTX()->HttpRequest->getGetPost($mKeyOrKeys, $bGetFirst, $bXssFilter);
 }
 
 /**
@@ -53,7 +61,7 @@ function GP($mKeyOrKeys, $bGetFirst = true, $bXssFilter = false)
  */
 function C($mKeyOrKeys, $bXssFilter = false)
 {
-    return Context::getInst()->HttpRequest->getCookie($mKeyOrKeys, $bXssFilter);
+    return CTX()->HttpRequest->getCookie($mKeyOrKeys, $bXssFilter);
 }
 
 /**
@@ -63,7 +71,7 @@ function C($mKeyOrKeys, $bXssFilter = false)
 */
 function REQ_H($sKey)
 {
-    Context::getInst()->HttpRequest->Header[$sKey];
+    CTX()->HttpRequest->Header[$sKey];
 }
 
 /**
@@ -73,7 +81,7 @@ function REQ_H($sKey)
  */
 function RES_H($mKeyOrKVMap, $sValue = null, $bOverWrite = true)
 {
-    Context::getInst()->HttpResponse->setHeader($mKeyOrKVMap, $sValue, $bOverWrite);
+    CTX()->HttpResponse->setHeader($mKeyOrKVMap, $sValue, $bOverWrite);
 }
 
 /**
@@ -81,7 +89,7 @@ function RES_H($mKeyOrKVMap, $sValue = null, $bOverWrite = true)
  */
 function RES_HJump($sUrl = null)
 {
-    $CTX = Context::getInst();
+    $CTX = CTX();
     if ($sUrl === null) {
         $sReferer = $CTX->HttpRequest->getHeader('Referer');
         $sUrl     = $sReferer === null ? '/' : $sReferer;
@@ -96,7 +104,7 @@ function RES_HJump($sUrl = null)
  */
 function __($sString)
 {
-    return (string)Context::getInst()->I18N->get($sString);
+    return (string)(CTX()->I18N->get($sString));
 }
 
 /**
@@ -107,16 +115,13 @@ function __($sString)
  */
 function subRender($sTpl, $aData = array())
 {
-    return Context::getInst()->View->subRender($sTpl, $aData);
+    return CTX()->View->subRender($sTpl, $aData);
 }
 
 /**
- * @param string $sTpl
- * @param array  $aData
- *
  * @return \{{{NS}}}\System\Model\Factory_Base
  */
 function MF()
 {
-    return Context::getInst()->ModelFactory;
+    return CTX()->ModelFactory;
 }
