@@ -1,7 +1,6 @@
 <?php
 namespace {{{NS}}}\Model;
 
-use Slime\Bundle\Framework\Context;
 use {{{NS}}}\System\Model\Model_Base;
 
 /**

@@ -6,7 +6,7 @@ return array(
         'module'   => 'Log',
         'class'    => 'Slime\\Component\\Log\\Logger',
         'params'   => array(
-            array('@File' => array('/tmp/{{{APP_NAME}}}_cli_%s_%s')),
+            array('@File' => array('/tmp/{{{APP_NAME}}}_cli_%s_%s.log')),
             Logger::LEVEL_ALL ^ Logger::LEVEL_DEBUG
         ),
         'run_mode' => 'cli'
@@ -15,7 +15,7 @@ return array(
         'module'   => 'Log',
         'class'    => 'Slime\\Component\\Log\\Logger',
         'params'   => array(
-            array('@File' => array('/tmp/{{{APP_NAME}}}_http_%s_%s')),
+            array('@File' => array('/tmp/{{{APP_NAME}}}_http_%s_%s.log')),
             Logger::LEVEL_ALL ^ Logger::LEVEL_DEBUG
         ),
         'run_mode' => 'http'

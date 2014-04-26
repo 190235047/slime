@@ -17,7 +17,7 @@ return array(
         'params'   => array(
             array(
                 '@WebPage' => array(),
-                '@File' => array('/tmp/{{{APP_NAME}}}_http_%s_%s'),
+                '@File' => array('/tmp/{{{APP_NAME}}}_http_%s_%s.log'),
             ),
             Logger::LEVEL_ALL
         ),

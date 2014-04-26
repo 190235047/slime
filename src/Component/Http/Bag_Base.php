@@ -33,7 +33,7 @@ class Bag_Base implements \ArrayAccess, \Countable
                 array_replace($this->aData, $aArr) :
                 array_merge($saKeyOrKVMap, $this->aData);
         } else {
-            if ($bOverwriteIfExist || $this->aData[$saKeyOrKVMap]===null) {
+            if ($bOverwriteIfExist || !isset($this->aData[$saKeyOrKVMap])) {
                 $this->aData[$saKeyOrKVMap] = $nsValue;
             }
         }
