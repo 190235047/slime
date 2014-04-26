@@ -1,7 +1,7 @@
 <?php
 return array(
     'http' => array(
-        '#^/v\d+/#' => array(array('Slime\Component\Route\Mode', 'slimeHttp_REST'), '{{{NS}}}\\ControllerApi\\C_', ''),
+        '#^/v\d+/#' => array(array('Slime\Component\Route\Mode', 'slimeHttp_REST'), '{{{NS}}}\\ControllerApi\\', ''),
         array(array('Slime\Component\Route\Mode', 'slimeHttp_Page'), '{{{NS}}}\\ControllerPage\\C_', 'action')
     ),
     'cli'  => array(

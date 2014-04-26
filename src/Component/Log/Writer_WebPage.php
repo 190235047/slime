@@ -12,8 +12,8 @@ use Slime\Bundle\Framework\Context;
 class Writer_WebPage implements IWriter
 {
     public $sDebugLayer;
-
     protected $aData = array();
+    protected $bDisabled = false;
 
     public function __construct($sDebugLayer = null)
     {
@@ -22,14 +22,27 @@ class Writer_WebPage implements IWriter
         }
     }
 
+    public function setDisable()
+    {
+        $this->bDisabled = true;
+    }
+
+    public function setEnable()
+    {
+        $this->bDisabled = false;
+    }
+
     public function acceptData($aRow)
     {
+        if ($this->bDisabled) {
+            return;
+        }
         $this->aData[] = $aRow;
     }
 
     public function __destruct()
     {
-        if (empty($this->aData)) {
+        if ($this->bDisabled || empty($this->aData)) {
             return;
         }
         $sCT = Context::getInst()->HttpResponse->getHeader('Context-type');

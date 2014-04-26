@@ -2,8 +2,9 @@
 namespace Slime\Bundle\Framework;
 
 use Slime\Component\Http;
-use Slime\Component\View;
 use Slime\Component\Helper\Arr2XML;
+use Slime\Component\View;
+use Slime\Component\Log\Writer_WebPage;
 
 /**
  * Class Controller_API
@@ -26,6 +27,11 @@ abstract class Controller_Api extends Controller_ABS
     public function __construct(array $aParam = array())
     {
         parent::__construct($aParam);
+        foreach ($this->Log->aWriter as $Writer) {
+            if ($Writer instanceof Writer_WebPage) {
+                $Writer->setDisable();
+            }
+        }
 
         $this->HttpRequest  = $this->Context->HttpRequest;
         $this->HttpResponse = $this->Context->HttpResponse;
