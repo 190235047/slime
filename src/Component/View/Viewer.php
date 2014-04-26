@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\View;
 
-use Slime\Component\Context\Sugar;
+use Slime\Component\Helper\Sugar;
 
 /**
  * Class View

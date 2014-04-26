@@ -1,6 +1,8 @@
 <?php
 namespace Slime\Component\Redis;
 
+use Slime\Component\Context\Event;
+
 /**
  * Class Redis
  *
@@ -29,7 +31,10 @@ class Redis
 
     public function __call($sMethod, $aArgs)
     {
-        return call_user_func_array(array($this->getInstance(), $sMethod), $aArgs);
+        Event::occurEvent(Event_Register::E_ALL_BEFORE, $this, $sMethod, $aArgs);
+        $mRS = call_user_func_array(array($this->getInstance(), $sMethod), $aArgs);
+        Event::occurEvent(Event_Register::E_ALL_AFTER, $mRS, $this, $sMethod, $aArgs);
+        return $mRS;
     }
 
     public function getInstance()

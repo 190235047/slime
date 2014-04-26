@@ -2,5 +2,5 @@
 return array(
     'type'     => 'single',
     'pconnect' => true,
-    'server'   => array('cq02-redis-proxy00.cq02', 9003)
+    'server'   => array('127.0.0.1', 6379)
 );

@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\Lock;
 
-use Slime\Component\Context\Sugar;
+use Slime\Component\Helper\Sugar;
 
 /**
  * Class Lock

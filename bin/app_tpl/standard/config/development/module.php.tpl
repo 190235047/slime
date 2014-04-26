@@ -6,7 +6,7 @@ return array(
         'module'   => 'Log',
         'class'    => 'Slime\\Component\\Log\\Logger',
         'params'   => array(
-            array('@STDFD' => array())
+            array('@STDFD' => array()),
             Logger::LEVEL_ALL
         ),
         'run_mode' => 'cli'
@@ -43,7 +43,6 @@ return array(
         'module' => 'Redis',
         'class'  => 'Slime\\Component\\Redis\\Redis',
         'params' => array('@redis'),
-        'packer' => \Slime\Component\Redis\AopRedis::$aAopAllCMDCost
     ),
     array(
         'module' => 'Lock',

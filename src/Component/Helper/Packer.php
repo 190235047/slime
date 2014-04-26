@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\Context;
+namespace Slime\Component\Helper;
 
 /**
  * Class Packer

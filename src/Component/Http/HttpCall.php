@@ -1,6 +1,8 @@
 <?php
 namespace Slime\Component\Http;
 
+use Slime\Component\Context\Event;
+
 if (!extension_loaded('curl')) {
     throw new \Exception('[EXT] Extension curl is not loaded');
 }
@@ -74,6 +76,7 @@ class HttpCall
     }
     public function call($sUrl, $naOptKV = null)
     {
+        Event::occurEvent(Event_Register::E_CALL_BEFORE, $this, $sUrl, $naOptKV);
         # init
         $rCurl = curl_init($sUrl);
         curl_setopt($rCurl, CURLOPT_RETURNTRANSFER, 1);
@@ -102,7 +105,12 @@ class HttpCall
             curl_setopt_array($rCurl, $naOptKV);
         }
 
-        return curl_exec($rCurl);
+        # run
+        $mRS = curl_exec($rCurl);
+        Event::occurEvent(Event_Register::E_CALL_AFTER, $mRS, $this, $sUrl, $naOptKV);
+
+        # return
+        return $mRS;
     }
 
     protected static function preDealWithIP(&$naHeader, &$aBlock, $nsIP)

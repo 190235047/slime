@@ -65,6 +65,15 @@ class HttpResponse
         $this->BagHeader->set($saKeyOrKVMap, $nsValue, $bOverwrite);
     }
 
+    /**
+     * @param string $sKey
+     *
+     * @return mixed
+     */
+    public function getHeader($sKey)
+    {
+        return $this->BagHeader[$sKey];
+    }
 
     /**
      * @param bool $bOverwrite
@@ -127,6 +136,14 @@ class HttpResponse
             'is_httponly' => $bHttpOnly
         );
         return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCookiePre()
+    {
+        return $this->aPreCookie;
     }
 
     /** @var string */

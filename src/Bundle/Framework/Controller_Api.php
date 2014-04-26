@@ -3,7 +3,7 @@ namespace Slime\Bundle\Framework;
 
 use Slime\Component\Http;
 use Slime\Component\View;
-use Slime\Component\Context\Arr2XML;
+use Slime\Component\Helper\Arr2XML;
 
 /**
  * Class Controller_API

@@ -97,7 +97,7 @@ class Adaptor_PHP implements IAdaptor
      */
     public function renderAsResult()
     {
-        Event::occurEvent('Slime.Component.View.renderAsResult', $this);
+        Event::occurEvent(Event_Register::E_RENDER_RS_BEFORE, $this);
         $sFile = $this->sBaseDir . DIRECTORY_SEPARATOR . $this->sTpl;
         if (!file_exists($sFile)) {
             throw new \RuntimeException("[VIEW] : Template file[{$sFile}] is not exist");

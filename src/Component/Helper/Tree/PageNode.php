@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\Context\Tree;
+namespace Slime\Component\Helper\Tree;
 
 /**
  * Class PageNode

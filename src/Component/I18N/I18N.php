@@ -32,7 +32,7 @@ class I18N
     ) {
         $sLanguage = null;
         if ($sCookieKey !== null) {
-            $sLanguage = $HttpRequest->getCookie($sCookieKey);
+            $sLanguage = $HttpRequest->getC($sCookieKey);
         }
         $sLanguage = empty($sLanguage) ?
             strtolower(strtok($HttpRequest->getHeader('Accept_Language'), ',')) :

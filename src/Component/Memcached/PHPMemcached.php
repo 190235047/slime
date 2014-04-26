@@ -23,11 +23,11 @@ class PHPMemcached
 
     public function __call($sMethodName, $aArg)
     {
-        Event::occurEvent('Slime.Component.Memcached.__All__:before', $this, $sMethodName, $aArg);
+        Event::occurEvent(Event_Register::E_ALL_BEFORE, $this, $sMethodName, $aArg);
         $mResult = empty($aArg) ?
             $this->getInstance()->$sMethodName() :
             call_user_func_array(array($this->getInstance(), $sMethodName), $aArg);
-        Event::occurEvent('Slime.Component.Memcached.__All__:after', $mResult, $this, $sMethodName, $aArg);
+        Event::occurEvent(Event_Register::E_ALL_AFTER, $mResult, $this, $sMethodName, $aArg);
         return $mResult;
     }
 

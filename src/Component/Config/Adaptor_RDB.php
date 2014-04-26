@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\Config;
 
-use Slime\Component\Context\Arr;
+use Slime\Component\Helper\Arr;
 
 /**
  * Class Configure

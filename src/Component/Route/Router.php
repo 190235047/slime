@@ -9,6 +9,9 @@ namespace Slime\Component\Route;
  */
 class Router
 {
+    /** @var null|\Slime\Component\Context\Context */
+    protected $Context;
+
     /**
      * @param null | \Slime\Component\Context\Context $Context
      */

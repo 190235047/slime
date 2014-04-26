@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\RDS;
 
-use Slime\Component\Context\Packer;
+use Slime\Component\Helper\Packer;
 
 /**
  * Class CURD
