@@ -6,22 +6,19 @@ namespace Slime\Component\Http;
  *
  * @package Slime\Component\Http
  * @author  smallslime@gmail.com
+ *
+ * @property-read array $aData
  */
-class Bag_Base implements \ArrayAccess, \Iterator, \Countable
+class Bag_Base implements \ArrayAccess, \Countable
 {
-    protected $aMap;
-    protected $iLen;
-    protected $iCursor;
+    public $aData;
 
-    public function __construct(array $aData = null)
+    protected $bXSSEnable;
+
+    public function __construct(array $aData, &$bXSSEnable = false)
     {
-        if (empty($aData)) {
-            $aData = array();
-        }
-        $this->aData   = $aData;
-        $this->aMap    = array_keys($this->aData);
-        $this->iLen    = count($this->aData);
-        $this->iCursor = 0;
+        $this->aData      = $aData;
+        $this->bXSSEnable = $bXSSEnable;
     }
 
     public function __get($sKey)
@@ -29,100 +26,17 @@ class Bag_Base implements \ArrayAccess, \Iterator, \Countable
         return $this->offsetGet($sKey);
     }
 
-    public function set($sKey, $mValue)
+    public function set($saKeyOrKVMap, $nsValue = null, $bOverwriteIfExist = true)
     {
-        $this->offsetSet($sKey, $mValue);
-        return $this;
-    }
-
-    public function delete($mKeyOrKeys)
-    {
-        if (is_array($mKeyOrKeys)) {
-            foreach ($mKeyOrKeys as $sKey) {
-                if (isset($this->aData[$sKey])) {
-                    unset($this->aData[$sKey]);
-                }
-            }
-        } else {
-            if (isset($this->aData[$mKeyOrKeys])) {
-                unset($this->aData[$mKeyOrKeys]);
-            }
-        }
-
-        return $this;
-    }
-
-    public function merge(array $aArr, $bOverwriteIfExist = true)
-    {
-        if (!empty($aArr)) {
+        if (is_array($saKeyOrKVMap)) {
             $this->aData = $bOverwriteIfExist ?
                 array_replace($this->aData, $aArr) :
-                array_merge($aArr, $this->aData);
-            $this->aMap  = array_keys($this->aData);
-            $this->iLen  = count($this->aData);
+                array_merge($saKeyOrKVMap, $this->aData);
+        } else {
+            if ($bOverwriteIfExist || $this->aData[$saKeyOrKVMap]===null) {
+                $this->aData[$saKeyOrKVMap] = $nsValue;
+            }
         }
-        return $this;
-    }
-
-    /**
-     * (PHP 5 >= 5.0.0)
-     * Return the current element
-     *
-     * @link http://php.net/manual/en/iterator.current.php
-     * @return mixed Can return any type.
-     */
-    public function current()
-    {
-        return $this->aData[$this->aMap[$this->iCursor]];
-    }
-
-    /**
-     * (PHP 5 >= 5.0.0)
-     * Move forward to next element
-     *
-     * @link http://php.net/manual/en/iterator.next.php
-     * @return void Any returned value is ignored.
-     */
-    public function next()
-    {
-        $this->iCursor++;
-    }
-
-    /**
-     * (PHP 5 >= 5.0.0)
-     * Return the key of the current element
-     *
-     * @link http://php.net/manual/en/iterator.key.php
-     * @return mixed scalar on success, or null on failure.
-     */
-    public function key()
-    {
-        return $this->aMap[$this->iCursor];
-    }
-
-    /**
-     * (PHP 5 >= 5.0.0)
-     * Checks if current position is valid
-     *
-     * @link http://php.net/manual/en/iterator.valid.php
-     * @return boolean The return value will be casted to boolean and then evaluated.
-     *       Returns true on success or false on failure.
-     */
-    public function valid()
-    {
-        return $this->iCursor < $this->iLen;
-    }
-
-    /**
-     * (PHP 5 >= 5.0.0)
-     * Rewind the Iterator to the first element
-     *
-     * @link http://php.net/manual/en/iterator.rewind.php
-     * @return void Any returned value is ignored.
-     */
-    public function rewind()
-    {
-        $this->iCursor = 0;
     }
 
     /**
@@ -153,7 +67,12 @@ class Bag_Base implements \ArrayAccess, \Iterator, \Countable
      */
     public function offsetGet($offset)
     {
-        return isset($this->aData[$offset]) ? $this->aData[$offset] : null;
+        return isset($this->aData[$offset]) ?
+            (
+                $this->bXSSEnable ?
+                    Helper_XSS::getInst()->clean($this->aData[$offset]) :
+                    $this->aData[$offset]
+            ) : null;
     }
 
     /**
@@ -170,8 +89,6 @@ class Bag_Base implements \ArrayAccess, \Iterator, \Countable
     public function offsetSet($offset, $value)
     {
         $this->aData[$offset] = $value;
-        $this->aMap[]         = $offset;
-        $this->iLen++;
     }
 
     /**
@@ -186,9 +103,9 @@ class Bag_Base implements \ArrayAccess, \Iterator, \Countable
      */
     public function offsetUnset($offset)
     {
-        unset($this->aData[$offset]);
-        $this->aMap = array_keys($this->aData);
-        $this->iLen--;
+        if (isset($this->aData[$offset])) {
+            unset($this->aData[$offset]);
+        }
     }
 
     /**
@@ -201,16 +118,11 @@ class Bag_Base implements \ArrayAccess, \Iterator, \Countable
      */
     public function count()
     {
-        return $this->iLen;
-    }
-
-    public function toArray()
-    {
-        return $this->aData;
+        return count($this->aData);
     }
 
     public function __toString()
     {
-        return json_encode($this->aData);
+        return var_export($this->aData, true);
     }
 }

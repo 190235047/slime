@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\Log;
 
-use Slime\Component\Helper\Sugar;
+use Slime\Component\Context\Sugar;
 
 /**
  * Class Logger

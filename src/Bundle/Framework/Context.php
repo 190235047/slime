@@ -22,6 +22,7 @@ namespace Slime\Bundle\Framework;
  * @property-read \Slime\Component\I18N\I18N                 $I18N           多语言对象
  * @property-read \Slime\Component\View\IAdaptor             $View           模板对象
  * @property-read mixed                                      $mCBErrPage     错误页回调
+ * @property-read array                                      $Arr            自定义数组
  */
 class Context extends \Slime\Component\Context\Context
 {

@@ -1,6 +1,8 @@
 <?php
 namespace Slime\Component\View;
 
+use Slime\Component\Context\Event;
+
 /**
  * Class Adaptor_PHP
  *
@@ -95,6 +97,7 @@ class Adaptor_PHP implements IAdaptor
      */
     public function renderAsResult()
     {
+        Event::occurEvent('Slime.Component.View.renderAsResult', $this);
         $sFile = $this->sBaseDir . DIRECTORY_SEPARATOR . $this->sTpl;
         if (!file_exists($sFile)) {
             throw new \RuntimeException("[VIEW] : Template file[{$sFile}] is not exist");

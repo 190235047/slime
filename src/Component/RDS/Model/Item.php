@@ -43,22 +43,19 @@ class Item implements \ArrayAccess
 
     public function __set($sKey, $mValue)
     {
-        $this->doSet($sKey, $mValue);
+        $this->_set($sKey, $mValue);
     }
 
     /**
      * @param string|array $mKeyOrKVMap
      * @param null         $mValue
-     *
-     * @return $this
      */
     public function set($mKeyOrKVMap, $mValue = null)
     {
-        $this->doSet($mKeyOrKVMap, $mValue);
-        return $this;
+        $this->_set($mKeyOrKVMap, $mValue);
     }
 
-    protected function doSet($mK, $mV = null)
+    protected function _set($mK, $mV = null)
     {
         if (is_array($mK)) {
             foreach ($mK as $sKey => $sValue) {
@@ -430,7 +427,7 @@ class Item implements \ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        $this->doSet($offset, $value);
+        $this->_set($offset, $value);
     }
 
     /**

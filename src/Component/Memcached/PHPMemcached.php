@@ -1,6 +1,8 @@
 <?php
 namespace Slime\Component\Memcached;
 
+use Slime\Component\Context\Event;
+
 /**
  * Class PHPMemcached
  *
@@ -17,14 +19,16 @@ class PHPMemcached
     public function __construct(array $aConfig)
     {
         $this->aConfig = $aConfig;
-        //check config
     }
 
     public function __call($sMethodName, $aArg)
     {
-        return empty($aArg) ?
+        Event::occurEvent('Slime.Component.Memcached.__All__:before', $this, $sMethodName, $aArg);
+        $mResult = empty($aArg) ?
             $this->getInstance()->$sMethodName() :
             call_user_func_array(array($this->getInstance(), $sMethodName), $aArg);
+        Event::occurEvent('Slime.Component.Memcached.__All__:after', $mResult, $this, $sMethodName, $aArg);
+        return $mResult;
     }
 
     /**

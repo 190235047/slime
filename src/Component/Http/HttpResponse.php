@@ -7,60 +7,96 @@ namespace Slime\Component\Http;
  * @package Slime\Component\Http
  * @author  smallslime@gmail.com
  */
-class HttpResponse extends HttpCommon
+class HttpResponse
 {
-    /** @var int */
-    public $iStatus = 200;
-
-    /** @var string */
-    public $sProtocol = 'HTTP/1.1';
-
-    /** @var string */
-    public $sStatusMessage;
-
-    /** @var string */
-    protected $sContent;
-
-    /** @var array */
-    protected $aPreCookie = array();
-
-    public static function create()
+    public function __construct()
     {
-        return new self();
+        $this->BagHeader = new Bag_Base(array());
+    }
+
+    /** @var int */
+    protected $iStatus = 200;
+
+    /**
+     * @param int $iCode
+     */
+    public function setResponseCode($iCode = 200)
+    {
+        $this->iStatus = $iCode;
     }
 
     /**
-     * @param string $sStr
-     *
-     * @return HttpResponse
+     * @return int
      */
-    public static function createFromResponseString($sStr)
+    public function getResponseCode()
     {
-        $SELF = new self();
+        return $this->iStatus;
+    }
 
-        list($sHeader, $sContent) = array_replace(array('', ''), explode("\r\n\r\n", ltrim($sStr), 2));
-        $aHeader = explode("\r\n", $sHeader);
+    /** @var string */
+    protected $sProtocol = 'HTTP/1.1';
 
-        foreach ($aHeader as $iK => $sV) {
-            if ($iK === 0) {
-                list($SELF->sProtocol, $SELF->iStatus, $SELF->sStatusMessage) =
-                    array_replace(array('', -1, ''), explode(' ', $sV, 3));
-                $SELF->iStatus = (int)$SELF->iStatus;
-            } else {
-                list($sKey, $sValue) = array_replace(array('', ''), explode(':', $sV, 2));
-                $SELF->Header[$sKey] = ltrim($sValue);
-            }
+    /**
+     * @param string $sProtocol
+     */
+    public function setProtocol($sProtocol = 'HTTP/1.1')
+    {
+        $this->sProtocol = $sProtocol;
+    }
+
+    /**
+     * @return string
+     */
+    public function getProtocol()
+    {
+        return $this->sProtocol;
+    }
+
+    /** @var Bag_Base */
+    protected $BagHeader;
+
+    /**
+     * @param array | string $saKeyOrKVMap
+     * @param null | string  $nsValue
+     * @param bool           $bOverwrite
+     */
+    public function setHeader($saKeyOrKVMap, $nsValue = null, $bOverwrite = true)
+    {
+        $this->BagHeader->set($saKeyOrKVMap, $nsValue, $bOverwrite);
+    }
+
+
+    /**
+     * @param bool $bOverwrite
+     */
+    public function setHeaderNoCache($bOverwrite = false)
+    {
+        $this->BagHeader->set(
+            array(
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma'        => 'no-cache',
+                'Expires'       => 'Expires: Mon, 26 Jul 1997 05:00:00 GMT'
+            ),
+            $bOverwrite
+        );
+    }
+
+    /**
+     * @param string $sURL
+     * @param int    $iCode
+     * @param bool   $bOverwrite
+     */
+    public function setHeaderRedirect($sURL, $iCode = null, $bOverwrite = true)
+    {
+        if ($iCode !== null) {
+            $this->iStatus = $iCode;
         }
 
-        $SELF->sContent = $sContent;
-
-        return $SELF;
+        $this->BagHeader->set(array('Location' => $sURL), $bOverwrite);
     }
 
-    public function __construct()
-    {
-        $this->Header = new Bag_Header();
-    }
+    /** @var array */
+    protected $aPreCookie = array();
 
     /**
      * @param string      $sName
@@ -93,43 +129,42 @@ class HttpResponse extends HttpCommon
         return $this;
     }
 
+    /** @var string */
+    protected $sContent;
+
     /**
-     * @return HttpResponse
+     * @return string
      */
-    public function setNoCache()
+    public function getContent()
     {
-        $this->setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        $this->setHeader('Pragma', 'no-cache');
-        $this->setHeader('Expires', 'Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-        return $this;
+        return $this->sContent;
     }
 
     /**
-     * @param string $sURL
-     * @param int    $iCode
-     *
-     * @return HttpResponse
+     * @param string $sContent
      */
-    public function setRedirect($sURL, $iCode = null)
+    public function setContent($sContent)
     {
-        if ($iCode !== null) {
-            $this->iStatus = $iCode;
-        }
+        $this->sContent = $sContent;
+    }
 
-        $this->setHeader('Location', $sURL);
-        return $this;
+    /**
+     * Sends content for the current web response.
+     */
+    public function sendContent()
+    {
+        echo $this->sContent;
     }
 
     /**
      * Sends HTTP headers.
-     *
-     * @return HttpResponse
      */
     public function sendHeader()
     {
         // headers have already been sent by the developer
         if (headers_sent()) {
-            return $this;
+            trigger_error('header has sent', E_USER_NOTICE);
+            return;
         }
 
         // first line
@@ -138,7 +173,7 @@ class HttpResponse extends HttpCommon
         }
 
         // headers
-        foreach ($this->Header as $sK => $sV) {
+        foreach ($this->BagHeader->aData as $sK => $sV) {
             header($sK . ': ' . $sV);
         }
 
@@ -148,37 +183,20 @@ class HttpResponse extends HttpCommon
                 $sName,
                 $aCookie['value'],
                 $aCookie['expire'],
-                isset($aCookie['path']) ? $aCookie['path'] : null,
-                isset($aCookie['domain']) ? $aCookie['domain'] : null,
-                isset($aCookie['is_secure']) ? $aCookie['is_secure'] : null,
-                isset($aCookie['is_httponly']) ? $aCookie['is_httponly'] : null
+                $aCookie['path'],
+                $aCookie['domain'],
+                $aCookie['is_secure'],
+                $aCookie['is_httponly']
             );
         }
-
-        return $this;
-    }
-
-    /**
-     * Sends content for the current web response.
-     *
-     * @return HttpResponse
-     */
-    public function sendContent()
-    {
-        echo $this->sContent;
-
-        return $this;
     }
 
     /**
      * Sends HTTP headers and content.
-     *
-     * @return HttpResponse
      */
     public function send()
     {
-        $this->sendHeader()->sendContent();
-
-        return $this;
+        $this->sendHeader();
+        $this->sendContent();
     }
 }

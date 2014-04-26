@@ -2,7 +2,7 @@
 namespace Slime\Component\RDS;
 
 use Slime\Bundle\Framework\Context;
-use Slime\Component\Helper\Packer;
+use Slime\Component\Context\Packer;
 use Slime\Component\Log\Logger;
 
 class AopPDO

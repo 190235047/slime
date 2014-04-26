@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\Helper;
+namespace Slime\Component\Context;
 
 /**
  * Class Sugar

@@ -9,6 +9,14 @@ namespace Slime\Component\Http;
  */
 class Helper_XSS
 {
+    private static $Inst = null;
+    public static function getInst()
+    {
+        if (self::$Inst === null) {
+            self::$Inst = new self();
+        }
+        return self::$Inst;
+    }
 
     /**
      * Random Hash for protecting URLs
@@ -96,7 +104,7 @@ class Helper_XSS
      *
      * @return    string
      */
-    public function xss_clean($str, $is_image = false)
+    public function clean($str, $is_image = false)
     {
         if ($str === null || $str === '') {
             return $str;
@@ -108,7 +116,7 @@ class Helper_XSS
          */
         if (is_array($str)) {
             while (list($key) = each($str)) {
-                $str[$key] = $this->xss_clean($str[$key]);
+                $str[$key] = $this->clean($str[$key]);
             }
 
             return $str;

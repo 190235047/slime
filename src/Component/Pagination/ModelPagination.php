@@ -121,12 +121,12 @@ class ModelPagination
             $mPageGetCBOrPageVar = $this->mDefaultPageGetCBOrPageVar;
         }
         $iCurrentPage = is_string($mPageGetCBOrPageVar) ?
-            max(1, (int)$this->HttpRequest->getGet($mPageGetCBOrPageVar)) :
+            max(1, (int)$this->HttpRequest->getG($mPageGetCBOrPageVar)) :
             (int)call_user_func($mPageGetCBOrPageVar);
 
         # get total
         $iTotalItem = call_user_func($mCountCB, $aWhere);
-        $iToTal = $iTotalItem;
+        $iToTal     = $iTotalItem;
 
         # get pagination data
         $aResult               = Core::run($iTotalItem, $iNumberPerPage, $iCurrentPage);

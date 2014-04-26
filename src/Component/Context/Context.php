@@ -2,7 +2,7 @@
 namespace Slime\Component\Context;
 
 use Slime\Component\Config\Configure;
-use Slime\Component\Helper\Packer;
+use Slime\Component\Context\Packer;
 
 /**
  * Class Context
@@ -59,6 +59,16 @@ class Context
     public function isRegistered($sVarName)
     {
         return isset($this->__aVarKey__[$sVarName]);
+    }
+
+    /**
+     * @param string $sVarName
+     *
+     * @return mixed
+     */
+    public function get($sVarName)
+    {
+        return isset($this->__aVarKey__[$sVarName]) ? $this->__aVarKey__[$sVarName] : null;
     }
 
     /**

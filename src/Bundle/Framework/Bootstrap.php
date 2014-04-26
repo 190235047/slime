@@ -27,7 +27,7 @@ class Bootstrap
         }
     }
 
-    public static function setDEVErrorPage()
+    public static function setDefaultErrorPage()
     {
         $C = Context::getInst();
         if ($C->sRunMode != 'http') {
@@ -68,8 +68,8 @@ class Bootstrap
             trigger_error($sStr, E_USER_ERROR);
         } else {
             if ($C->sRunMode === 'http') {
-                if ($C->HttpResponse->iStatus < 400) {
-                    $C->HttpResponse->iStatus = 500;
+                if ($C->HttpResponse->getResponseCode() < 400) {
+                    $C->HttpResponse->setResponseCode(500);
                 }
                 if ($C->isRegistered('mCBErrPage')) {
                     call_user_func($C->mCBErrPage, $E);
@@ -136,6 +136,7 @@ class Bootstrap
             'sRunMode'  => $sAPI === null ?
                     (strtolower(PHP_SAPI) === 'cli' ? 'cli' : 'http') :
                     (strtolower($sAPI) === 'cli' ? 'cli' : 'http'),
+            'Arr'       => array()
         );
 
         if ($aMap['sRunMode'] === 'cli') {
@@ -143,10 +144,12 @@ class Bootstrap
                 $GLOBALS['argv'] :
                 $mHttpReqOrCliArg;
         } else {
-            $aMap['HttpRequest']  = $mHttpReqOrCliArg === null ?
-                HttpRequest::createFromGlobals() :
-                $mHttpReqOrCliArg;
-            $aMap['HttpResponse'] = HttpResponse::create();
+            if ($mHttpReqOrCliArg===null) {
+                $aMap['HttpRequest'] = new HttpRequest();
+            } else {
+                $aMap['HttpRequest'] = $mHttpReqOrCliArg;
+            }
+            $aMap['HttpResponse'] = new HttpResponse();
         }
 
         $this->Context->registerMulti($aMap);
@@ -205,7 +208,7 @@ class Bootstrap
                     throw new \RuntimeException("[MAIN] : RunMode {$this->Context->sRunMode} is not supported");
             }
         } catch (RouteFailException $E) {
-            $this->Context->HttpResponse->iStatus = 404;
+            $this->Context->HttpResponse->setResponseCode(404);
             call_user_func(self::$mCBUncaughtException, $E);
             exit(1);
         } catch (\Exception $E) {
