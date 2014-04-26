@@ -10,7 +10,7 @@ namespace Slime\Component\Http;
  * @property-read array        $aSERVER
  * @property-read Bag_Param    $BagGET
  * @property-read Bag_Param    $BagPOST
- * @property-read Bag_Cookie   $BagCOOKIE
+ * @property-read Bag_Param    $BagCOOKIE
  * @property-read Bag_File     $BagFILE
  * @property-read Bag_Param    $BagGP
  */
@@ -29,15 +29,29 @@ class HttpRequest
         $this->aSERVER   = empty($aSERVER) ? $_SERVER : $aSERVER;
         $this->BagGET    = new Bag_Param(empty($aGET) ? $_GET : $aGET, $this->bEnable);
         $this->BagPOST   = new Bag_Param(empty($aPOST) ? $_POST : $aPOST, $this->bEnable);
-        $this->BagCOOKIE = new Bag_Cookie(empty($aCOOKIE) ? $_COOKIE : $aCOOKIE, $this->bEnable);
+        $this->BagCOOKIE = new Bag_Param(empty($aCOOKIE) ? $_COOKIE : $aCOOKIE, $this->bEnable);
         $this->BagFILE   = new Bag_File(empty($aFILE) ? $_FILES : $aFILE, $this->bEnable);
         $this->BagGP     = new Bag_Param(empty($aREQUEST) ? $_REQUEST : $aREQUEST, $this->bEnable);
     }
-    
+
     private $bEnable;
+    private $bTmpEnable;
+
     public function setXSSEnable($bEnable = true)
     {
         $this->bEnable = $bEnable;
+    }
+
+    public function setTmpXSSEnable($bEnable = true)
+    {
+        $this->bTmpEnable = $bEnable;
+        $this->bEnable    = $bEnable;
+    }
+
+    public function resetXSSStatus()
+    {
+        $this->bEnable    = $this->bTmpEnable;
+        $this->bTmpEnable = null;
     }
 
     public function __get($sKey)

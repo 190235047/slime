@@ -15,6 +15,6 @@ $B = new Bootstrap(
     ),
     'development'
 );
-Bootstrap::setDEVErrorPage();
+Bootstrap::setErrorPage();
 
 $B->run();

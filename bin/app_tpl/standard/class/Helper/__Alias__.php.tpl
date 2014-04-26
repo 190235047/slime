@@ -21,47 +21,42 @@ function CFG($sKey, $mDefaultValue = null, $bForce = false)
 
 /**
  * @param string | array $mKeyOrKeys
- * @param bool           $bXssFilter
  *
  * @return array | string | null
  */
-function G($mKeyOrKeys, $bXssFilter = false)
+function G($mKeyOrKeys)
 {
-    return CTX()->HttpRequest->getGetPost($mKeyOrKeys, $bXssFilter);
+    return CTX()->HttpRequest->getG($mKeyOrKeys);
 }
 
 /**
  * @param string | array $mKeyOrKeys
- * @param bool           $bXssFilter
  *
  * @return array | string | null
  */
-function P($mKeyOrKeys, $bXssFilter = false)
+function P($mKeyOrKeys)
 {
-    return CTX()->HttpRequest->getGetPost($mKeyOrKeys, $bXssFilter);
+    return CTX()->HttpRequest->getP($mKeyOrKeys);
 }
 
 /**
  * @param string | array $mKeyOrKeys
- * @param bool           $bGetFirst
- * @param bool           $bXssFilter
  *
  * @return array | string | null
  */
-function GP($mKeyOrKeys, $bGetFirst = true, $bXssFilter = false)
+function GP($mKeyOrKeys)
 {
-    return CTX()->HttpRequest->getGetPost($mKeyOrKeys, $bGetFirst, $bXssFilter);
+    return CTX()->HttpRequest->getGP($mKeyOrKeys);
 }
 
 /**
  * @param string | array $mKeyOrKeys
- * @param bool           $bXssFilter
  *
  * @return array | string | null
  */
-function C($mKeyOrKeys, $bXssFilter = false)
+function C($mKeyOrKeys)
 {
-    return CTX()->HttpRequest->getCookie($mKeyOrKeys, $bXssFilter);
+    return CTX()->HttpRequest->getC($mKeyOrKeys);
 }
 
 /**
@@ -93,7 +88,7 @@ function RES_HJump($sUrl = null)
         $sReferer = $CTX->HttpRequest->getHeader('Referer');
         $sUrl     = $sReferer === null ? '/' : $sReferer;
     }
-    $CTX->HttpResponse->setRedirect($sUrl);
+    $CTX->HttpResponse->setHeaderRedirect($sUrl);
 }
 
 /**

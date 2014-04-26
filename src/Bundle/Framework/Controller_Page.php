@@ -61,16 +61,14 @@ abstract class Controller_Page extends Controller_ABS
 
         if ($this->iRenderType === self::RENDER_PAGE) {
             $this->HttpResponse->setContent(
-                ltrim(
-                    $this->Context->View
-                        ->assignMulti($this->aData)
-                        ->setTpl($this->sTPL === null ? $this->getDefaultTPL() : $this->sTPL)
-                        ->renderAsResult()
-                )
+                $this->Context->View
+                    ->assignMulti($this->aData)
+                    ->setTpl($this->sTPL === null ? $this->getDefaultTPL() : $this->sTPL)
+                    ->renderAsResult()
             );
         } else {
             $sJump = $this->sJumpUrl === null ? $this->HttpRequest->getHeader('Referer') : $this->sJumpUrl;
-            $this->HttpResponse->setRedirect($sJump === null ? '/' : $sJump, $this->iJumpCode);
+            $this->HttpResponse->setHeaderRedirect($sJump === null ? '/' : $sJump, $this->iJumpCode);
         }
     }
 

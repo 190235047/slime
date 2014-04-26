@@ -13,12 +13,12 @@ use Slime\Component\Log\Logger;
  */
 class Event_Register
 {
-    const E_ALL_BEFORE = 'Slime.Component.View.IAdaptor.renderAsResult:before';
+    const E_RENDER_RS = 'Slime.Component.View.IAdaptor.renderAsResult';
 
     public static function register_renderAsResult()
     {
         Event::regEvent(
-            self::E_ALL_BEFORE,
+            self::E_RENDER_RS,
             function(IAdaptor $View)
             {
                 $Log = Context::getInst()->Log;

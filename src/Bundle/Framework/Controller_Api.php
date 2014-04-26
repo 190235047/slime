@@ -61,39 +61,36 @@ abstract class Controller_Api extends Controller_ABS
 
     protected function _renderXML()
     {
-        $this->HttpResponse
-            ->setHeader('Content-Type', 'text/xml', false)
-            ->setContent(
-                $this->sXmlTPL === null ?
-                    Arr2XML::factory()->Array2XML($this->aData) :
-                    $this->Context->View->assignMulti($this->aData)->setTpl($this->sXmlTPL)->renderAsResult()
-            );
+        $this->HttpResponse->setHeader('Content-Type', 'text/xml', false);
+        $this->HttpResponse->setContent(
+            $this->sXmlTPL === null ?
+                Arr2XML::factory()->Array2XML($this->aData) :
+                $this->Context->View->assignMulti($this->aData)->setTpl($this->sXmlTPL)->renderAsResult()
+        );
     }
 
     protected function _renderJSON()
     {
-        $this->HttpResponse
-            ->setHeader('Content-Type', 'text/javascript', false)
-            ->setContent(
-                $this->sJsonTPL === null ?
-                    json_encode($this->aData) :
-                    $this->Context->View->assignMulti($this->aData)->setTpl($this->sJsonTPL)->renderAsResult()
-            );
+        $this->HttpResponse->setHeader('Content-Type', 'text/javascript', false);
+        $this->HttpResponse->setContent(
+            $this->sJsonTPL === null ?
+                json_encode($this->aData) :
+                $this->Context->View->assignMulti($this->aData)->setTpl($this->sJsonTPL)->renderAsResult()
+        );
     }
 
     protected function _renderJSONP()
     {
-        $sCB = $this->HttpRequest->getGet($this->sJSCBParam);
+        $sCB = $this->HttpRequest->getG($this->sJSCBParam);
         if ($sCB === null) {
             $sCB = 'cb';
         }
-        $this->HttpResponse
-            ->setHeader('Content-Type', 'text/javascript', false)
-            ->setContent(
-                $this->sJsonPTPL === null ?
-                    $sCB . '(' . json_encode($this->aData) . ')' :
-                    $this->Context->View->assignMulti($this->aData)->setTpl($this->sJsonPTPL)->renderAsResult()
-            );
+        $this->HttpResponse->setHeader('Content-Type', 'text/javascript', false);
+        $this->HttpResponse->setContent(
+            $this->sJsonPTPL === null ?
+                $sCB . '(' . json_encode($this->aData) . ')' :
+                $this->Context->View->assignMulti($this->aData)->setTpl($this->sJsonPTPL)->renderAsResult()
+        );
     }
 
     protected function _renderJS()
