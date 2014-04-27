@@ -30,7 +30,7 @@ class Bag_Base implements \ArrayAccess, \Countable
     {
         if (is_array($saKeyOrKVMap)) {
             $this->aData = $bOverwriteIfExist ?
-                array_replace($this->aData, $aArr) :
+                array_replace($this->aData, $saKeyOrKVMap) :
                 array_merge($saKeyOrKVMap, $this->aData);
         } else {
             if ($bOverwriteIfExist || !isset($this->aData[$saKeyOrKVMap])) {
