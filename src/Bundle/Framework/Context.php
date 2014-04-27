@@ -14,6 +14,7 @@ namespace Slime\Bundle\Framework;
  * @property-read Bootstrap                                  $Bootstrap      框架核心基础对象
  * @property-read \Slime\Component\Config\IAdaptor           $Config         配置对象
  * @property-read \Slime\Component\Log\Logger                $Log            日志对象
+ * @property-read \Slime\Component\Context\Event             $Event          事件对象
  * @property-read \Slime\Component\Route\Router              $Route          路由对象
  * @property-read \Slime\Component\Route\CallBack            $CallBack       路由结果回调对象
  * @property-read \Slime\Component\HTTP\HttpRequest          $HttpRequest    本次Http请求生成的HttpRequest对象

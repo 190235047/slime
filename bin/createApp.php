@@ -66,3 +66,4 @@ function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $
         }
     }
 }
+

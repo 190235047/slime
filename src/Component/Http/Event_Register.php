@@ -21,14 +21,14 @@ class Event_Register
     {
         Event::regEvent(
             self::E_CALL_BEFORE,
-            function (HttpCall $HC, $sUrl, $naOptKV) {
+            function ($sUrl, $naOptKV) {
                 Context::getInst()->Arr[self::GV_TIME_PAST] = microtime(true);
             }
         );
 
         Event::regEvent(
             self::E_CALL_AFTER,
-            function (HttpCall $HC, $mRS, $this, $sUrl, $naOptKV) {
+            function ($mRS, $sUrl, $naOptKV) {
                 $Log = Context::getInst()->Log;
                 if ($Log->needLog(Logger::LEVEL_INFO)) {
                     $Log->info(

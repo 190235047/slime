@@ -1,4 +1,22 @@
 <?php
+if (!defined('DIR_PUBLIC')) {
+    define('DIR_PUBLIC', __DIR__);
+    define('DIR_BASE', dirname(DIR_PUBLIC));
+    define('DIR_CONFIG', DIR_BASE . '/config');
+    define('DIR_LANGUAGE', DIR_BASE . '/language');
+    define('DIR_VIEW', DIR_BASE . '/view');
+    define('DIR_CLASS', DIR_BASE . '/class');
+}
+
+
+// event register
+\Slime\Component\View\Event_Register::register_renderAsResult();
+\Slime\Component\Http\Event_Register::register_Call();
+#\Slime\Component\Memcached\Event_Register::register_ALL();
+#\Slime\Component\Redis\Event_Register::register_ALL();
+
+
+//function alias
 /**
  * @return {{{NS}}}\System\Context\Context
  */
@@ -20,67 +38,67 @@ function CFG($sKey, $mDefaultValue = null, $bForce = false)
 }
 
 /**
- * @param string | array $mKeyOrKeys
- *
- * @return array | string | null
- */
+* @param string | array $mKeyOrKeys
+*
+* @return array | string | null
+*/
 function G($mKeyOrKeys)
 {
     return CTX()->HttpRequest->getG($mKeyOrKeys);
 }
 
 /**
- * @param string | array $mKeyOrKeys
- *
- * @return array | string | null
- */
+* @param string | array $mKeyOrKeys
+*
+* @return array | string | null
+*/
 function P($mKeyOrKeys)
 {
     return CTX()->HttpRequest->getP($mKeyOrKeys);
 }
 
 /**
- * @param string | array $mKeyOrKeys
- *
- * @return array | string | null
- */
+* @param string | array $mKeyOrKeys
+*
+* @return array | string | null
+*/
 function GP($mKeyOrKeys)
 {
     return CTX()->HttpRequest->getGP($mKeyOrKeys);
 }
 
 /**
- * @param string | array $mKeyOrKeys
- *
- * @return array | string | null
- */
+* @param string | array $mKeyOrKeys
+*
+* @return array | string | null
+*/
 function C($mKeyOrKeys)
 {
     return CTX()->HttpRequest->getC($mKeyOrKeys);
 }
 
 /**
- * @param string $sKey
- * @return string | null
- */
+* @param string $sKey
+* @return string | null
+*/
 function REQ_H($sKey)
 {
     CTX()->HttpRequest->getHeader($sKey);
 }
 
 /**
- * @param string | array $mKeyOrKVMap
- * @param string | null  $sValue
- * @param bool           $bOverWrite
- */
+* @param string | array $mKeyOrKVMap
+* @param string | null  $sValue
+* @param bool           $bOverWrite
+*/
 function RES_H($mKeyOrKVMap, $sValue = null, $bOverWrite = true)
 {
     CTX()->HttpResponse->setHeader($mKeyOrKVMap, $sValue, $bOverWrite);
 }
 
 /**
- * @param string | null $sUrl
- */
+* @param string | null $sUrl
+*/
 function RES_HJump($sUrl = null)
 {
     $CTX = CTX();
@@ -92,29 +110,29 @@ function RES_HJump($sUrl = null)
 }
 
 /**
- * @param string $sString
- *
- * @return string
- */
+* @param string $sString
+*
+* @return string
+*/
 function __($sString)
 {
     return (string)(CTX()->I18N->get($sString));
 }
 
 /**
- * @param string $sTpl
- * @param array  $aData
- *
- * @return string
- */
+* @param string $sTpl
+* @param array  $aData
+*
+* @return string
+*/
 function subRender($sTpl, $aData = array())
 {
     return CTX()->View->subRender($sTpl, $aData);
 }
 
 /**
- * @return \{{{NS}}}\System\Model\Factory_Base
- */
+* @return \{{{NS}}}\System\Model\Factory_Base
+*/
 function MF()
 {
     return CTX()->ModelFactory;

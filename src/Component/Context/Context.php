@@ -68,7 +68,7 @@ class Context
      */
     public function get($sVarName)
     {
-        return isset($this->__aVarKey__[$sVarName]) ? $this->__aVarKey__[$sVarName] : null;
+        return isset($this->__aVarKey__[$sVarName]) ? $this->$sVarName : null;
     }
 
     /**

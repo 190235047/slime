@@ -9,6 +9,9 @@ if (!extension_loaded('curl')) {
 
 class HttpCall
 {
+    public static $DEFAULT_TIMEOUT_MS = 3000;
+    public static $DEFAULT_CONNECT_TIMEOUT_MS = 3000;
+
     public static function callGET(
         $sUrl,
         array $naParam = null,
@@ -70,19 +73,14 @@ class HttpCall
         //@todo;
     }
 
-    public function __construct($sUrl, $naOptKV)
+    public static function call($sUrl, $naOptKV = null)
     {
-        ;
-    }
-    public function call($sUrl, $naOptKV = null)
-    {
-        Event::occurEvent(Event_Register::E_CALL_BEFORE, $this, $sUrl, $naOptKV);
         # init
         $rCurl = curl_init($sUrl);
         curl_setopt($rCurl, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($rCurl, CURLOPT_HEADER, 1);
 
-        # set header
+        # preset opt header
         if (!empty($aHeader)) {
             $aTidyHeader = array();
             foreach ($aHeader as $sK => $sV) {
@@ -91,7 +89,7 @@ class HttpCall
             curl_setopt($rCurl, CURLOPT_HTTPHEADER, $aTidyHeader);
         }
 
-        #set opt
+        # preset opt https
         if (substr($sUrl, 0, 8) === 'https://') {
             if (!isset($nsOptKV[CURLOPT_SSL_VERIFYHOST])) {
                 curl_setopt($rCurl, CURLOPT_SSL_VERIFYHOST, 1);
@@ -101,13 +99,23 @@ class HttpCall
             }
         }
 
+        # preset opt timeout
+        if (!isset($naOptKV[CURLOPT_TIMEOUT]) && !isset($naOptKV[CURLOPT_TIMEOUT_MS]) && self::$DEFAULT_TIMEOUT_MS!==null) {
+            $naOptKV[CURLOPT_TIMEOUT_MS] = self::$DEFAULT_TIMEOUT_MS;
+        }
+        if (!isset($naOptKV[CURLOPT_CONNECTTIMEOUT]) && !isset($naOptKV[CURLOPT_CONNECTTIMEOUT_MS]) && self::$DEFAULT_CONNECT_TIMEOUT_MS!==null) {
+            $naOptKV[CURLOPT_TIMEOUT_MS] = self::$DEFAULT_CONNECT_TIMEOUT_MS;
+        }
+
+        # set opt
         if (!empty($naOptKV)) {
             curl_setopt_array($rCurl, $naOptKV);
         }
 
         # run
+        Event::occurEvent(Event_Register::E_CALL_BEFORE, $sUrl, $naOptKV);
         $mRS = curl_exec($rCurl);
-        Event::occurEvent(Event_Register::E_CALL_AFTER, $mRS, $this, $sUrl, $naOptKV);
+        Event::occurEvent(Event_Register::E_CALL_AFTER, $mRS, $sUrl, $naOptKV);
 
         # return
         return $mRS;

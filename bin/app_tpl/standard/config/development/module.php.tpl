@@ -24,6 +24,11 @@ return array(
         'run_mode' => 'http'
     ),
     array(
+        'module' => 'Event',
+        'class'  => 'Slime\\Component\\Context\\Event',
+        'params' => array()
+    ),
+    array(
         'module' => 'View',
         'class'  => 'Slime\\Component\\View\\Adaptor_PHP',
         'params' => array(DIR_VIEW)

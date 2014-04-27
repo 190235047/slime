@@ -17,7 +17,7 @@ class Event_Register
     const E_ALL_AFTER  = 'Slime.Component.Memcached.PHPMemcached.__All__:after';
     const GV_TIME_PAST = 'Slime.Component.Memcached.EventRegister:time';
 
-    public static function register_All_Before()
+    public static function register_ALL()
     {
         Event::regEvent(
             self::E_ALL_BEFORE,

@@ -106,7 +106,6 @@ class Bootstrap
         }
     }
 
-
     /**
      * @var \Slime\Bundle\Framework\Context
      */
@@ -215,6 +214,6 @@ class Bootstrap
             call_user_func(self::$mCBUncaughtException, $E);
             exit(1);
         }
-        $Log->info('RUN_END : ' . microtime(true) - $fT1);
+        $Log->info('RUN_END : ' . round(microtime(true) - $fT1, 6));
     }
 }

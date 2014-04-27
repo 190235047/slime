@@ -4,7 +4,8 @@ namespace {{{NS}}};
 use Slime\Bundle\Framework\Bootstrap;
 use Slime\Component\Config\Configure;
 
-require __DIR__ . '/_common.php';
+date_default_timezone_set('{{{TIME_ZONE}}}');
+require __DIR__ . '/../vendor/autoload.php';
 
 Bootstrap::setHandle();
 $B = new Bootstrap(
@@ -16,5 +17,7 @@ $B = new Bootstrap(
     'development'
 );
 Bootstrap::setDefaultErrorPage();
+
+require __DIR__ . '/__init__.php';
 
 $B->run();
