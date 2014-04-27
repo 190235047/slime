@@ -1,20 +1,9 @@
 <?php
-if (!defined('DIR_PUBLIC')) {
-    define('DIR_PUBLIC', __DIR__);
-    define('DIR_BASE', dirname(DIR_PUBLIC));
-    define('DIR_CONFIG', DIR_BASE . '/config');
-    define('DIR_LANGUAGE', DIR_BASE . '/language');
-    define('DIR_VIEW', DIR_BASE . '/view');
-    define('DIR_CLASS', DIR_BASE . '/class');
-}
-
-
 // event register
 \Slime\Component\View\Event_Register::register_renderAsResult();
 \Slime\Component\Http\Event_Register::register_Call();
 #\Slime\Component\Memcached\Event_Register::register_ALL();
 #\Slime\Component\Redis\Event_Register::register_ALL();
-
 
 //function alias
 /**
