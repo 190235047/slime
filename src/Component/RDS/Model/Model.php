@@ -184,7 +184,7 @@ class Model
         $iLimit = null,
         $iOffset = null,
         $sTable = null,
-        $sSelect = ''
+        $sSelect = null
     ) {
         $sAttr = '';
         $sOrderBy !== null && $sAttr .= " ORDER BY $sOrderBy";

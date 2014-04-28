@@ -52,16 +52,16 @@ class Writer_WebPage implements IWriter
         if ($this->sDebugLayer === null) {
             $sLi       = $sUl = '';
             $aTidyData = array();
-            $iAllLevel = 0;
+            $iMaxLevel = 0;
             foreach ($this->aData as $aRow) {
-                $iAllLevel                    = $iAllLevel | $aRow['iLevel'];
+                $iMaxLevel                    = max($iMaxLevel, $aRow['iLevel']);
                 $aTidyData[$aRow['iLevel']][] = $aRow;
             }
             $bAutoOpen = false;
-            if ($iAllLevel <= Logger::LEVEL_INFO) {
+            if ($iMaxLevel <= Logger::LEVEL_INFO) {
                 $sColor    = 'green';
                 $bAutoOpen = false;
-            } elseif ($iAllLevel <= Logger::LEVEL_WARNING) {
+            } elseif ($iMaxLevel <= Logger::LEVEL_WARNING) {
                 $sColor = 'orange';
             } else {
                 $sColor = 'red';
