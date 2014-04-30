@@ -87,7 +87,7 @@ class ModelPagination
         $iNumberPerPage = null,
         $mPageGetCBOrPageVar = null,
         $mRenderCB = null,
-        $iTotal = null
+        &$iTotal = null
     ) {
         return $this->getListFromCB(
             array($Model, 'findCount'),

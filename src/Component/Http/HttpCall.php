@@ -78,7 +78,6 @@ class HttpCall
         # init
         $rCurl = curl_init($sUrl);
         curl_setopt($rCurl, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($rCurl, CURLOPT_HEADER, 1);
 
         # preset opt header
         if (!empty($aHeader)) {
