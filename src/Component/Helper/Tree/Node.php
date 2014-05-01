@@ -95,7 +95,11 @@ class Node
         $this->updateLevel($this, $iLevel);
     }
 
-    private function updateLevel(Node $Node, $iLevel)
+    /**
+     * @param Node $Node
+     * @param int  $iLevel
+     */
+    private function updateLevel($Node, $iLevel)
     {
         if (isset($this->Pool->aaPoolLevel[$Node->iLevel][$Node->sKey])) {
             unset($this->Pool->aaPoolLevel[$Node->iLevel][$Node->sKey]);
@@ -150,7 +154,12 @@ class Node
         return $sStr;
     }
 
-    private function __treeString(Node $Node, $iIndent, &$sStr)
+    /**
+     * @param Node   $Node
+     * @param int    $iIndent
+     * @param string $sStr
+     */
+    private function __treeString($Node, $iIndent, &$sStr)
     {
         $sStr .= '|' . str_repeat('----', $iIndent) . '[' . get_class($Node) . ']' . (string)$Node . PHP_EOL;
         if (!empty($Node->aChildren)) {

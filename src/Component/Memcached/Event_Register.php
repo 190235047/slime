@@ -21,14 +21,14 @@ class Event_Register
     {
         Event::regEvent(
             self::E_ALL_BEFORE,
-            function (PHPMemcached $MC, $sMethodName, $aArgv) {
+            function ($MC, $sMethodName, $aArgv) {
                 Context::getInst()->Arr[self::GV_TIME_PAST] = microtime(true);
             }
         );
 
         Event::regEvent(
             self::E_ALL_AFTER,
-            function ($mResult, PHPMemcached $MC, $sMethodName, $aArgv) {
+            function ($mResult, $MC, $sMethodName, $aArgv) {
                 $Log = Context::getInst()->Log;
                 if ($Log->needLog(Logger::LEVEL_INFO)) {
                     $Log->info(

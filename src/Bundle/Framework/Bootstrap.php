@@ -67,6 +67,7 @@ class Bootstrap
         if ($C === null || !$C->isRegistered('Log')) {
             trigger_error($sStr, E_USER_ERROR);
         } else {
+            $C->Log->error($E->getMessage());
             if ($C->sRunMode === 'http') {
                 if ($C->HttpResponse->getResponseCode() < 400) {
                     $C->HttpResponse->setResponseCode(500);
@@ -76,8 +77,6 @@ class Bootstrap
                 }
                 $C->HttpResponse->send();
             }
-
-            $C->Log->error($E->getMessage());
         }
         exit(1);
     }

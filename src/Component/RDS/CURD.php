@@ -56,7 +56,7 @@ class CURD
         if (!$this->Instance ||
             (
                 ($bCheckConnect || $this->bCheckConnect) &&
-                ($this->Instance->getAttribute(\PDO::ATTR_SERVER_INFO) === null)
+                (!$this->Instance->getAttribute(\PDO::ATTR_SERVER_INFO))
             )
         ) {
             $this->Instance = new Packer(
