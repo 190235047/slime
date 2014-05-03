@@ -2,7 +2,7 @@
 namespace Slime\Component\Helper;
 
 /**
- * Class ArrXMLConvert
+ * Class EasyXML
  *
  * @package Slime\Component\Helper
  * @author  smallslime@gmail.com
