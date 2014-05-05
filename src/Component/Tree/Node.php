@@ -10,16 +10,16 @@ namespace Slime\Component\Tree;
  * @example
  *
     $Root = new Node('root');
-    $L1_L1 = new Node('left_1');
-    $L1_L2 = new Node('left_2');
-    $L1_R1 = new Node('right_1');
+    $N1 = new Node('music');
+    $N2 = new Node('video');
+    $N3 = new Node('book');
 
-    $L2_L2_A = new Node('l2l2A');
-    $L2_L2_A->addAsChild($L1_L2);
+    $N1_1 = new Node('R&B');
+    $N2_1->appendTo($N1);
 
-    $L1_L1->addAsChild($Root);
-    $L1_L2->addAsChild($Root);
-    $L1_R1->addAsChild($Root);
+    $N1->appendTo($Root);
+    $N2->appendTo($Root);
+    $N3->appendTo($Root);
 
     foreach ($Root as $iLevel => $mV) {
         var_dump($iLevel, $mV);
@@ -37,6 +37,10 @@ class Node implements \IteratorAggregate
 
     protected $mValue;
 
+    /**
+     * @param mixed   $mValue
+     * @param null | Node $Parent
+     */
     public function __construct($mValue, $Parent = null) {
         $this->mValue = $mValue;
         $this->Parent = $Parent;
@@ -47,27 +51,44 @@ class Node implements \IteratorAggregate
         $this->aChildren[] = $ChildNode;
     }
 
-    public function addAsChild(Node $ParentNode)
+    /**
+     * @param Node $ParentNode
+     */
+    public function appendTo(Node $ParentNode)
     {
         $this->Parent = $ParentNode;
         $ParentNode->_addChild($this);
     }
 
+    /**
+     * @return mixed
+     */
     public function getValue()
     {
         return $this->mValue;
     }
 
+    /**
+     * @return Node[]
+     */
     public function getChildren()
     {
         return $this->aChildren;
     }
 
+    /**
+     * @param int $i
+     *
+     * @return null|Node
+     */
     public function getChild($i)
     {
         return isset($this->aChildren[$i]) ? $this->aChildren[$i] : null;
     }
 
+    /**
+     * @return Node[]
+     */
     public function getBrother()
     {
         $aArr = $this->getParent()->getChildren();
@@ -79,11 +100,19 @@ class Node implements \IteratorAggregate
         return $aArr;
     }
 
+    /**
+     * @return null|Node
+     */
     public function getParent()
     {
         return $this->Parent;
     }
 
+    /**
+     * @param int $iMax
+     *
+     * @return null|Node
+     */
     public function getForbear($iMax = 0)
     {
         if ($iMax <= 0) {
@@ -108,6 +137,9 @@ class Node implements \IteratorAggregate
         return $P;
     }
 
+    /**
+     * @return int
+     */
     public function getHeight()
     {
         $i = -1;

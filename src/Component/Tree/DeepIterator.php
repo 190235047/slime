@@ -4,12 +4,12 @@ namespace Slime\Component\Tree;
 class DeepIterator implements \Iterator
 {
     protected $aMap = array();
-    protected $iCurLevel = 0;
+    protected $iCurHeight = 0;
 
     public function __construct(Node $TreeNode)
     {
         $PreNode = new Node(true);
-        $TreeNode->addAsChild($PreNode);
+        $TreeNode->appendTo($PreNode);
 
         $this->BaseNode    = $TreeNode;
         $this->CurrentNode = $TreeNode;
@@ -48,13 +48,13 @@ class DeepIterator implements \Iterator
             $sPHash = spl_object_hash($P);
             $iIndex = $this->aMap[$sPHash] + 1;
             if (($CurNode = $P->getChild($iIndex)) !== null) {
-                $this->iCurLevel++;
+                $this->iCurHeight++;
                 $this->CurrentNode   = $CurNode;
                 $this->aMap[$sPHash] = $iIndex;
                 break;
             }
 
-            $this->iCurLevel--;
+            $this->iCurHeight--;
             $P = $P->getParent();
         } while (true);
     }
@@ -68,7 +68,7 @@ class DeepIterator implements \Iterator
      */
     public function key()
     {
-        return $this->iCurLevel;
+        return $this->iCurHeight;
     }
 
     /**

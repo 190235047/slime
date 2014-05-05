@@ -51,7 +51,7 @@ class I18N
         return new self($sLanguageBaseDir, $sLanguage, $sDefaultLanguageDir);
     }
 
-    public function __construct($sLanguageBaseDir, $sLanguage, $sDefaultLanguageDir)
+    public function __construct($sLanguageBaseDir, $sLanguage, $sDefaultLanguageDir, $sConfigAdaptor = '@PHP')
     {
         $sCurrentLanguageDir = null;
         foreach (self::$aLangMapDir as $sK => $sV) {
@@ -61,10 +61,11 @@ class I18N
             }
         }
 
-        $this->Configure = new Config\Adaptor_PHP(
+        $this->Configure = Config\Configure::factory($sConfigAdaptor,
             $sLanguageBaseDir . DIRECTORY_SEPARATOR . $sCurrentLanguageDir,
             $sLanguageBaseDir . DIRECTORY_SEPARATOR . $sDefaultLanguageDir
         );
+
         $this->Configure->setParseMode(false);
     }
 
