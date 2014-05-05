@@ -267,6 +267,7 @@ class CURD
                     if (empty($mV)) {
                         $aWhereBuild[] = '1';
                     } else {
+                        $mV = array_unique($mV);
                         $aWhereBuild[] = sprintf(
                             "$sKey $sOP (%s)",
                             implode(',', array_fill(0, count($mV), '?'))
