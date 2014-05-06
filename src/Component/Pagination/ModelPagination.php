@@ -160,7 +160,7 @@ class ModelPagination
         }
 
         $sURI             = strstr($HttpRequest->getRequestURI(), '?', true);
-        $aGet              = $HttpRequest->BagGET->aData;
+        $aGet             = $HttpRequest->BagGET->aData;
         $sPage            = '<div class="pagination">';
         $aResult['first'] = 1;
         foreach (
@@ -175,7 +175,7 @@ class ModelPagination
             $sPage .= "<span class=\"page-$sK\">";
             if ($sK === 'list') {
                 foreach ($aResult[$sK] as $iPage) {
-                    $aGet['page']      = $iPage;
+                    $aGet['page'] = $iPage;
                     $sPage .= $iPage < 0 ?
                         sprintf('<span>%s</span>', 0 - $iPage) :
                         sprintf(
@@ -186,7 +186,8 @@ class ModelPagination
                         );
                 }
             } else {
-                $iPage = $aResult[$sK];
+                $iPage        = $aResult[$sK];
+                $aGet['page'] = abs($iPage);
                 $sPage .= $iPage <= 0 ?
                     $sV :
                     sprintf(
