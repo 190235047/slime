@@ -8,6 +8,10 @@ use Slime\Component\Helper\Sugar;
  *
  * @package Slime\Component\Log
  * @author  smallslime@gmail.com
+ *
+ * @property-read IWriter[] $aWriter
+ * @property-read int       $iLogLevel
+ * @property-read string    $sGUID
  */
 class Logger implements LoggerInterface
 {
@@ -51,32 +55,29 @@ class Logger implements LoggerInterface
         $iLogLevel = self::LEVEL_ALL,
         $sRequestID = null
     ) {
-        $this->aWriter   = self::createWriter($aWriterConf);
+        foreach ($aWriterConf as $sK => $aClassAndArgs) {
+            $this->aWriter[$sK] = Sugar::createObjAdaptor(__NAMESPACE__, $aClassAndArgs, 'IWriter', 'Writer_');
+        }
         $this->iLogLevel = $iLogLevel;
         $this->sGUID     = $sRequestID ? $sRequestID : md5(uniqid(__CLASS__, true));
     }
 
     /**
-     * @param $aWriterConf ['@File' => ['param1', 'param2'], '@FirePHP']
-     *
-     * @return IWriter[]
+     * @param string       $sK
+     * @param null | array $aClassAndArgs
+     * @param bool         $bOnlyAdd
      */
-    public static function createWriter($aWriterConf)
+    public function setWriter($sK, $aClassAndArgs = null, $bOnlyAdd = false)
     {
-        $aWriter = array();
-        foreach ($aWriterConf as $sK => $mParam) {
-            $aClassAndArgs = array();
-            if (is_int($sK)) {
-                $aClassAndArgs[] = (string)$mParam;
-            } else {
-                $aClassAndArgs[] = $sK;
-                if (!empty($mParam) && is_array($mParam)) {
-                    $aClassAndArgs = array_merge($aClassAndArgs, $mParam);
-                }
+        if ($aClassAndArgs === null) {
+            if (isset($this->aWriter[$sK])) {
+                unset($this->aWriter[$sK]);
             }
-            $aWriter[] = Sugar::createObjAdaptor(__NAMESPACE__, $aClassAndArgs, 'IWriter', 'Writer_');
+        } else {
+            if (!$bOnlyAdd || !isset($this->aWriter[$sK])) {
+                $this->aWriter[$sK] = Sugar::createObjAdaptor(__NAMESPACE__, $aClassAndArgs, 'IWriter', 'Writer_');;
+            }
         }
-        return $aWriter;
     }
 
     /**
@@ -201,7 +202,7 @@ class Logger implements LoggerInterface
      */
     public function log($iLevel, $sMessage, array $aContext = array())
     {
-        if (!($iLevel & $this->iLogLevel)) {
+        if (!($iLevel & $this->iLogLevel) || empty($this->aWriter)) {
             return;
         }
 

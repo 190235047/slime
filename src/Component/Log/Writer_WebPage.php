@@ -11,7 +11,6 @@ use Slime\Bundle\Framework\Context;
  */
 class Writer_WebPage implements IWriter
 {
-    public $sDebugLayer;
     protected $aData = array();
     protected $bDisabled = false;
 

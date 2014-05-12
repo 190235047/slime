@@ -8,7 +8,7 @@ use {{{NS}}}\System\Model\Model_Base;
  *
  * @package {{{NS}}}\Model
  *
- * @method Item_User createItem() createItem(array $aData)
+ * @method Item_User createItem() createItem(array $aData = array())
  * @method Item_User find() find(mixed $mPKOrWhere)
  * @method Item_User[] | \Slime\Component\RDS\Model\Group findMulti() findMulti(array $aWhere = array(), string $sOrderBy = null, int $iLimit = null, int $iOffset = null, string $sTable = null, string $sSelect = null)
  */

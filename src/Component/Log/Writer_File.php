@@ -9,64 +9,42 @@ namespace Slime\Component\Log;
  */
 class Writer_File implements IWriter
 {
-    public $sFormat = '[:iLevel] : :sTime ; :sGuid ; :sMessage';
-
-    protected $aData;
-    protected $iNumber;
-
     public function __construct(
-        $sFilePathFormat,
-        $iBuffer = 50,
-        $aLevelMap = array(
+        $sFileFormat,
+        $nsContentFormat = null,
+        $naLevelMap = null,
+        $aVarMap = null
+    ) {
+        $this->sFileFormat    = $sFileFormat;
+        $this->sContentFormat = $nsContentFormat === null ? '[{iLevel}] : {sTime} ; {sGuid} ; {sMessage}' : (string)$nsContentFormat;
+        $this->aVarMap        = $aVarMap === null ? array('{date}' => date('Y-m-d')) : (array)$aVarMap;
+        $this->aLevelMap      = $naLevelMap === null ? array(
             Logger::LEVEL_DEBUG => 'access',
             Logger::LEVEL_INFO  => 'access',
             -1                  => 'error'
-        ),
-        $mCBPath = null
-    )
-    {
-        $this->sFilePathFormat = $sFilePathFormat;
-        $this->iBuffer         = $iBuffer;
-        $this->aLevelMap       = $aLevelMap;
-        $this->mCBPath         = $mCBPath;
+        ) : (array)$naLevelMap;
     }
 
     public function acceptData($aRow)
     {
-        $sFilePath = $this->mCBPath === null ?
-            sprintf(
-                $this->sFilePathFormat,
-                date('Y-m-d'),
-                (isset($this->aLevelMap[$aRow['iLevel']]) ? $this->aLevelMap[$aRow['iLevel']] : $this->aLevelMap[-1])
-            ) :
-            call_user_func($this->mCBPath, $this->sFilePathFormat, $this->aLevelMap, $aRow);
+        $aVarMap = array();
+        if (!isset($this->aVarMap['{level}'])) {
+            $aVarMap['{level}'] = isset($this->aLevelMap[$aRow['iLevel']]) ?
+                $this->aLevelMap[$aRow['iLevel']] :
+                $this->aLevelMap[-1];
+        }
+        if (!isset($this->aVarMap['{date}'])) {
+            $aVarMap['{date}'] = date('Y-m-d');
+        }
+        $aVarMap   = array_merge($aVarMap, $this->aVarMap);
+        $sFilePath = str_replace(array_keys($aVarMap), array_values($aVarMap), $this->sFileFormat);
 
-        $this->aData[$sFilePath][] = str_replace(
-                array(':sTime', ':iLevel', ':sMessage', ':sGuid'),
+        $sStr = str_replace(
+                array('{sTime}', '{iLevel}', '{sMessage}', '{sGuid}'),
                 array($aRow['sTime'], Logger::getLevelString($aRow['iLevel']), $aRow['sMessage'], $aRow['sGuid']),
-                $this->sFormat
+                $this->sContentFormat
             ) . PHP_EOL;
-        $this->iNumber++;
 
-        if ($this->iNumber >= $this->iBuffer) {
-            $this->flush2File();
-        }
-    }
-
-    public function flush2File()
-    {
-        foreach ($this->aData as $sFilePath => $aData) {
-            file_put_contents($sFilePath, implode(PHP_EOL, $aData) . PHP_EOL, FILE_APPEND);
-            $this->aData[$sFilePath] = array();
-        }
-
-        $this->iNumber = 0;
-    }
-
-    public function __destruct()
-    {
-        if ($this->iNumber > 0) {
-            $this->flush2File();
-        }
+        file_put_contents($sFilePath, implode(PHP_EOL, $sStr) . PHP_EOL, FILE_APPEND);
     }
 }
