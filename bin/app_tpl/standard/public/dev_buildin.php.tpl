@@ -1,4 +1,5 @@
 <?php
+//cd xxxx && php -S 0.0.0.0:80 dev_buildin.php 2>&1 > /dev/null &
 $sRequestFile = __DIR__ . $_SERVER['REQUEST_URI'];
 if (is_file($sRequestFile) && file_exists($sRequestFile)) {
     $aBlock = parse_url($_SERVER['REQUEST_URI']);
