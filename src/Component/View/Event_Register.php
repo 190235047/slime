@@ -24,7 +24,7 @@ class Event_Register
                 $Log = Context::getInst()->Log;
                 if ($Log->needLog(Logger::LEVEL_DEBUG)) {
                     $Log->debug(
-                        'TPL : {path}',
+                        '[TPL] : {path}',
                         array('path' => $View->getBaseDir() . DIRECTORY_SEPARATOR . $View->getTpl())
                     );
                 }

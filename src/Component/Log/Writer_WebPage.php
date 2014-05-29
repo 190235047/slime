@@ -16,9 +16,7 @@ class Writer_WebPage implements IWriter
 
     public function __construct($sDebugLayer = null)
     {
-        if ($sDebugLayer !== null) {
-            $this->sDebugLayer = $sDebugLayer;
-        }
+        $this->sDebugLayer = $sDebugLayer;
     }
 
     public function setDisable()

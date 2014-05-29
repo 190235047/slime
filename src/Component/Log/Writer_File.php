@@ -45,6 +45,6 @@ class Writer_File implements IWriter
                 $this->sContentFormat
             ) . PHP_EOL;
 
-        file_put_contents($sFilePath, implode(PHP_EOL, $sStr) . PHP_EOL, FILE_APPEND);
+        file_put_contents($sFilePath, $sStr, FILE_APPEND);
     }
 }
