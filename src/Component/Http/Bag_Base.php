@@ -13,17 +13,19 @@ class Bag_Base implements \ArrayAccess, \Countable
 {
     public $aData;
 
-    protected $bXSSEnable;
-
-    public function __construct(array $aData, &$bXSSEnable = false)
+    public function __construct(array $aData)
     {
-        $this->aData      = $aData;
-        $this->bXSSEnable = $bXSSEnable;
+        $this->aData = $aData;
     }
 
     public function __get($sKey)
     {
         return $this->offsetGet($sKey);
+    }
+
+    public function preDeal($mCB)
+    {
+        $this->aData = call_user_func($mCB, $this->aData);
     }
 
     public function set($saKeyOrKVMap, $nsValue = null, $bOverwriteIfExist = true)
@@ -67,12 +69,7 @@ class Bag_Base implements \ArrayAccess, \Countable
      */
     public function offsetGet($offset)
     {
-        return isset($this->aData[$offset]) ?
-            (
-                $this->bXSSEnable ?
-                    Helper_XSS::getInst()->clean($this->aData[$offset]) :
-                    $this->aData[$offset]
-            ) : null;
+        return isset($this->aData[$offset]) ? $this->aData[$offset] : null;
     }
 
     /**

@@ -11,14 +11,9 @@ class Bag_Param extends Bag_Base
     public function find($saKeyOrKeys)
     {
         if (is_array($saKeyOrKeys)) {
-            $aResult = array_intersect_key($this->aData, array_flip($saKeyOrKeys));
-            return $this->bXSSEnable ? Helper_XSS::getInst()->clean($aResult) : $aResult;
+            return array_intersect_key($this->aData, array_flip($saKeyOrKeys));
         } else {
-            return isset($this->aData[$saKeyOrKeys]) ?
-                ($this->bXSSEnable ?
-                    Helper_XSS::getInst()->clean($this->aData[$saKeyOrKeys]) :
-                    $this->aData[$saKeyOrKeys]
-                ) : null;
+            return isset($this->aData[$saKeyOrKeys]) ? $this->aData[$saKeyOrKeys] : null;
         }
     }
 }

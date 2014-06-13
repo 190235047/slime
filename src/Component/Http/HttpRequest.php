@@ -26,32 +26,12 @@ class HttpRequest
         $aFILE = null,
         $aREQUEST = null
     ) {
-        $this->aSERVER   = empty($aSERVER) ? $_SERVER : $aSERVER;
-        $this->BagGET    = new Bag_Param(empty($aGET) ? $_GET : $aGET, $this->bEnable);
-        $this->BagPOST   = new Bag_Param(empty($aPOST) ? $_POST : $aPOST, $this->bEnable);
-        $this->BagCOOKIE = new Bag_Param(empty($aCOOKIE) ? $_COOKIE : $aCOOKIE, $this->bEnable);
-        $this->BagFILE   = new Bag_File(empty($aFILE) ? $_FILES : $aFILE, $this->bEnable);
-        $this->BagGP     = new Bag_Param(empty($aREQUEST) ? $_REQUEST : $aREQUEST, $this->bEnable);
-    }
-
-    private $bEnable;
-    private $bTmpEnable;
-
-    public function setXSSEnable($bEnable = true)
-    {
-        $this->bEnable = $bEnable;
-    }
-
-    public function setTmpXSSEnable($bEnable = true)
-    {
-        $this->bTmpEnable = $bEnable;
-        $this->bEnable    = $bEnable;
-    }
-
-    public function resetXSSStatus()
-    {
-        $this->bEnable    = $this->bTmpEnable;
-        $this->bTmpEnable = null;
+        $this->aSERVER    = empty($aSERVER) ? $_SERVER : $aSERVER;
+        $this->BagGET     = new Bag_Param(empty($aGET) ? $_GET : $aGET);
+        $this->BagPOST    = new Bag_Param(empty($aPOST) ? $_POST : $aPOST);
+        $this->BagCOOKIE  = new Bag_Param(empty($aCOOKIE) ? $_COOKIE : $aCOOKIE);
+        $this->BagFILE    = new Bag_File(empty($aFILE) ? $_FILES : $aFILE);
+        $this->BagGP      = new Bag_Param(empty($aREQUEST) ? $_REQUEST : $aREQUEST);
     }
 
     public function __get($sKey)

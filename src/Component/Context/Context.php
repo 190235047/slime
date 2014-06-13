@@ -53,12 +53,24 @@ class Context
 
     /**
      * @param string $sVarName
+     * @param bool   $bAttemptAutoload
      *
      * @return bool
      */
-    public function isRegistered($sVarName)
+    public function isRegistered($sVarName, $bAttemptAutoload = false)
     {
-        return isset($this->__aVarKey__[$sVarName]);
+        if ($bAttemptAutoload) {
+            if (!isset($this->__aVarKey__[$sVarName])) {
+                try {
+                    $this->$sVarName;
+                } catch (\DomainException $E) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            return isset($this->__aVarKey__[$sVarName]);
+        }
     }
 
     /**

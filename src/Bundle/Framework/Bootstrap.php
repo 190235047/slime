@@ -64,7 +64,7 @@ class Bootstrap
         $sStr = $E->getMessage();
         # 在某些对象的析构函数中使用了Context, 而对象在脚本执行完成时进入回收阶段, 才调用对象的析构.
         # 此时 Context 可能已经销毁, 所以会拿不到 Context. 尽量避免!
-        if ($C === null || !$C->isRegistered('Log')) {
+        if ($C === null || !$C->isRegistered('Log', true)) {
             trigger_error($sStr, E_USER_ERROR);
         } else {
             $C->Log->error($E->getMessage());
@@ -72,7 +72,7 @@ class Bootstrap
                 if ($C->HttpResponse->getResponseCode() < 400) {
                     $C->HttpResponse->setResponseCode(500);
                 }
-                if ($C->isRegistered('mCBErrPage')) {
+                if ($C->isRegistered('mCBErrPage', true)) {
                     call_user_func($C->mCBErrPage, $E);
                 }
                 $C->HttpResponse->send();
@@ -88,7 +88,7 @@ class Bootstrap
         $C = Context::getInst();
         # 在某些对象的析构函数中使用了Context, 而对象在脚本执行完成时进入回收阶段, 才调用对象的析构.
         # 此时 Context 可能已经销毁, 所以会拿不到 Context. 尽量避免!
-        if ($C === null || !$C->isRegistered('Log')) {
+        if ($C === null || !$C->isRegistered('Log', true)) {
             trigger_error($sStr, E_USER_WARNING);
         } else {
             switch ($iErrNum) {
@@ -189,6 +189,7 @@ class Bootstrap
                 case 'cli':
                     # add log
                     $Log->info('RUN_START');
+
                     $aCallBack = $C->Route->generateFromCli(
                         $C->aArgv,
                         $C->Config->get($sRouteKey === null ? 'route.cli' : $sRouteKey),

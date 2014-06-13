@@ -9,15 +9,6 @@ namespace Slime\Component\Http;
  */
 class Helper_XSS
 {
-    private static $Inst = null;
-    public static function getInst()
-    {
-        if (self::$Inst === null) {
-            self::$Inst = new self();
-        }
-        return self::$Inst;
-    }
-
     /**
      * Random Hash for protecting URLs
      *
@@ -67,17 +58,6 @@ class Helper_XSS
     public function __construct($charset = 'UTF-8')
     {
         $this->charset = $charset;
-    }
-
-    public function getCharset()
-    {
-        return $this->charset;
-    }
-
-    public function setCharset($charset)
-    {
-        $this->charset = $charset;
-        return $this;
     }
 
     /**

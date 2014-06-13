@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\Http;
+namespace Slime\Component\Http\Call;
 
 use Slime\Bundle\Framework\Context;
 use Slime\Component\Context\Event;
