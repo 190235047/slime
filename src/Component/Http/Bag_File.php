@@ -30,7 +30,7 @@ class Bag_File extends Bag_Base
 
         $aResult = array();
         foreach ($aData as $sName => $aItem) {
-            $sFileName     = $mCBGentFileName === null ? md5(uniqid('', true)) : call_user_func(
+            $sFileName   = $mCBGentFileName === null ? md5(uniqid('', true)) : call_user_func(
                 $mCBGentFileName,
                 $aItem,
                 $sName
@@ -46,10 +46,10 @@ class Bag_File extends Bag_Base
                 $aResult[$sName] = array('error' => $aItem['error']);
             } else {
                 $aResult[$sName] = array(
-                    'error'         => 0,
-                    'type'          => $aItem['type'],
-                    'size'          => $aItem['size'],
-                    'file_path'     => $sFilePath
+                    'error'     => 0,
+                    'type'      => $aItem['type'],
+                    'size'      => $aItem['size'],
+                    'file_path' => $sFilePath
                 );
             }
         }

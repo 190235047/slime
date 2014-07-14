@@ -26,12 +26,28 @@ class HttpRequest
         $aFILE = null,
         $aREQUEST = null
     ) {
+        $XssStatus        = new \stdClass();
+        $XssStatus->value = false;
+        $this->XssStatus  = $XssStatus;
         $this->aSERVER    = empty($aSERVER) ? $_SERVER : $aSERVER;
-        $this->BagGET     = new Bag_Param(empty($aGET) ? $_GET : $aGET);
-        $this->BagPOST    = new Bag_Param(empty($aPOST) ? $_POST : $aPOST);
-        $this->BagCOOKIE  = new Bag_Param(empty($aCOOKIE) ? $_COOKIE : $aCOOKIE);
-        $this->BagFILE    = new Bag_File(empty($aFILE) ? $_FILES : $aFILE);
-        $this->BagGP      = new Bag_Param(empty($aREQUEST) ? $_REQUEST : $aREQUEST);
+        $this->BagGET     = new Bag_Param(empty($aGET) ? $_GET : $aGET, $XssStatus);
+        $this->BagPOST    = new Bag_Param(empty($aPOST) ? $_POST : $aPOST, $XssStatus);
+        $this->BagCOOKIE  = new Bag_Param(empty($aCOOKIE) ? $_COOKIE : $aCOOKIE, $XssStatus);
+        $this->BagFILE    = new Bag_File(empty($aFILE) ? $_FILES : $aFILE, $XssStatus);
+        $this->BagGP      = new Bag_Param(empty($aREQUEST) ? $_REQUEST : $aREQUEST, $XssStatus);
+    }
+
+    private $XssStatus;
+
+    public function enableXSSFilter($sCharset = 'UTF-8')
+    {
+        $this->XssStatus->value = true;
+        $this->XssStatus->XSS   = new Helper_XSS($sCharset);
+    }
+
+    public function disableXSSFilter()
+    {
+        $this->XssStatus->value = false;
     }
 
     public function __get($sKey)

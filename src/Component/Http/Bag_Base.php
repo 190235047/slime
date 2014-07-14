@@ -12,20 +12,17 @@ namespace Slime\Component\Http;
 class Bag_Base implements \ArrayAccess, \Countable
 {
     public $aData;
+    protected $XssStatus;
 
-    public function __construct(array $aData)
+    public function __construct(array $aData, \stdClass $XSSEnable)
     {
-        $this->aData = $aData;
+        $this->aData     = $aData;
+        $this->XssStatus = $XSSEnable;
     }
 
     public function __get($sKey)
     {
         return $this->offsetGet($sKey);
-    }
-
-    public function preDeal($mCB)
-    {
-        $this->aData = call_user_func($mCB, $this->aData);
     }
 
     public function set($saKeyOrKVMap, $nsValue = null, $bOverwriteIfExist = true)
@@ -69,7 +66,12 @@ class Bag_Base implements \ArrayAccess, \Countable
      */
     public function offsetGet($offset)
     {
-        return isset($this->aData[$offset]) ? $this->aData[$offset] : null;
+        return isset($this->aData[$offset]) ?
+            (
+            $this->XssStatus->value ?
+                $this->XssStatus->XSS->clean($this->aData[$offset]) :
+                $this->aData[$offset]
+            ) : null;
     }
 
     /**

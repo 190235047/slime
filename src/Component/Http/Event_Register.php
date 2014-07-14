@@ -1,5 +1,5 @@
 <?php
-namespace Slime\Component\Http\Call;
+namespace Slime\Component\Http;
 
 use Slime\Bundle\Framework\Context;
 use Slime\Component\Context\Event;
@@ -34,8 +34,8 @@ class Event_Register
                     $Log->info(
                         '[HTTP] : {cost} ; {url}',
                         array(
-                            'cost'   => round(microtime(true) - Context::getInst()->Arr[self::GV_TIME_PAST], 4),
-                            'url'    => $sUrl,
+                            'cost' => round(microtime(true) - Context::getInst()->Arr[self::GV_TIME_PAST], 4),
+                            'url'  => $sUrl,
                         )
                     );
                 }

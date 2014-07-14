@@ -38,10 +38,11 @@ class Node implements \IteratorAggregate
     protected $mValue;
 
     /**
-     * @param mixed   $mValue
+     * @param mixed       $mValue
      * @param null | Node $Parent
      */
-    public function __construct($mValue, $Parent = null) {
+    public function __construct($mValue, $Parent = null)
+    {
         $this->mValue = $mValue;
         $this->Parent = $Parent;
     }
