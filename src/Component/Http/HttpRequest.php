@@ -38,13 +38,11 @@ class HttpRequest
     }
 
     private $XssStatus;
-
     public function enableXSSFilter($sCharset = 'UTF-8')
     {
         $this->XssStatus->value = true;
         $this->XssStatus->XSS   = new Helper_XSS($sCharset);
     }
-
     public function disableXSSFilter()
     {
         $this->XssStatus->value = false;

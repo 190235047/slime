@@ -60,6 +60,8 @@ class ModelPagination
             $List,
             $aWhere,
             $sOrderBy,
+            null,
+            null,
             $iNumberPerPage,
             $mPageGetCBOrPageVar,
             $mRenderCB,
@@ -72,10 +74,12 @@ class ModelPagination
      * @param mixed                            $List
      * @param array                            $aWhere
      * @param null | string                    $sOrderBy
+     * @param null | string                    $sTable
+     * @param null | string                    $sSelect
+     * @param mixed                            $iTotal
      * @param null | int                       $iNumberPerPage
      * @param null | mixed                     $mPageGetCBOrPageVar
      * @param null | mixed                     $mRenderCB
-     * @param mixed                            $iTotal
      *
      * @return mixed
      */
@@ -84,10 +88,12 @@ class ModelPagination
         &$List,
         $aWhere = array(),
         $sOrderBy = null,
+        $sTable = null,
+        $sSelect = null,
+        &$iTotal = null,
         $iNumberPerPage = null,
         $mPageGetCBOrPageVar = null,
-        $mRenderCB = null,
-        &$iTotal = null
+        $mRenderCB = null
     ) {
         return $this->getListFromCB(
             array($Model, 'findCount'),
@@ -95,10 +101,12 @@ class ModelPagination
             $List,
             $aWhere,
             $sOrderBy,
+            $sTable,
+            $sSelect,
+            $iTotal,
             $iNumberPerPage,
             $mPageGetCBOrPageVar,
-            $mRenderCB,
-            $iTotal
+            $mRenderCB
         );
     }
 
@@ -108,10 +116,12 @@ class ModelPagination
         &$List,
         $aWhere = array(),
         $sOrderBy = null,
+        $sTable = null,
+        $sSelect = null,
+        &$iToTal = null,
         $iNumberPerPage = null,
         $mPageGetCBOrPageVar = null,
-        $mRenderCB = null,
-        &$iToTal = null
+        $mRenderCB = null
     ) {
         # number per page
         $iNumberPerPage = max(1, $iNumberPerPage === null ? $this->iDefaultNumberPerPage : $iNumberPerPage);
@@ -125,7 +135,7 @@ class ModelPagination
             (int)call_user_func($mPageGetCBOrPageVar);
 
         # get total
-        $iTotalItem = call_user_func($mCountCB, $aWhere);
+        $iTotalItem = call_user_func($mCountCB, $aWhere, $sTable);
         $iToTal     = $iTotalItem;
 
         # get pagination data
@@ -133,7 +143,15 @@ class ModelPagination
         $aResult['total_item'] = $iTotalItem;
 
         # get list data
-        $List = call_user_func($mListCB, $aWhere, $sOrderBy, $iNumberPerPage, ($iCurrentPage - 1) * $iNumberPerPage);
+        $List = call_user_func(
+            $mListCB,
+            $aWhere,
+            $sOrderBy,
+            $iNumberPerPage,
+            ($iCurrentPage - 1) * $iNumberPerPage,
+            $sTable,
+            $sSelect
+        );
 
         # render pagination result
         if ($mRenderCB === null) {

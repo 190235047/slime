@@ -14,7 +14,11 @@ class Bag_Base implements \ArrayAccess, \Countable
     public $aData;
     protected $XssStatus;
 
-    public function __construct(array $aData, \stdClass $XSSEnable)
+    /**
+     * @param array            $aData
+     * @param \stdClass | null $XSSEnable
+     */
+    public function __construct(array $aData = array(), $XSSEnable = null)
     {
         $this->aData     = $aData;
         $this->XssStatus = $XSSEnable;
@@ -68,7 +72,7 @@ class Bag_Base implements \ArrayAccess, \Countable
     {
         return isset($this->aData[$offset]) ?
             (
-            $this->XssStatus->value ?
+            $this->XssStatus && $this->XssStatus->value ?
                 $this->XssStatus->XSS->clean($this->aData[$offset]) :
                 $this->aData[$offset]
             ) : null;

@@ -11,7 +11,7 @@ class HttpResponse
 {
     public function __construct()
     {
-        $this->BagHeader = new Bag_Base(array());
+        $this->BagHeader = new Bag_Base();
     }
 
     /** @var int */

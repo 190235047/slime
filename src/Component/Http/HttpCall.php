@@ -26,9 +26,11 @@ class HttpCall
         if (!empty($naParam)) {
             if (!empty($aBlock['query'])) {
                 parse_str($aBlock['query'], $aQuery);
-                $aBlock['query'] = http_build_query(array_merge($aQuery, $naParam), '', '', $iEncType);
-                $bReBuild        = true;
+            } else {
+                $aQuery = array();
             }
+            $aBlock['query'] = http_build_query(array_merge($aQuery, $naParam), '', '&', $iEncType);
+            $bReBuild        = true;
         }
         if ($nsIP !== null) {
             self::preDealWithIP($naHeader, $aBlock, $nsIP);
@@ -58,7 +60,7 @@ class HttpCall
             $sUrl = self::buildUrl($aBlock);
         }
         if ($naParam !== null) {
-            $naOptKV[CURLOPT_POSTFIELDS] = http_build_query($naParam, '', '', $iEncType);
+            $naOptKV[CURLOPT_POSTFIELDS] = http_build_query($naParam, '', '&', $iEncType);
         }
         if ($naHeader !== null) {
             $naOptKV[CURLOPT_HTTPHEADER] = $naHeader;
@@ -79,15 +81,6 @@ class HttpCall
         $rCurl = curl_init($sUrl);
         curl_setopt($rCurl, CURLOPT_RETURNTRANSFER, 1);
 
-        # preset opt header
-        if (!empty($aHeader)) {
-            $aTidyHeader = array();
-            foreach ($aHeader as $sK => $sV) {
-                $aTidyHeader[] = "$sK: $sV";
-            }
-            curl_setopt($rCurl, CURLOPT_HTTPHEADER, $aTidyHeader);
-        }
-
         # preset opt https
         if (substr($sUrl, 0, 8) === 'https://') {
             if (!isset($nsOptKV[CURLOPT_SSL_VERIFYHOST])) {
@@ -99,10 +92,10 @@ class HttpCall
         }
 
         # preset opt timeout
-        if (!isset($naOptKV[CURLOPT_TIMEOUT]) && !isset($naOptKV[CURLOPT_TIMEOUT_MS]) && self::$DEFAULT_TIMEOUT_MS !== null) {
+        if (!isset($naOptKV[CURLOPT_TIMEOUT]) && !isset($naOptKV[CURLOPT_TIMEOUT_MS]) && self::$DEFAULT_TIMEOUT_MS!==null) {
             $naOptKV[CURLOPT_TIMEOUT_MS] = self::$DEFAULT_TIMEOUT_MS;
         }
-        if (!isset($naOptKV[CURLOPT_CONNECTTIMEOUT]) && !isset($naOptKV[CURLOPT_CONNECTTIMEOUT_MS]) && self::$DEFAULT_CONNECT_TIMEOUT_MS !== null) {
+        if (!isset($naOptKV[CURLOPT_CONNECTTIMEOUT]) && !isset($naOptKV[CURLOPT_CONNECTTIMEOUT_MS]) && self::$DEFAULT_CONNECT_TIMEOUT_MS!==null) {
             $naOptKV[CURLOPT_TIMEOUT_MS] = self::$DEFAULT_CONNECT_TIMEOUT_MS;
         }
 
@@ -128,7 +121,7 @@ class HttpCall
 
     public static function buildUrl($aBlock)
     {
-        $sScheme   = isset($aBlock['scheme']) ? $aBlock['scheme'] . '://' : '';
+        $sScheme   = isset($aBlock['scheme']) ? $aBlock['scheme'] . 'http://' : '';
         $sHost     = isset($aBlock['host']) ? $aBlock['host'] : '';
         $sPort     = isset($aBlock['port']) ? ':' . $aBlock['port'] : '';
         $sUser     = isset($aBlock['user']) ? $aBlock['user'] : '';
