@@ -2,7 +2,6 @@
 namespace Slime\Component\Context;
 
 use Slime\Component\Config\Configure;
-use Slime\Component\Helper\Packer;
 
 /**
  * Class Context

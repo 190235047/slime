@@ -1,12 +1,12 @@
 <?php
-namespace Slime\Component\RDS\Model;
+namespace Slime\Component\RDBMS\ORM;
 
-use Slime\Component\RDS\CURD;
+use Slime\Component\RDBMS\DAL\Engine;
 
 /**
  * Class Factory
  *
- * @package Slime\Component\RDS\Model
+ * @package Slime\Component\RDBMS\ORM
  * @author  smallslime@gmail.com
  */
 class Factory
@@ -14,8 +14,8 @@ class Factory
     /** @var string | null  null means disable auto_create function */
     public $sDefaultDB = 'default';
 
-    protected $aCURD              = array();
-    protected $bCompatibleMode    = false;
+    protected $aDAL = array();
+    protected $bCompatibleMode = false;
     protected $bTmpCompatibleMode = null;
 
     /** @var Model[] */
@@ -38,7 +38,7 @@ class Factory
         array $aAOP = array()
     ) {
         foreach ($aDBConfigAll as $sK => $aDBConfig) {
-            $this->aCURD[$sK] = new CURD(
+            $this->aDAL[$sK] = new Engine(
                 $sK,
                 $aDBConfig['dsn'],
                 $aDBConfig['username'],
@@ -78,7 +78,7 @@ class Factory
 
             $aConf = $this->aModelConf[$sModelName];
             $sDB   = $aConf['db'];
-            if (!isset($this->aCURD[$sDB])) {
+            if (!isset($this->aDAL[$sDB])) {
                 throw new \OutOfRangeException("[MODEL] : There is no database config [$sDB] exist");
             }
 
@@ -88,7 +88,7 @@ class Factory
 
             $this->aModel[$sModelName] = new $sModelClassName(
                 $sModelName,
-                $this->aCURD[$sDB],
+                $this->aDAL[$sDB],
                 $aConf,
                 $this
             );
@@ -131,6 +131,7 @@ class Factory
 
     /**
      * @param bool $b
+     *
      * @return void
      */
     public function setCompatibleMode($b = true)
@@ -139,13 +140,14 @@ class Factory
     }
 
     /**
-     * @param Item | CompatibleItem | Group | null $mData
+     * @param Item | CItem | Group | null $mData
+     *
      * @return bool
      */
     public static function isModelDataEmpty($mData)
     {
-        if ($mData===null ||
-            $mData instanceof CompatibleItem ||
+        if ($mData === null ||
+            $mData instanceof CItem ||
             ($mData instanceof Group && $mData->count() == 0)
         ) {
             return true;

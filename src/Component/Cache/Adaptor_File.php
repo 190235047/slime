@@ -9,21 +9,21 @@ namespace Slime\Component\Cache;
  */
 class Adaptor_File implements IAdaptor
 {
-    protected $sCacheDir;
+    protected $sCachePath;
     protected $mCBKey2File;
 
     /**
      * @param string $sCacheDir
-     * @param mixed  $mCBKey2File (callback 回调, 参数为缓存key, 期待返回缓存文件名)
      * @param int    $iCreateMode
+     * @param mixed  $mCBKey2File
      *
      * @throws \RuntimeException
      */
-    public function __construct($sCacheDir, $mCBKey2File = null, $iCreateMode = 0777)
+    public function __construct($sCacheDir, $iCreateMode = 0777, $mCBKey2File = null)
     {
-        $this->sCacheDir = rtrim($sCacheDir, '/') . '/';
-        if (!file_exists($this->sCacheDir)) {
-            if (!@mkdir($this->sCacheDir, $iCreateMode, true)) {
+        $this->sCachePath = rtrim($sCacheDir, '/') . '/';
+        if (!file_exists($this->sCachePath)) {
+            if (!@mkdir($this->sCachePath, $iCreateMode, true)) {
                 throw new \RuntimeException("[CACHE] : Create dir[$sCacheDir] failed");
             }
         }
@@ -37,7 +37,7 @@ class Adaptor_File implements IAdaptor
      */
     public function get($sKey)
     {
-        $sFile = $this->getFileFromKey($sKey);
+        $sFile = $this->sCachePath . ($this->mCBKey2File===null ? md5($sKey) : call_user_func($this->mCBKey2File, $sKey));
 
         if (!file_exists($sFile)) {
             return null;
@@ -65,8 +65,8 @@ class Adaptor_File implements IAdaptor
     public function set($sKey, $mValue, $iExpire)
     {
         return file_put_contents(
-            $this->getFileFromKey($sKey),
-            sprintf("%s\n%s", time() + $iExpire, json_encode($mValue))
+            $sFile = $this->sCachePath . ($this->mCBKey2File===null ? md5($sKey) : call_user_func($this->mCBKey2File, $sKey)),
+            sprintf("%d\n%s", time() + $iExpire, json_encode($mValue))
         ) !== false;
     }
 
@@ -77,7 +77,7 @@ class Adaptor_File implements IAdaptor
      */
     public function delete($sKey)
     {
-        $sFile = $this->getFileFromKey($sKey);
+        $sFile = $this->sCachePath . md5($sKey);
         return file_exists($sFile) ? unlink($sFile) : true;
     }
 
@@ -86,23 +86,13 @@ class Adaptor_File implements IAdaptor
      */
     public function flush()
     {
-        $rDir = opendir($this->sCacheDir);
+        $rDir = opendir($this->sCachePath);
         while (($sFile = readdir($rDir)) !== false) {
             if (ltrim($sFile, '.') !== '') {
-                @unlink($this->sCacheDir . $sFile);
+                unlink($this->sCachePath . $sFile);
             }
         }
         closedir($rDir);
         return true;
-    }
-
-    private function getFileFromKey($sKey)
-    {
-        return $this->sCacheDir .
-        (
-        $this->mCBKey2File === null ?
-            md5($sKey) . '.cache.php' :
-            call_user_func($this->mCBKey2File, $sKey)
-        );
     }
 }

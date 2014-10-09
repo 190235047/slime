@@ -43,7 +43,7 @@ class Bootstrap
                         unset($aArr[$iK]['args']);
                     }
                 }
-                $RES->setContent(
+                $RES->setBody(
                     sprintf(
                         '<h1>%s</h1><h2>%d:%s</h2><h3>File:%s;Line:%s</h3><div><pre>%s</pre></div>',
                         get_class($E),

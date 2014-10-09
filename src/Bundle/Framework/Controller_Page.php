@@ -60,7 +60,7 @@ abstract class Controller_Page extends Controller_ABS
         }
 
         if ($this->iRenderType === self::RENDER_PAGE) {
-            $this->HttpResponse->setContent(
+            $this->HttpResponse->setBody(
                 $this->Context->View
                     ->assignMulti($this->aData)
                     ->setTpl($this->sTPL === null ? $this->getDefaultTPL() : $this->sTPL)

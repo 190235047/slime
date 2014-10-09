@@ -1,10 +1,12 @@
 <?php
-namespace Slime\Component\RDS\Model;
+namespace Slime\Component\RDBMS\ORM;
+
+use Slime\Component\RDBMS\DAL\Val;
 
 /**
  * Class Item
  *
- * @package Slime\Component\RDS
+ * @package Slime\Component\RDBMS\ORM
  * @author  smallslime@gmail.com
  *
  * @property-read array $aData
@@ -47,12 +49,11 @@ class Item implements \ArrayAccess
     }
 
     /**
-     * @param string|array $mKeyOrKVMap
-     * @param null         $mValue
+     * @param array $aKVMap
      */
-    public function set($mKeyOrKVMap, $mValue = null)
+    public function set(array $aKVMap)
     {
-        $this->_set($mKeyOrKVMap, $mValue);
+        $this->_set($aKVMap);
     }
 
     protected function _set($mK, $mV = null)
@@ -105,23 +106,21 @@ class Item implements \ArrayAccess
     }
 
     /**
-     * @param string $sModelName
-     * @param array  $aWhere
-     * @param string $sOrderBy
-     * @param int    $iLimit
-     * @param int    $iOffset
-     * @param bool   $bJoin
+     * @param string                                        $sModelName
+     * @param array | \Slime\Component\RDBMS\DAL\SQL_SELECT $aWhere_SQLSEL
+     * @param string                                        $sOrderBy
+     * @param int                                           $iLimit
+     * @param int                                           $iOffset
      *
      * @return $this|$this[]
      * @throws \OutOfRangeException
      */
     public function relation(
         $sModelName,
-        array $aWhere = null,
+        $aWhere_SQLSEL = array(),
         $sOrderBy = null,
         $iLimit = null,
-        $iOffset = null,
-        $bJoin = false
+        $iOffset = null
     ) {
         $mResult = null;
 
@@ -135,11 +134,11 @@ class Item implements \ArrayAccess
                 $this->$sMethod($sModelName) :
                 $this->Group->relation($sModelName, $this);
         } else {
-            $mResult = $this->$sMethod($sModelName, $aWhere, $sOrderBy, $iLimit, $iOffset, $bJoin);
+            $mResult = $this->$sMethod($sModelName, $aWhere_SQLSEL, $sOrderBy, $iLimit, $iOffset);
         }
 
         if ($mResult === null && $this->Model->Factory->isCompatibleMode()) {
-            $mResult = new CompatibleItem();
+            $mResult = new CItem();
         }
 
         return $mResult;
@@ -173,45 +172,37 @@ class Item implements \ArrayAccess
      */
     public function add()
     {
-        $M   = $this->Model;
-        $iID = $M->CURD->insertSmarty($M->sTable, $this->aData);
-        if ($iID === null) {
-            $bRS = false;
+        if ($this->Model->add($this->aData, true, $iLastID) === false) {
+            return false;
         } else {
-            $this->aData[$M->sPKName] = $iID;
-            $bRS                      = true;
+            $this->aData[$this->Model->sPKName] = $iLastID;
+            return true;
+        }
+    }
+
+    /**
+     * @return bool | null | int [null:无需更新]
+     */
+    public function update()
+    {
+        $aUpdate = array_intersect_key($this->aData, $this->aOldData);
+        if (empty($aUpdate)) {
+            return null;
+        }
+        $bRS = $this->Model->update(array($this->Model->sPKName => $this->aData[$this->Model->sPKName]), $aUpdate);
+        if ($bRS) {
+            $this->aOldData = array();
         }
         return $bRS;
     }
+
 
     /**
      * @return bool
      */
     public function delete()
     {
-        $M = $this->Model;
-        return $M->CURD->deleteSmarty($M->sTable, array($M->sPKName => $this->aData[$M->sPKName]));
-    }
-
-    /**
-     * @return int|bool [int:非pdo错误; true:更新成功; false:更新失败]
-     */
-    public function update()
-    {
-        $aUpdate = array_intersect_key($this->aData, $this->aOldData);
-        if (empty($aUpdate)) {
-            return 99;
-        }
-        $M   = $this->Model;
-        $bRS = $M->CURD->updateSmarty(
-            $M->sTable,
-            $aUpdate,
-            array($M->sPKName => $this->aData[$M->sPKName])
-        );
-        if ($bRS) {
-            $this->aOldData = array();
-        }
-        return $bRS;
+        return $this->Model->delete(array($this->Model->sPKName => $this->aData[$this->Model->sPKName]));
     }
 
     /**
@@ -221,9 +212,8 @@ class Item implements \ArrayAccess
      */
     public function hasOne($sModelName)
     {
-        $M     = $this->Model;
-        $Model = $M->Factory->get($sModelName);
-        return $Model->find(array($M->sFKName => $this->aData[$M->sPKName]));
+        $Model = $this->Model->Factory->get($sModelName);
+        return $Model->find(array($this->Model->sFKName => $this->aData[$this->Model->sPKName]));
     }
 
     /**
@@ -238,29 +228,30 @@ class Item implements \ArrayAccess
     }
 
     /**
-     * @param string $sModel
-     * @param array  $aWhere
-     * @param string $sOrderBy
-     * @param int    $iLimit
-     * @param int    $iOffset
+     * @param string                                        $sModel
+     * @param array | \Slime\Component\RDBMS\DAL\SQL_SELECT $aWhere_SQLSEL
+     * @param string                                        $sOrderBy
+     * @param int                                           $iLimit
+     * @param int                                           $iOffset
      *
      * @return Group|Item[]
      */
     public function hasMany(
         $sModel,
-        array $aWhere = null,
+        $aWhere_SQLSEL = array(),
         $sOrderBy = null,
         $iLimit = null,
         $iOffset = null
     ) {
-        $M     = $this->Model;
-        $Model = $M->Factory->get($sModel);
+        $Model = $this->Model->Factory->get($sModel);
 
         return $Model->findMulti(
-            (empty($aWhere) ?
-                array($M->sFKName => $this->aData[$Model->sPKName]) :
-                array_merge(array($M->sFKName => $this->aData[$Model->sPKName]), $aWhere)
-            ),
+            is_array($aWhere_SQLSEL) ?
+                (empty($aWhere) ?
+                    array($this->Model->sFKName => $this->aData[$Model->sPKName]) :
+                    array_merge(array($this->Model->sFKName => $this->aData[$Model->sPKName]), $aWhere)
+                ) :
+                $aWhere_SQLSEL,
             $sOrderBy,
             $iLimit,
             $iOffset
@@ -268,106 +259,113 @@ class Item implements \ArrayAccess
     }
 
     /**
-     * @param string $sModel
-     * @param array  $aWhere
+     * @param string                                        $sModel
+     * @param array | \Slime\Component\RDBMS\DAL\SQL_SELECT $aWhere_SQLSEL
      *
      * @return int
      */
-    public function hasManyCount($sModel, array $aWhere = null)
+    public function hasManyCount($sModel, $aWhere_SQLSEL = array())
     {
-        $M     = $this->Model;
-        $Model = $M->Factory->get($sModel);
+        $Model = $this->Model->Factory->get($sModel);
 
         return $Model->findCount(
-            (empty($aWhere) ?
-                array($M->sFKName => $this->aData[$Model->sPKName]) :
-                array_merge(array($M->sFKName => $this->aData[$Model->sPKName]), $aWhere)
-            )
+            is_array($aWhere_SQLSEL) ?
+                (empty($aWhere) ?
+                    array($this->Model->sFKName => $this->aData[$Model->sPKName]) :
+                    array_merge(array($this->Model->sFKName => $this->aData[$Model->sPKName]), $aWhere)
+                ) :
+                $aWhere_SQLSEL
         );
     }
 
     /**
-     * @param string $sModelTarget
-     * @param array  $aWhere
-     * @param string $sOrderBy
-     * @param int    $iLimit
-     * @param int    $iOffset
+     * @param string                                        $sModelTarget
+     * @param array | \Slime\Component\RDBMS\DAL\SQL_SELECT $aWhere_SQLSEL
+     * @param string                                        $nsOrderBy
+     * @param int                                           $niLimit
+     * @param int                                           $niOffset
      *
      * @return null|Group|Item[]
      */
     public function hasManyThrough(
         $sModelTarget,
-        array $aWhere = null,
-        $sOrderBy = null,
-        $iLimit = null,
-        $iOffset = null
+        $aWhere_SQLSEL = array(),
+        $nsOrderBy = null,
+        $niLimit = null,
+        $niOffset = null
     ) {
-        $ModelTarget = $this->Model->Factory->get($sModelTarget);
-        $ModelOrg    = $this->Model;
-        //@todo $sRelatedTableName declare in config
-        $sRelatedTableName = 'rel__' . (strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
-                $ModelTarget->sTable . '__' . $ModelOrg->sTable :
-                $ModelOrg->sTable . '__' . $ModelTarget->sTable);
+        $MTarget   = $this->Model->Factory->get($sModelTarget);
+        $MOrg      = $this->Model;
+        $sRelTName = self::getTableNameFromManyThrough($MTarget, $MOrg);
 
-        $sMTPKName    = $ModelTarget->sPKName;
-        $sMTFKName    = $ModelTarget->sFKName;
-        $sMTTableName = $ModelTarget->sTable;
-        $sTable       = "$sMTTableName JOIN $sRelatedTableName ON $sMTTableName.$sMTPKName = $sRelatedTableName.$sMTFKName";
-        $sSelect      = "$sMTTableName.*";
-        $aArrTable    = array($ModelTarget->sTable, $sRelatedTableName);
+        if (is_array($aWhere_SQLSEL)) {
+            $SQL = $MOrg->SQL_R()
+                ->join(
+                    $sRelTName,
+                    array(
+                        "{$MTarget->sTable}.{$MTarget->sPKName}" => Val::Name("$sRelTName.{$MTarget->sFKName}")
+                    )
+                )
+                ->fields("{$MTarget->sTable}.*")
+                ->where($aWhere_SQLSEL);
+            if ($nsOrderBy !== null) {
+                $SQL->orderBy($nsOrderBy);
+            }
+            if ($niLimit !== null) {
+                $SQL->limit($niLimit);
+            }
+            if ($niOffset !== null) {
+                $SQL->offset($niLimit);
+            }
 
-        $aNewWhere = array("$sRelatedTableName.{$ModelOrg->sFKName}" => $this->aData[$ModelOrg->sPKName]);
-        if (!empty($aWhere)) {
-            $aNewWhere = array($aNewWhere, self::preReplace($aWhere, $aArrTable));
+            return $MTarget->findMulti($SQL);
+        } else {
+            return $MTarget->findMulti($aWhere_SQLSEL);
         }
-        if (!empty($sOrderBy)) {
-            $sOrderBy = self::preReplace($sOrderBy, $aArrTable);
-        }
-
-        return $ModelTarget->findMulti($aNewWhere, $sOrderBy, $iLimit, $iOffset, $sTable, $sSelect);
-    }
-
-    public function hasManyThroughCount($sModelTarget, array $aWhere = null)
-    {
-        $ModelTarget = $this->Model->Factory->get($sModelTarget);
-        $ModelOrg    = $this->Model;
-        //@todo $sRelatedTableName declare in config
-        $sRelatedTableName = 'rel__' . (strcmp($ModelOrg->sTable, $ModelTarget->sTable) > 0 ?
-                $ModelTarget->sTable . '__' . $ModelOrg->sTable :
-                $ModelOrg->sTable . '__' . $ModelTarget->sTable);
-
-        $sMTPKName    = $ModelTarget->sPKName;
-        $sMTFKName    = $ModelTarget->sFKName;
-        $sMTTableName = $ModelTarget->sTable;
-        $sTable       = "$sMTTableName JOIN $sRelatedTableName ON $sMTTableName.$sMTPKName = $sRelatedTableName.$sMTFKName";
-        $aArrTable    = array($ModelTarget->sTable, $sRelatedTableName);
-        $aNewWhere    = array("$sRelatedTableName.{$ModelOrg->sFKName}" => $this->aData[$ModelOrg->sPKName]);
-        if (!empty($aWhere)) {
-            $aNewWhere = array($aNewWhere, self::preReplace($aWhere, $aArrTable));
-        }
-
-        return $ModelTarget->findCount($aNewWhere, $sTable);
     }
 
     /**
-     * @param array|string $mMix
-     * @param array        $aArrTable
+     * @param string                                        $sModelTarget
+     * @param array | \Slime\Component\RDBMS\DAL\SQL_SELECT $aWhere_SQLSEL
      *
-     * @return array|string
+     * @return bool | int
      */
-    public static function preReplace($mMix, array $aArrTable)
+    public function hasManyThroughCount($sModelTarget, $aWhere_SQLSEL = array())
     {
-        if (!is_array($mMix)) {
-            return is_string($mMix) ? str_replace(array('!', '@'), $aArrTable, $mMix) : $mMix;
-        }
+        $MTarget   = $this->Model->Factory->get($sModelTarget);
+        $MOrg      = $this->Model;
+        $sRelTName = self::getTableNameFromManyThrough($MTarget, $MOrg);
 
-        $aWhereNew = array();
-        foreach ($mMix as $mK => $mV) {
-            $sFixKey             = is_string($mK) ? self::preReplace($mK, $aArrTable) : $mK;
-            $aWhereNew[$sFixKey] = self::preReplace($mV, $aArrTable);
-        }
+        if (is_array($aWhere_SQLSEL)) {
+            $SQL = $MOrg->SQL_R()
+                ->join(
+                    $sRelTName,
+                    array(
+                        "{$MTarget->sTable}.{$MTarget->sPKName}" => Val::Name("$sRelTName.{$MTarget->sFKName}")
+                    )
+                )
+                ->fields("{$MTarget->sTable}.*")
+                ->where($aWhere_SQLSEL);
 
-        return $aWhereNew;
+            return $MTarget->findCount($SQL);
+        } else {
+            return $MTarget->findCount($aWhere_SQLSEL);
+        }
+    }
+
+    /**
+     * @param Model $M1
+     * @param Model $M2
+     *
+     * @return string
+     */
+    public static function getTableNameFromManyThrough($M1, $M2)
+    {
+        //@todo find in config
+        $sRelatedTableName = 'rel__' . (strcmp($M1->sTable, $M2->sTable) > 0 ?
+                $M2->sTable . '__' . $M1->sTable :
+                $M1->sTable . '__' . $M2->sTable);
+        return $sRelatedTableName;
     }
 
     /**

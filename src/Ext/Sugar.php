@@ -1,28 +1,28 @@
 <?php
-namespace Slime\Component\Helper;
+namespace Slime\Ext;
 
 /**
  * Class Sugar
  *
- * @package Slime\Component\Helper
+ * @package Slime\Ext
  * @author  smallslime@gmail.com
  */
 class Sugar
 {
     /**
-     * @param callable $mTryFunc
+     * @param callable $mTryCB
      * @param array    $aParam
      * @param int      $iMaxTimes
      * @param int      $iSleepMS
      *
      * @return mixed|null
      */
-    public static function tryIt($mTryFunc, array $aParam = array(), $iMaxTimes = -1, $iSleepMS = 10)
+    public static function tryIt($mTryCB, array $aParam = array(), $iMaxTimes = -1, $iSleepMS = 10)
     {
         $i     = 0;
         $mData = null;
         while ($iMaxTimes <= 0 || $i < $iMaxTimes) {
-            if (($mData = call_user_func_array($mTryFunc, $aParam)) !== null) {
+            if (($mData = call_user_func_array($mTryCB, $aParam)) !== null) {
                 break;
             }
             if ($iSleepMS > 0) {

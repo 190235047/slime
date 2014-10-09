@@ -2,7 +2,7 @@
 namespace Slime\Bundle\Framework;
 
 use Slime\Component\Http;
-use Slime\Component\Helper\Arr2XML;
+use Slime\Component\XML\EasyXML;
 use Slime\Component\View;
 use Slime\Component\Log\Writer_WebPage;
 
@@ -44,9 +44,9 @@ abstract class Controller_Api extends Controller_ABS
         $this->aData['errMsg']  = '';
     }
 
-    protected function fail($sErr, $iErr = 1)
+    protected function fail($sErr, $iErr = 1, array $aData = array())
     {
-        $this->aData['data']    = array();
+        $this->aData['data']    = $aData;
         $this->aData['errCode'] = $iErr;
         $this->aData['errMsg']  = $sErr;
     }
@@ -68,9 +68,9 @@ abstract class Controller_Api extends Controller_ABS
     protected function _renderXML()
     {
         $this->HttpResponse->setHeader('Content-Type', 'text/xml', false);
-        $this->HttpResponse->setContent(
+        $this->HttpResponse->setBody(
             $this->sXmlTPL === null ?
-                Arr2XML::factory()->Array2XML($this->aData) :
+                EasyXML::Array2XML($this->aData) :
                 $this->Context->View->assignMulti($this->aData)->setTpl($this->sXmlTPL)->renderAsResult()
         );
     }
@@ -78,7 +78,7 @@ abstract class Controller_Api extends Controller_ABS
     protected function _renderJSON()
     {
         $this->HttpResponse->setHeader('Content-Type', 'text/javascript', false);
-        $this->HttpResponse->setContent(
+        $this->HttpResponse->setBody(
             $this->sJsonTPL === null ?
                 json_encode($this->aData) :
                 $this->Context->View->assignMulti($this->aData)->setTpl($this->sJsonTPL)->renderAsResult()
@@ -92,7 +92,7 @@ abstract class Controller_Api extends Controller_ABS
             $sCB = 'cb';
         }
         $this->HttpResponse->setHeader('Content-Type', 'text/javascript', false);
-        $this->HttpResponse->setContent(
+        $this->HttpResponse->setBody(
             $this->sJsonPTPL === null ?
                 $sCB . '(' . json_encode($this->aData) . ')' :
                 $this->Context->View->assignMulti($this->aData)->setTpl($this->sJsonPTPL)->renderAsResult()

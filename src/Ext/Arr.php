@@ -1,10 +1,10 @@
 <?php
-namespace Slime\Component\Helper;
+namespace Slime\Ext;
 
 /**
  * Class Arr
  *
- * @package Slime\Component\Helper
+ * @package Slime\Ext
  * @author  smallslime@gmail.com
  */
 class Arr

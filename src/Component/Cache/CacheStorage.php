@@ -31,7 +31,7 @@ class CacheStorage
      * @param null | object $StorageWriteDefault
      */
     public function __construct(
-        array $aMap,
+        array $aMap = array(),
         $CacheReadDefault = null,
         $CacheWriteDefault = null,
         $StorageReadDefault = null,

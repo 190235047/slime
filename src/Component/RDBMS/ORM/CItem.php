@@ -1,13 +1,13 @@
 <?php
-namespace Slime\Component\RDS\Model;
+namespace Slime\Component\RDBMS\ORM;
 
 /**
  * Class CompatibleItem
  *
- * @package Slime\Component\RDS\Model
+ * @package Slime\Component\RDBMS\ORM
  * @author  smallslime@gmail.com
  */
-class CompatibleItem
+class CItem
 {
     public function __call($sMethod, $aArg)
     {

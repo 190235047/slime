@@ -1,10 +1,10 @@
 <?php
-namespace Slime\Component\RDS\Model;
+namespace Slime\Component\RDBMS\ORM;
 
 /**
  * Class Group
  *
- * @package Slime\Component\RDS\Model
+ * @package Slime\Component\RDBMS\ORM
  * @author  smallslime@gmail.com
  */
 class Group implements \ArrayAccess, \Iterator, \Countable
@@ -24,7 +24,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
         $this->Model = $Model;
     }
 
-    public function getFieldArr($sField)
+    public function getField($sField)
     {
         if ($sField == $this->Model->sPKName) {
             return array_keys($this->aModelItem);
@@ -38,35 +38,34 @@ class Group implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
-     * @param string $sModelName
-     * @param Item   $ModelItem
+     * @param string      $sModelName
+     * @param Item | null $noModelItem full array if param is null
      *
      * @return mixed
      * @throws \OutOfRangeException
      */
-    public function relation($sModelName, $ModelItem = null)
+    public function relation($sModelName, $noModelItem = null)
     {
-        $aRelConf = $this->Model->aRelationConfig;
-        if (!isset($aRelConf[$sModelName])) {
+        if (!isset($this->Model->aRelationConfig[$sModelName])) {
             throw new \OutOfRangeException("[MODEL] : Relation model $sModelName is not exist");
         }
-        $sMethod = $aRelConf[$sModelName];
-        return $this->$sMethod($sModelName, $ModelItem);
+        $sMethod = $this->Model->aRelationConfig[$sModelName];
+        return $this->$sMethod($sModelName, $noModelItem);
     }
 
     /**
-     * @param string $sModelName
-     * @param Item   $ModelItem
+     * @param string      $sModelName
+     * @param Item | null $noModelItem
      *
      * @return Group | Item | null
      */
-    public function hasOne($sModelName, $ModelItem = null)
+    public function hasOne($sModelName, $noModelItem = null)
     {
-        if ($ModelItem === null && isset($this->aRelation[$sModelName])) {
+        if ($noModelItem === null && isset($this->aRelation[$sModelName])) {
             return $this->aRelation[$sModelName];
         }
 
-        $sPK = $ModelItem[$this->Model->sPKName];
+        $sPK = $noModelItem[$this->Model->sPKName];
         if (isset($this->aRelObj[$sModelName])) {
             return isset($this->aRelObj[$sModelName][$sPK]) ? $this->aRelObj[$sModelName][$sPK] : null;
         }
@@ -75,12 +74,12 @@ class Group implements \ArrayAccess, \Iterator, \Countable
         $Model                        = $this->Model->Factory->get($sModelName);
         $this->aRelation[$sModelName] = $Group = $Model->findMulti(array($this->Model->sFKName . ' IN' => $aPK));
 
-        if ($ModelItem === null) {
+        if ($noModelItem === null) {
             return $Group;
         }
 
         $this->aRelObj[$sModelName] = array();
-        $aQ                         = & $this->aRelObj[$sModelName];
+        $aQ                         = &$this->aRelObj[$sModelName];
         foreach ($Group as $ItemNew) {
             $sThisPK      = $this->aModelItem[$ItemNew[$this->Model->sFKName]][$this->Model->sPKName];
             $aQ[$sThisPK] = $ItemNew;
@@ -90,18 +89,18 @@ class Group implements \ArrayAccess, \Iterator, \Countable
     }
 
     /**
-     * @param string $sModelName
-     * @param Item   $ModelItem
+     * @param string      $sModelName
+     * @param Item | null $noModelItem
      *
      * @return Group | Item | null
      */
-    public function belongsTo($sModelName, $ModelItem = null)
+    public function belongsTo($sModelName, $noModelItem = null)
     {
-        if ($ModelItem === null && isset($this->aRelation[$sModelName])) {
+        if ($noModelItem === null && isset($this->aRelation[$sModelName])) {
             return $this->aRelation[$sModelName];
         } else {
             $Model = $this->Model->Factory->get($sModelName);
-            $sFK   = $ModelItem[$Model->sFKName];
+            $sFK   = $noModelItem[$Model->sFKName];
             if (isset($this->aRelation[$sModelName])) {
                 return isset($this->aRelation[$sModelName][$sFK]) ? $this->aRelation[$sModelName][$sFK] : null;
             }
@@ -112,7 +111,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
             $aFK[] = $Item[$Model->sFKName];
         }
         $this->aRelation[$sModelName] = $Model->findMulti(array($Model->sPKName . ' IN' => $aFK));
-        if ($ModelItem === null) {
+        if ($noModelItem === null) {
             return $this->aRelation[$sModelName];
         } else {
             return $this->aRelation[$sModelName][$sFK];

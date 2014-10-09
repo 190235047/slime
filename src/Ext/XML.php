@@ -1,22 +1,22 @@
 <?php
-namespace Slime\Component\Helper;
+namespace Slime\Ext;
 
 /**
- * Class EasyXML
+ * Class XML
  *
- * @package Slime\Component\Helper
+ * @package Slime\Ext
  * @author  smallslime@gmail.com
  *
- * @usage   :
+ * @example :
  *          $aArr = array(
  *              'books' => array(
- *                  'book' => '\@The name with @first', //easy way if no index duplicate
+ *                  'book' => 'The book name', //easy way if no index duplicate
  *                  array(
  *                      'book' => 'Common english book',
  *                      '__attr__' => array('important' => '0', 'has_read' => '1'),
  *                  ),
  *                  array(
- *                      'book' => '@有中文需CDATA',
+ *                      'book' => XML::Str('有中文需CDATA'),
  *                      '__attr__' => array('important' => '1', 'has_read' => '1'),
  *                  ),
  *              ),
@@ -29,11 +29,16 @@ namespace Slime\Component\Helper;
  *          var_dump(EasyXML::XML2Array($sXML, true));
  *          var_dump(EasyXML::XML2Array($sXML, true, 'root', '1.0', 'gbk', function($sStr){return iconv('utf-8', 'gbk', $sStr);}));
  */
-class EasyXML
+class XML
 {
+    public static function Str($sString, $bCDATA = true, $mCB = null)
+    {
+        return new XmlString($sString, $bCDATA, $mCB);
+    }
+
     /**
      * @param string       $sXML
-     * @param bool         $bAutoAtWhenCDATA
+     * @param bool         $bStrAsObj
      * @param string       $sRoot
      * @param string       $sVersion
      * @param string       $sCharset
@@ -43,7 +48,7 @@ class EasyXML
      */
     public static function XML2Array(
         $sXML,
-        $bAutoAtWhenCDATA = false,
+        $bStrAsObj = false,
         $sRoot = 'root',
         $sVersion = '1.0',
         $sCharset = 'utf-8',
@@ -52,26 +57,24 @@ class EasyXML
         $DOM = new \DOMDocument($sVersion, $sCharset);
         $DOM->loadXML($sXML);
         $Root = $DOM->getElementsByTagName($sRoot)->item(0);
-        $aArr = self::ParseXML($Root, $bAutoAtWhenCDATA, $nmCBIconv);
+        $aArr = self::ParseXML($Root, $bStrAsObj, $nmCBIconv);
         return $aArr[$sRoot];
     }
 
     /**
      * @param \DOMNode     $Node
-     * @param bool         $bAutoAtWhenCDATA
+     * @param bool         $bStrAsObj
      * @param mixed | null $nmCBIconv
      *
      * @return array|string
      */
-    public static function ParseXML(\DOMNode $Node, $bAutoAtWhenCDATA, $nmCBIconv = null)
+    public static function ParseXML($Node, $bStrAsObj, $nmCBIconv = null)
     {
         if ($Node instanceof \DOMCdataSection) {
-            $sStr = $bAutoAtWhenCDATA ? "@$Node->textContent" : $Node->textContent;
+            $sStr = $bStrAsObj ? self::Str("$Node->textContent") : $Node->textContent;
             return $nmCBIconv === null ? $sStr : call_user_func($nmCBIconv, $sStr);
         } elseif ($Node instanceof \DOMText) {
-            $sStr = ($bAutoAtWhenCDATA && $Node->textContent[0] === '@') ?
-                "\\{$Node->textContent}" : $Node->textContent;
-            return $nmCBIconv === null ? $sStr : call_user_func($nmCBIconv, $sStr);
+            return $nmCBIconv === null ? $Node->textContent : call_user_func($nmCBIconv, $Node->textContent);
         } else {
             $sIndex = $Node->nodeName;
             $mValue = null;
@@ -89,7 +92,7 @@ class EasyXML
                 $ChildNodes = $Node->childNodes;
                 $iL         = $ChildNodes->length;
                 for ($i = 0; $i < $iL; $i++) {
-                    $mRS = self::ParseXML($ChildNodes->item($i), $bAutoAtWhenCDATA, $nmCBIconv);
+                    $mRS = self::ParseXML($ChildNodes->item($i), $bStrAsObj, $nmCBIconv);
                     if (is_string($mRS)) {
                         if ($iL !== 1) {
                             trigger_error(
@@ -178,12 +181,8 @@ class EasyXML
         } else {
             $bCreateCDATA = false;
             $sStr         = (string)$mData;
-
-            if ($sStr === '@') {
+            if ($mData instanceof XmlString && $mData->isCDATA()) {
                 $bCreateCDATA = true;
-                $sStr         = substr($sStr, 1);
-            } elseif ("{$sStr[0]}{$sStr[1]}" === '\@') {
-                $sStr = substr($mData, 1);
             }
 
             if ($nmCBIconv !== null) {
@@ -196,5 +195,27 @@ class EasyXML
                     $DOMDocument->createTextNode($sStr)
             );
         }
+    }
+}
+
+class XmlString
+{
+    protected $sStr;
+    protected $bCDATA;
+
+    public function __construct($sStr, $bCDATA)
+    {
+        $this->sStr   = $sStr;
+        $this->bCDATA = $bCDATA;
+    }
+
+    public function isCDATA()
+    {
+        return $this->bCDATA;
+    }
+
+    public function __toString()
+    {
+        return $this->sStr;
     }
 }

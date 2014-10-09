@@ -2,7 +2,7 @@
 namespace Slime\Component\Config;
 
 use Slime\Bundle\Framework\Context;
-use Slime\Component\Helper\Sugar;
+use Slime\Ext\Sugar;
 
 /**
  * Class Configure

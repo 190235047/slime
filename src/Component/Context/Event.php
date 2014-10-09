@@ -26,7 +26,10 @@ class Event
      */
     public static function regEvent($sEventName, $mCB)
     {
-        Context::getInst()->Event->register($sEventName, $mCB);
+        $Event = Context::getInst()->get('Event');
+        if ($Event instanceof Event) {
+            $Event->register($sEventName, $mCB);
+        }
     }
 
     protected $aEventCBMap = array();
@@ -49,5 +52,25 @@ class Event
     public function register($sEventName, $mCB)
     {
         $this->aEventCBMap[$sEventName] = $mCB;
+    }
+
+    /**
+     * @param string $sEventName
+     */
+    public function unRegister($sEventName)
+    {
+        if (isset($this->aEventCBMap[$sEventName])) {
+            unset($this->aEventCBMap[$sEventName]);
+        }
+    }
+
+    /**
+     * @param string $sEventName
+     *
+     * @return mixed
+     */
+    public function getEventCB($sEventName)
+    {
+        return isset($this->aEventCBMap[$sEventName]) ? $this->aEventCBMap[$sEventName] : null;
     }
 }

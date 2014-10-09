@@ -9,9 +9,19 @@ namespace Slime\Component\Http;
  */
 class HttpResponse
 {
-    public function __construct()
+    public function __construct($niCode = null, array $naHeader = null, $nsBody = null)
     {
         $this->BagHeader = new Bag_Base();
+
+        if ($niCode!==null) {
+            $this->setResponseCode($niCode);
+        }
+        if ($naHeader!==null) {
+            $this->setHeader($naHeader);
+        }
+        if ($nsBody!==null) {
+            $this->setBody($nsBody);
+        }
     }
 
     /** @var int */
@@ -118,7 +128,7 @@ class HttpResponse
      *
      * @return HttpResponse
      */
-    public function setCookie(
+    public function setCookiePre(
         $sName,
         $sValue,
         $iExpire = null,
@@ -147,30 +157,30 @@ class HttpResponse
     }
 
     /** @var string */
-    protected $sContent;
+    protected $sBody;
 
     /**
      * @return string
      */
-    public function getContent()
+    public function getBody()
     {
-        return $this->sContent;
+        return $this->sBody;
     }
 
     /**
-     * @param string $sContent
+     * @param string $sBody
      */
-    public function setContent($sContent)
+    public function setBody($sBody)
     {
-        $this->sContent = $sContent;
+        $this->sBody = $sBody;
     }
 
     /**
      * Sends content for the current web response.
      */
-    public function sendContent()
+    public function sendBody()
     {
-        echo $this->sContent;
+        echo $this->sBody;
     }
 
     /**
@@ -214,6 +224,6 @@ class HttpResponse
     public function send()
     {
         $this->sendHeader();
-        $this->sendContent();
+        $this->sendBody();
     }
 }

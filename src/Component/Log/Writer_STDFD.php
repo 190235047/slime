@@ -9,7 +9,12 @@ namespace Slime\Component\Log;
  */
 class Writer_STDFD implements IWriter
 {
-    public $sFormat = '[:sGuid][:iLevel] : :sTime , :sMessage';
+    protected $sFormat;
+
+    public function __construct($nsFormat = null)
+    {
+        $this->sFormat = $nsFormat === null ? '[:sGuid][:iLevel] : :sTime , :sMessage' : $nsFormat;
+    }
 
     public function acceptData($aRow)
     {
