@@ -1,8 +1,8 @@
 <?php
 namespace Slime\Component\Route;
 
-use Slime\Component\Http\HttpRequest;
-use Slime\Component\Http\HttpResponse;
+use Slime\Component\Support\Str;
+use Slime\Component\Support\Url;
 
 /**
  * Class Mode
@@ -13,132 +13,186 @@ use Slime\Component\Http\HttpResponse;
 class Mode
 {
     /**
-     * @param HttpRequest  $REQ
-     * @param HttpResponse $RES
-     * @param HitMode      $HitMode
-     * @param string       $sControllerPre
-     * @param string       $sActionPre
+     * @param \Slime\Component\Http\REQ            $REQ
+     * @param \Slime\Component\Http\RESP           $RESP
+     * @param \Slime\Component\Log\LoggerInterface $Log
+     * @param \Slime\Component\Support\Context     $CTX
+     * @param array                                $aSetting
      *
-     * @return CallBack
+     * @return bool
+     * @throws RouteException
      */
-    public static function slimeHttp_Page(
-        $REQ,
-        $RES,
-        $HitMode,
-        $sControllerPre,
-        $sActionPre
-    ) {
-        $aUrl      = parse_url($REQ->getRequestURI());
-        $aUrlBlock = explode('/', strtolower(substr($aUrl['path'], 1)));
-
-        $iLastIndex = count($aUrlBlock) - 1;
-        if ($aUrlBlock[$iLastIndex] === '') {
-            $aUrlBlock[$iLastIndex] = 'default';
+    public static function slimeHttp_Page($REQ, $RESP, $Log, $CTX, $aSetting)
+    {
+        $aBlock = Url::parse($REQ->getRequestURI(), true, false);
+        $aPath  = $aBlock['path'];
+        if ($aPath[($i = count($aPath) - 1)] === '') {
+            $aPath[$i] = $aSetting['default_action'];
+        }
+        if (count($aPath) === 1) {
+            array_unshift($aPath, $aSetting['default_controller']);
+        }
+        $sAction     = array_pop($aPath);
+        $sController = $aSetting['controller_pre'] .
+            implode('_', array_map(array('\\Slime\\Component\\Support\\Str', 'camel'), $aPath));
+        if (($iPos = strrpos($sAction, '.')) === false) {
+            $sExt = isset($aSetting['default_ext']) ? $aSetting['default_ext'] : null;
+        } else {
+            $sExt    = substr($sAction, $iPos + 1);
+            $sAction = substr($sAction, 0, $iPos);
+        }
+        $sAction = $aSetting['action_pre'] . Str::camel($sAction);
+        if (($sReqMethod = $REQ->getRequestMethod()) !== 'GET') {
+            $sAction .= '__' . $sReqMethod;
         }
 
-        if (count($aUrlBlock) === 1) {
-            array_unshift($aUrlBlock, 'Main');
-        }
-
-        $sAction = ucfirst(array_pop($aUrlBlock));
-        foreach ($aUrlBlock as $iK => $sBlock) {
-            $aUrlBlock[$iK] = implode('', array_map('ucfirst', explode('_', $sBlock)));
-        }
-
-        list($sAction, $sExt) = array_replace(array('', 'html'), explode('.', $sAction, 2));
-        $sAction = implode('', array_map('ucfirst', explode('_', $sAction)));
-
-        $sRequestMethod = $REQ->getRequestMethod();
-        if ($sRequestMethod !== 'GET') {
-            $sAction .= '_' . $sRequestMethod;
-        }
-
-        $CallBack = new CallBack($sControllerPre, $sActionPre);
-        $CallBack->setCBObject(
-            implode('_', $aUrlBlock),
+        self::objCall(
+            $CTX,
+            $sController,
             $sAction,
-            array(array('__ext__' => strtolower($sExt)))
+            array(
+                '__EXT__'        => $sExt,
+                '__CONTROLLER__' => $sController,
+                '__ACTION__'     => $sAction,
+                '__SETTING__'    => $aSetting
+            )
         );
 
-        return $CallBack;
+        return false;
     }
 
     /**
-     * @param HttpRequest  $REQ
-     * @param HttpResponse $RES
-     * @param HitMode      $HitMode
-     * @param string       $sControllerPre
-     * @param string       $sActionPre
+     * @param \Slime\Component\Http\REQ            $REQ
+     * @param \Slime\Component\Http\RESP           $RESP
+     * @param \Slime\Component\Log\LoggerInterface $Log
+     * @param \Slime\Component\Support\Context     $CTX
+     * @param array                                $aSetting
      *
-     * @return CallBack
+     * @return bool
+     * @throws RouteException
      */
-    public static function slimeHttp_REST(
-        $REQ,
-        $RES,
-        $HitMode,
-        $sControllerPre,
-        $sActionPre
-    ) {
-        $aURI  = parse_url($REQ->getRequestURI());
-        $aPath = explode('/', trim($aURI['path'], '/'));
-        if (count($aPath) < 2) {
-            return null;
+    public static function slimeHttp_REST($REQ, $RESP, $Log, $CTX, $aSetting)
+    {
+        $aBlock = Url::parse($REQ->getRequestURI(), true, false);
+        $aPath  = $aBlock['path'];
+        $iCount = count($aPath);
+        $sLast  = &$aPath[$iCount - 1];
+        if ($sLast == '') {
+            $sLast = $aSetting['default_controller'];
         }
-
-        $sExt    = substr(strrpos($aURI['path'], '.'), 1);
-        $aParam  = array('__ext__' => $sExt);
-        $Version = strtoupper(array_shift($aPath));
-        $sEntity = array_pop($aPath);
-        if (($i = strpos($sEntity, '.')) !== false) {
-            $sExt    = substr($sEntity, $i + 1);
-            $sEntity = substr($sEntity, 0, $i);
+        if (($iC = count($aPath)) < 2 || $iC % 2 !== 0) {
+            throw new RouteException('[ROUTE] ; Url path block count I must accord with: I >= 2 && I % 2 == 0', 400);
+        }
+        if (($iPos = strrpos($sLast, '.')) === false) {
+            $sExt = $aSetting['default_ext'];
         } else {
-            $sExt = 'json';
+            $sExt  = substr($sLast, $iPos + 1);
+            $sLast = substr($sLast, 0, $iPos);
         }
-        if (($iCount = count($aPath)) >= 2 && $iCount % 2 === 0) {
-            for ($i = 0; $i < $iCount; $i += 2) {
-                $aParam[$aPath[$i]] = $aPath[$i + 1];
+        $aParam = array('__EXT__' => $sExt);
+        $sVer   = strtoupper(array_shift($aPath));
+        for ($i = 0, $iC = count($aPath); $i < $iC; $i += 2) {
+            $aParam[$aPath[$i]] = $aPath[$i + 1];
+        }
+        $sAction     = strtolower($REQ->getRequestMethod());
+        $sController = $sVer . '_' . Str::camel($sLast);
+
+        self::objCall($CTX, $sController, $sAction, array('__EXT__' => $sExt));
+
+        return false;
+    }
+
+    /**
+     * @param array                                $aArgv
+     * @param \Slime\Component\Log\LoggerInterface $Log
+     * @param \Slime\Component\Support\Context     $CTX
+     * @param array                                $aSetting
+     *
+     * @return bool
+     * @throws RouteException
+     */
+    public static function slimeHttp_Cli($aArgv, $Log, $CTX, $aSetting)
+    {
+        if (strpos($aArgv[1], '.') === false) {
+            $aBlock = array($aArgv[1], $aSetting['default_controller']);
+        } else {
+            $aBlock = explode('.', $aArgv[1], 2);
+        }
+        $aParam = empty($aArgv[2]) ? array() : json_decode($aArgv[2], true);
+
+        self::objCall(
+            $CTX,
+            $aSetting['default_controller'] . $aBlock[0],
+            $aSetting['default_action'] . $aBlock[1],
+            $aParam
+        );
+
+        return false;
+    }
+
+    /**
+     * @param \Slime\Component\Support\Context $CTX
+     * @param string                           $sController
+     * @param string                           $sAction
+     * @param array                            $aParam
+     *
+     * @return bool
+     * @throws RouteException
+     */
+    public static function objCall($CTX, $sController, $sAction, $aParam = array())
+    {
+        # for throw exception
+        $mAL = function ($sClass) {
+            throw new RouteException("[ROUTE] ; Controller[$sClass] is not found", 404);
+        };
+        spl_autoload_register($mAL);
+        $Obj = new $sController($CTX, $aParam);
+        spl_autoload_unregister($mAL);
+
+
+        if (isset($aSetting['aop']) && $aSetting['aop'] === false) {
+            $Obj->$sAction();
+        } else {
+            $Ref = new \ReflectionClass($sController);
+            # get all public method map
+            $aMethod = array();
+            foreach ($Ref->getMethods(\ReflectionMethod::IS_PUBLIC) as $Method) {
+                $aMethod[$Method->getName()] = true;
+            }
+
+            # find method
+            if (!isset($aMethod[$sAction])) {
+                throw new RouteException("[ROUTE] ; Action[$sAction] is not found in Controller[$sController]", 404);
+            }
+
+            # before and after
+            $sBefore       = $sAfter = null;
+            $sExpectBefore = "__before_{$sAction}__";
+            if (isset($aMethod[$sExpectBefore])) {
+                $sBefore = $sExpectBefore;
+            } elseif (isset($aMethod['__before__'])) {
+                $sBefore = '__before__';
+            }
+            $sExpectAfter = "__after_{$sAction}__";
+            if (isset($aMethod[$sExpectAfter])) {
+                $sAfter = $sExpectAfter;
+            } elseif (isset($aMethod['__after__'])) {
+                $sAfter = '__after__';
+            }
+
+            # call
+            $bContinue = true;
+            if ($sBefore !== null) {
+                $bContinue = call_user_func(array($Obj, $sBefore));
+            }
+            if ($bContinue !== false) {
+                $bContinue = call_user_func(array($Obj, $sAction));
+            }
+            if ($bContinue !== false && $sAfter !== null) {
+                call_user_func(array($Obj, $sAfter));
             }
         }
-        $aParam['__ext__'] = $sExt;
-        $sMethod           = strtolower($REQ->getRequestMethod());
-        $sController       = $Version . '_' . implode(
-                '',
-                array_map(
-                    function ($sPart) {
-                        return ucfirst(strtolower($sPart));
-                    },
-                    explode('_', $sEntity)
-                )
-            );
-        $CallBack          = new CallBack($sControllerPre, $sActionPre);
-        $CallBack->setCBObject($sController, $sMethod, array($aParam));
 
-        return $CallBack;
-    }
-
-    /**
-     * @param array   $aArg
-     * @param HitMode $HitMode
-     * @param string  $sControllerPre
-     * @param string  $sActionPre
-     *
-     * @return CallBack
-     */
-    public static function slimeCli($aArg, $HitMode, $sControllerPre, $sActionPre)
-    {
-        if (strpos($aArg[1], '.') === false) {
-            $aBlock = array($aArg[1], 'Default');
-        } else {
-            $aBlock = explode('.', $aArg[1], 2);
-        }
-        $aParam = empty($aArg[2]) ?
-            array() :
-            json_decode($aArg[2], true);
-
-        $CallBack = new CallBack($sControllerPre, $sActionPre);
-        $CallBack->setCBObject($aBlock[0], $aBlock[1], array($aParam));
-
-        return $CallBack;
+        return true;
     }
 }

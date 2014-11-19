@@ -1,7 +1,9 @@
 <?php
 namespace Slime\Component\Config;
 
-use Slime\Component\Helper\Arr;
+use Slime\Component\RDBMS\DBAL\SQL_SELECT;
+use Slime\Component\RDBMS\DBAL\Engine;
+use Slime\Component\Support\Arr;
 
 /**
  * Class Configure
@@ -19,10 +21,10 @@ class Adaptor_RDB extends Adaptor_ABS
     protected $aData = null;
 
     /**
-     * @param \Slime\Component\RDS\CURD $PDO
-     * @param string                    $sTable
-     * @param string                    $sFieldKey
-     * @param string                    $sFieldValue
+     * @param Engine $PDO
+     * @param string $sTable
+     * @param string $sFieldKey
+     * @param string $sFieldValue
      */
     public function __construct($PDO, $sTable, $sFieldKey = 'key', $sFieldValue = 'value')
     {
@@ -34,29 +36,27 @@ class Adaptor_RDB extends Adaptor_ABS
 
     /**
      * @param string $sKey
-     * @param mixed  $mDefaultValue
-     * @param bool   $bForce
+     * @param mixed  $mDefault
+     * @param bool   $bWithParse
      *
-     * @throws \OutOfRangeException
      * @return mixed
      */
-    public function get($sKey, $mDefaultValue = null, $bForce = false)
+    public function get($sKey, $mDefault = null, $bWithParse = false)
     {
         if ($this->aData === null) {
-            $aArr        = $this->PDO->querySmarty($this->sTable);
+            $aArr        = $this->PDO->Q(SQL_SELECT::SEL($this->sTable));
             $this->aData = empty($aArr) ? array() : Arr::changeIndexToKVMap($aArr, $this->sFieldK, $this->sFieldV);
         }
         if (!isset($this->aData[$sKey])) {
-            if ($bForce) {
-                throw new \OutOfRangeException("[CONFIG] : Key[$sKey] is not exist");
-            } else {
-                $mRS = $mDefaultValue;
-                goto RET;
-            }
+            return null;
         }
-        $mRS = $this->bParseMode ? Configure::parseRecursion($this->aData[$sKey], $this) : $this->aData[$sKey];
 
-        RET:
-            return $mRS;
+        $mRS = $this->aData[$sKey];
+        if ($bWithParse) {
+            $mRS = $this->parse($mRS, false);
+        }
+
+        return $mRS;
     }
+
 }

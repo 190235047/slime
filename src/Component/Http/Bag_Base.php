@@ -11,17 +11,19 @@ namespace Slime\Component\Http;
  */
 class Bag_Base implements \ArrayAccess, \Countable
 {
-    public $aData;
-    protected $XssStatus;
+    protected $aData;
 
     /**
-     * @param array            $aData
-     * @param \stdClass | null $XSSEnable
+     * @param array $aData
      */
-    public function __construct(array $aData = array(), $XSSEnable = null)
+    public function __construct(array $aData = array())
     {
-        $this->aData     = $aData;
-        $this->XssStatus = $XSSEnable;
+        $this->aData = $aData;
+    }
+
+    public function getData()
+    {
+        return $this->aData;
     }
 
     public function __get($sKey)
@@ -29,17 +31,27 @@ class Bag_Base implements \ArrayAccess, \Countable
         return $this->offsetGet($sKey);
     }
 
-    public function set($saKeyOrKVMap, $nsValue = null, $bOverwriteIfExist = true)
+    /**
+     * @param string $sK
+     * @param string $mV
+     * @param bool   $bOverwrite
+     */
+    public function set($sK, $mV, $bOverwrite = true)
     {
-        if (is_array($saKeyOrKVMap)) {
-            $this->aData = $bOverwriteIfExist ?
-                array_replace($this->aData, $saKeyOrKVMap) :
-                array_merge($saKeyOrKVMap, $this->aData);
-        } else {
-            if ($bOverwriteIfExist || !isset($this->aData[$saKeyOrKVMap])) {
-                $this->aData[$saKeyOrKVMap] = $nsValue;
-            }
+        if ($bOverwrite || !isset($this->aData[$sK])) {
+            $this->aData[$sK] = $mV;
         }
+    }
+
+    /**
+     * @param array $aKV
+     * @param bool  $bOverwrite
+     */
+    public function setMulti($aKV, $bOverwrite = true)
+    {
+        $this->aData = $bOverwrite ?
+            array_replace($this->aData, $aKV) :
+            array_merge($aKV, $this->aData);
     }
 
     /**
@@ -70,12 +82,7 @@ class Bag_Base implements \ArrayAccess, \Countable
      */
     public function offsetGet($offset)
     {
-        return isset($this->aData[$offset]) ?
-            (
-            $this->XssStatus && $this->XssStatus->value ?
-                $this->XssStatus->XSS->clean($this->aData[$offset]) :
-                $this->aData[$offset]
-            ) : null;
+        return isset($this->aData[$offset]) ? $this->aData[$offset] : null;
     }
 
     /**

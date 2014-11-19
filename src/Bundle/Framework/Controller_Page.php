@@ -4,7 +4,6 @@ namespace Slime\Bundle\Framework;
 /**
  * Class Controller_Page
  * Slime 内置 Page 控制器基类
- * 建议 Autoload View Module
  *
  * @package Slime\Bundle\Framework
  * @author  smallslime@gmail.com
@@ -17,12 +16,6 @@ abstract class Controller_Page extends Controller_ABS
     const RENDER_PAGE = 1;
     const RENDER_JUMP = 2;
 
-    # is http method get
-    protected $bGet = true;
-
-    # is ajax
-    protected $bAjax = false;
-
     # for render
     protected $sTPL = null;
     protected $aData = array();
@@ -32,18 +25,18 @@ abstract class Controller_Page extends Controller_ABS
     protected $iJumpCode = null;
 
     # render/jump logic if get
-    private $iRenderType = self::RENDER_AUTO;
+    protected $iRender = self::RENDER_AUTO;
 
-
-    public function __construct(array $aParam = array())
+    /**
+     * @param Context $CTX
+     * @param array   $aParam
+     */
+    public function __construct($CTX, array $aParam = array())
     {
-        parent::__construct($aParam);
+        parent::__construct($CTX, $aParam);
 
-        $this->HttpRequest  = $this->Context->HttpRequest;
-        $this->HttpResponse = $this->Context->HttpResponse;
-
-        $this->bGet  = $this->HttpRequest->getRequestMethod() === 'GET';
-        $this->bAjax = $this->HttpRequest->isAjax();
+        $this->REQ  = $CTX->REQ;
+        $this->RESP = $CTX->RESP;
     }
 
     /**
@@ -51,63 +44,88 @@ abstract class Controller_Page extends Controller_ABS
      */
     public function __after__()
     {
-        if ($this->iRenderType === self::RENDER_NONE) {
+        if ($this->isNoneRender()) {
             return;
-        }
-
-        if ($this->iRenderType === self::RENDER_AUTO) {
-            $this->iRenderType = ($this->bGet || $this->bAjax) ? self::RENDER_PAGE : self::RENDER_JUMP;
-        }
-
-        if ($this->iRenderType === self::RENDER_PAGE) {
-            $this->HttpResponse->setBody(
-                $this->Context->View
+        } elseif ($this->isJumpRender()) {
+            $sJump = $this->sJumpUrl === null ? $this->REQ->getHeader('Referer') : $this->sJumpUrl;
+            $this->RESP->setHeaderRedirect($sJump === null ? '/' : $sJump, $this->iJumpCode);
+        } else {
+            $this->RESP->setHeader('Content-Type', 'text/html; charset=utf-8', false)->setBody(
+                $this->CTX->View
                     ->assignMulti($this->aData)
                     ->setTpl($this->sTPL === null ? $this->getDefaultTPL() : $this->sTPL)
                     ->renderAsResult()
             );
-        } else {
-            $sJump = $this->sJumpUrl === null ? $this->HttpRequest->getHeader('Referer') : $this->sJumpUrl;
-            $this->HttpResponse->setHeaderRedirect($sJump === null ? '/' : $sJump, $this->iJumpCode);
         }
     }
 
+    /**
+     * @return string
+     */
     protected function getDefaultTPL()
     {
-        return sprintf('%s_%s.%sphp',
-            str_replace($this->Context->sControllerPre, '', get_called_class()),
-            str_replace($this->Context->sActionPre, '', $this->Context->CallBack->mCallable[1]),
-            ($sExt = $this->getParam('__ext__', 'html') === 'html') ? '' : "$sExt."
+        return sprintf(
+            '%s-%s.%s',
+            str_replace($this->aParam['__SETTING__']['controller_pre'], '', $this->aParam['__CONTROLLER__']),
+            str_replace($this->aParam['__SETTING__']['action_pre'], '', $this->aParam['__ACTION__']),
+            $this->aParam['__EXT__'] === null ? 'php' : $this->aParam['__EXT__']
         );
     }
 
-    protected function setRenderMode_Auto()
+    public function setAsNoneRender()
     {
-        $this->iRenderType = self::RENDER_AUTO;
-    }
-
-    protected function setRenderMode_Page()
-    {
-        $this->iRenderType = self::RENDER_PAGE;
-    }
-
-    protected function setRenderMode_Jump()
-    {
-        $this->iRenderType = self::RENDER_JUMP;
-    }
-
-    protected function setRenderMode_None()
-    {
-        $this->iRenderType = self::RENDER_NONE;
+        $this->iRender = self::RENDER_NONE;
     }
 
     /**
-     * @return int RENDER_NONE/RENDER_PAGE/RENDER_JUMP
+     * @return bool
      */
-    protected function getRenderType()
+    protected function isNoneRender()
     {
-        return $this->iRenderType === self::RENDER_AUTO ?
-            (($this->bGet || $this->bAjax) ? self::RENDER_PAGE : self::RENDER_JUMP) :
-            $this->iRenderType;
+        return $this->iRender === self::RENDER_NONE;
+    }
+
+    /**
+     * @param null|string $nsTPL
+     */
+    public function setAsPageRender($nsTPL = null)
+    {
+        $this->iRender = self::RENDER_PAGE;
+        if ($nsTPL !== null) {
+            $this->sTPL = $nsTPL;
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isPageRender()
+    {
+        return $this->iRender === self::RENDER_PAGE ||
+        ($this->iRender === self::RENDER_AUTO && $this->REQ->getRequestMethod() === 'GET');
+    }
+
+    /**
+     * @param null|string $nsJumpUrl
+     * @param null|int    $niJumpCode
+     */
+    public function setAsJumpRender($nsJumpUrl = null, $niJumpCode = null)
+    {
+        $this->iRender = self::RENDER_JUMP;
+        if ($nsJumpUrl !== null) {
+            $this->sJumpUrl = $nsJumpUrl;
+            if ($niJumpCode !== null) {
+                $this->iJumpCode = $niJumpCode;
+            }
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isJumpRender()
+    {
+        return $this->iRender === self::RENDER_JUMP ||
+        ($this->iRender === self::RENDER_AUTO && $this->REQ->getRequestMethod() !== 'GET');
     }
 }

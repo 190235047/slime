@@ -22,40 +22,41 @@ class Adaptor_PHP extends Adaptor_ABS
     private $aCachedData;
 
     /**
-     * @param string $sBaseDir
-     * @param string $sDefaultBaseDir
+     * @param string      $sBaseDir
+     * @param null|string $nsDefaultBaseDir
      */
-    public function __construct($sBaseDir, $sDefaultBaseDir)
+    public function __construct($sBaseDir, $nsDefaultBaseDir = null)
     {
         $this->sBaseDir        = $sBaseDir;
-        $this->sDefaultBaseDir = $sDefaultBaseDir;
+        $this->sDefaultBaseDir = $nsDefaultBaseDir === null ? $sBaseDir : $nsDefaultBaseDir;
         $this->bIsDefault      = $this->sBaseDir === $this->sDefaultBaseDir;
     }
 
     /**
      * @param string $sKey
-     * @param mixed  $mDefaultValue
-     * @param bool   $bForce
+     * @param mixed  $mDefault
+     * @param bool   $bWithParse
      *
-     * @throws \OutOfRangeException
      * @return mixed
      */
-    public function get($sKey, $mDefaultValue = null, $bForce = false)
+    public function get($sKey, $mDefault = null, $bWithParse = false)
     {
         if ($this->bIsDefault) {
-            $mResult = $this->_get($sKey, $this->sDefaultBaseDir);
+            $mResult = $this->_find($sKey, $this->sBaseDir);
         } else {
-            $mDefaultResult    = $this->_get($sKey, $this->sDefaultBaseDir);
-            $mCurrentENVResult = $this->_get($sKey, $this->sBaseDir);
+            $mDefaultResult    = $this->_find($sKey, $this->sDefaultBaseDir);
+            $mCurrentENVResult = $this->_find($sKey, $this->sBaseDir);
             $mResult           = $mCurrentENVResult === null ? $mDefaultResult : $mCurrentENVResult;
         }
-        if ($mResult === null && $bForce) {
-            throw new \OutOfRangeException("[CONFIG] : Key [{$sKey}] is not exsi");
+
+        if ($bWithParse) {
+            $mResult = $this->parse($mResult, false);
         }
+
         return $mResult;
     }
 
-    protected function _get($sKey, $sBaseDir)
+    protected function _find($sKey, $sBaseDir)
     {
         if (strpos($sKey, '.') === false) {
             $sK    = $sKey;
@@ -66,10 +67,8 @@ class Adaptor_PHP extends Adaptor_ABS
         }
 
         if (!isset($this->aCachedData[$sBaseDir][$sK])) {
-            $sConfFile = $sBaseDir . '/' . str_replace(':', '/', $sK) . '.php';
-            $mResult   = file_exists($sConfFile) ? require $sConfFile : null;
-            $mResult   = $this->bParseMode ? Configure::parseRecursion($mResult, $this) : $mResult;
-
+            $sConfFile                         = $sBaseDir . '/' . str_replace(':', '/', $sK) . '.php';
+            $mResult                           = file_exists($sConfFile) ? require $sConfFile : null;
             $this->aCachedData[$sBaseDir][$sK] = $mResult;
         } else {
             $mResult = $this->aCachedData[$sBaseDir][$sK];

@@ -1,8 +1,6 @@
 <?php
 namespace Slime\Component\View;
 
-use Slime\Component\Context\Event;
-
 /**
  * Class Adaptor_PHP
  *
@@ -11,19 +9,23 @@ use Slime\Component\Context\Event;
  */
 class Adaptor_PHP implements IAdaptor
 {
-    private $sBaseDir;
-    private $sTpl;
+    const EV_RENDER = 'slime.component.view.adaptor_php.render';
 
-    private $aData = array();
+    protected $sBaseDir;
+    protected $sTpl;
+    protected $aData = array();
+    protected $nEV = null;
 
     /**
-     * @param string|null $sBaseDir
+     * @param string|null                       $sBaseDir
+     * @param null|\Slime\Component\Event\Event $nEV
      */
-    public function __construct($sBaseDir = null)
+    public function __construct($sBaseDir = null, $nEV = null)
     {
         if ($sBaseDir !== null) {
             $this->sBaseDir = $sBaseDir;
         }
+        $this->nEV = $nEV;
     }
 
     /**
@@ -97,10 +99,12 @@ class Adaptor_PHP implements IAdaptor
      */
     public function renderAsResult()
     {
-        Event::occurEvent(Event_Register::E_RENDER_RS_BEFORE, $this);
         $sFile = $this->sBaseDir . DIRECTORY_SEPARATOR . $this->sTpl;
+        if ($this->nEV) {
+            $this->nEV->fire(self::EV_RENDER, array($this, __METHOD__, array(), array('file' => $sFile)));
+        }
         if (!file_exists($sFile)) {
-            throw new \RuntimeException("[VIEW] : Template file[{$sFile}] is not exist");
+            throw new \RuntimeException("[VIEW] ; Template file[{$sFile}] is not exist");
         }
         extract($this->aData);
         ob_start();

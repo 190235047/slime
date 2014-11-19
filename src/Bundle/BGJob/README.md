@@ -4,7 +4,6 @@
 
         <?php
         require '/your_path_of_psr4_autoload/autoload.php';
-        date_default_timezone_set('PRC');
         
         $Q = new \Slime\Bundle\BGJob\Queue_SysMsg(dirname(__FILE__));
         $Log = new \Slime\Component\Log\Logger(array('STDFD' => array('@STDFD')), Slime\Component\Log\Logger::LEVEL_INFO);

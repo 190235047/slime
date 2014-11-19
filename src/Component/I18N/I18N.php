@@ -17,28 +17,35 @@ class I18N
     );
 
     /**
-     * @param string                            $sLanguageBaseDir
-     * @param \Slime\Component\Http\HttpRequest $HttpRequest
-     * @param string                            $sDefaultLanguageDir
-     * @param string                            $sCookieKey
+     * @param \Slime\Component\Http\REQ $HttpRequest
+     * @param string                    $sLanguageBaseDir
+     * @param string                    $sDefaultLanguageDir
+     * @param string                    $sCookieKey
      *
      * @return I18N
      */
     public static function createFromHttp(
-        $sLanguageBaseDir,
         $HttpRequest,
+        $sLanguageBaseDir,
         $sDefaultLanguageDir = 'english',
         $sCookieKey = null
     ) {
-        $sLanguage = null;
+        $nsLangFromC = null;
         if ($sCookieKey !== null) {
-            $sLanguage = $HttpRequest->getC($sCookieKey);
+            $nsLangFromC = $HttpRequest->getC($sCookieKey);
         }
-        $sLanguage = empty($sLanguage) ?
-            strtolower(strtok($HttpRequest->getHeader('Accept_Language'), ',')) :
-            $sLanguage;
+        $nsLangFromH = $HttpRequest->getHeader('Accept_Language');
+        if (empty($nsLangFromC)) {
+            if ($nsLangFromH === null) {
+                $sLang = 'en-us';
+            } else {
+                $sLang = strtolower(strtok($nsLangFromH, ','));
+            }
+        } else {
+            $sLang = $nsLangFromC;
+        }
 
-        return new self($sLanguageBaseDir, $sLanguage, $sDefaultLanguageDir);
+        return new self($sLanguageBaseDir, $sLang, $sDefaultLanguageDir);
     }
 
     public static function createFromCli($sLanguageBaseDir, array $aArg, $sDefaultLanguageDir = 'english')
@@ -61,12 +68,13 @@ class I18N
             }
         }
 
-        $this->Configure = Config\Configure::factory($sConfigAdaptor,
+        $this->sLangDir = $sCurrentLanguageDir;
+
+        $this->Configure = Config\Configure::factory(
+            $sConfigAdaptor,
             $sLanguageBaseDir . DIRECTORY_SEPARATOR . $sCurrentLanguageDir,
             $sLanguageBaseDir . DIRECTORY_SEPARATOR . $sDefaultLanguageDir
         );
-
-        $this->Configure->setParseMode(false);
     }
 
     public function get($sString)

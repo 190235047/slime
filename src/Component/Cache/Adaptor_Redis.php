@@ -13,19 +13,19 @@ class Adaptor_Redis implements IAdaptor
     public $aConfig;
 
     /** @var \Redis */
-    private $Obj;
+    private $Inst;
 
     /**
-     * @param \Slime\Component\Redis\Redis $Redis
+     * @param \Slime\Component\NoSQL\Redis\Redis $Inst
      */
-    public function __construct($Redis)
+    public function __construct($Inst)
     {
-        $this->Obj = $Redis;
+        $this->Inst = $Inst;
     }
 
     public function __call($sMethod, $aParam)
     {
-        return empty($aParam) ? $this->Obj->$sMethod() : call_user_func_array(array($this->Obj, $sMethod), $aParam);
+        return empty($aParam) ? $this->Inst->$sMethod() : call_user_func_array(array($this->Inst, $sMethod), $aParam);
     }
 
     /**
@@ -35,7 +35,7 @@ class Adaptor_Redis implements IAdaptor
      */
     public function get($sKey)
     {
-        return $this->Obj->get($sKey);
+        return $this->Inst->get($sKey);
     }
 
     /**
@@ -47,7 +47,7 @@ class Adaptor_Redis implements IAdaptor
      */
     public function set($sKey, $mValue, $iExpire)
     {
-        return $this->Obj->set($sKey, $mValue, $iExpire);
+        return $this->Inst->set($sKey, $mValue, $iExpire);
     }
 
     /**
@@ -57,7 +57,7 @@ class Adaptor_Redis implements IAdaptor
      */
     public function delete($sKey)
     {
-        return $this->Obj->delete($sKey);
+        return $this->Inst->delete($sKey);
     }
 
     /**
@@ -65,6 +65,6 @@ class Adaptor_Redis implements IAdaptor
      */
     public function flush()
     {
-        return $this->Obj->flushDB();
+        return $this->Inst->flushDB();
     }
 }

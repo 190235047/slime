@@ -11,29 +11,26 @@ interface IAdaptor
 {
     /**
      * @param string $sKey
-     * @param mixed  $mDefaultValue
-     * @param bool   $bForce
+     * @param mixed  $mDefault
+     * @param bool   $bWithParse
      *
      * @return mixed
      */
-    public function get($sKey, $mDefaultValue = null, $bForce = false);
+    public function get($sKey, $mDefault = null, $bWithParse = false);
 
     /**
-     * @param bool $bParse
+     * @param string $sKey
+     * @param bool   $bWithParse
      *
-     * @return $this
+     * @return mixed
      */
-    public function setParseMode($bParse = true);
+    public function getForce($sKey, $bWithParse = false);
 
     /**
-     * @param bool $bParse
+     * @param string|array $mData
+     * @param bool         $bForce
      *
-     * @return $this
+     * @return mixed
      */
-    public function setTmpParseMode($bParse = false);
-
-    /**
-     * @return $this
-     */
-    public function resetParseMode();
+    public function parse($mData, $bForce);
 }

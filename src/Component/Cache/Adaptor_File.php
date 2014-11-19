@@ -37,7 +37,8 @@ class Adaptor_File implements IAdaptor
      */
     public function get($sKey)
     {
-        $sFile = $this->sCachePath . ($this->mCBKey2File===null ? md5($sKey) : call_user_func($this->mCBKey2File, $sKey));
+        $sFile = $this->sCachePath .
+            ($this->mCBKey2File === null ? md5($sKey) : call_user_func($this->mCBKey2File, $sKey));
 
         if (!file_exists($sFile)) {
             return null;
@@ -65,7 +66,7 @@ class Adaptor_File implements IAdaptor
     public function set($sKey, $mValue, $iExpire)
     {
         return file_put_contents(
-            $sFile = $this->sCachePath . ($this->mCBKey2File===null ? md5($sKey) : call_user_func($this->mCBKey2File, $sKey)),
+            $this->sCachePath . ($this->mCBKey2File === null ? md5($sKey) : call_user_func($this->mCBKey2File, $sKey)),
             sprintf("%d\n%s", time() + $iExpire, json_encode($mValue))
         ) !== false;
     }

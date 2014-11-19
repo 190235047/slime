@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\Log;
 
-use Slime\Bundle\Framework\Context;
+use Slime\Component\Support\Context;
 
 /**
  * Class Writer_WebPage
@@ -19,12 +19,12 @@ class Writer_WebPage implements IWriter
         $this->sDebugLayer = $sDebugLayer;
     }
 
-    public function setDisable()
+    public function disable()
     {
         $this->bDisabled = true;
     }
 
-    public function setEnable()
+    public function enable()
     {
         $this->bDisabled = false;
     }
@@ -42,8 +42,14 @@ class Writer_WebPage implements IWriter
         if ($this->bDisabled || empty($this->aData)) {
             return;
         }
-        $sCT = Context::getInst()->HttpResponse->getHeader('Context-type');
-        if ($sCT!==null && substr(strtolower(ltrim($sCT)), 0, 9)!=='text/html') {
+        $C = Context::inst();
+        if (!$C->isBound('REQ')) {
+            return;
+        }
+        /** @var \Slime\Component\Http\REQ $REQ */
+        $REQ = $C->REQ;
+        if (($sCT = $REQ->getHeader('Context-type')) !== null && substr(strtolower(ltrim($sCT)), 0, 9) !== 'text/html'
+        ) {
             return;
         }
         if ($this->sDebugLayer === null) {

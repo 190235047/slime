@@ -1,96 +1,111 @@
 <?php
 namespace Slime\Component\RDBMS\ORM;
 
-use Slime\Component\RDBMS\DAL\SQL;
-use Slime\Component\RDBMS\DAL\SQL_SELECT;
-use Slime\Component\RDBMS\DAL\Val;
+use Slime\Component\RDBMS\DBAL\Engine;
+use Slime\Component\RDBMS\DBAL\Bind;
+use Slime\Component\RDBMS\DBAL\BindItem;
+use Slime\Component\RDBMS\DBAL\Condition;
+use Slime\Component\RDBMS\DBAL\SQL;
+use Slime\Component\RDBMS\DBAL\SQL_DELETE;
+use Slime\Component\RDBMS\DBAL\SQL_INSERT;
+use Slime\Component\RDBMS\DBAL\SQL_SELECT;
+use Slime\Component\RDBMS\DBAL\V;
 
 /**
  * Class Model
  *
  * @package Slime\Component\RDBMS\ORM
  * @author  smallslime@gmail.com
+ *
+ * @property-read string     $sMName
+ * @property-read string     $sTable
+ * @property-read string     $sPKName
+ * @property-read string     $sFKName
+ * @property-read array      $aRelConf
+ * @property-read null|array $naField
+ * @property-read bool       $bUseFull
+ *
+ * @property-read Engine     $Engine
+ * @property-read Factory    $Factory
+ * @property-read string     $sItemClass
  */
 class Model
 {
-    protected $sItemClassNS = null;
-    protected $sItemClassPartName = null;
+    protected $Factory;
+    protected $Engine;
 
-    private $sItemClassName;
+    protected $sMName;
 
-    public $sModelName;
+    protected $sItemClass;
+    protected $sTable;
+    protected $sPKName;
+    protected $sFKName;
+    protected $aRelConf;
+    protected $naField;
+    protected $bUseFull;
 
-    public $DAL;
-    public $sTable;
-    public $sPKName;
-    public $sFKName;
-    public $aRelationConfig;
-    public $Factory;
+    protected $nsFKNameTmp = null;
 
-    protected $sFKNameTmp = null;
+    public function __get($sK)
+    {
+        return $this->$sK;
+    }
 
     /**
-     * @param string                            $sModelName
-     * @param \Slime\Component\RDBMS\DAL\Engine $DAL
-     * @param array                             $aConfig
-     * @param Factory                           $Factory
+     * @param string  $sItemClass
+     * @param string  $sMName
+     * @param Engine  $Engine
+     * @param array   $aConf
+     * @param Factory $Factory
      *
      * @throws \RuntimeException
      */
-    public function __construct($sModelName, $DAL, $aConfig, $Factory)
+    public function __construct($sItemClass, $sMName, $Engine, $aConf, $Factory)
     {
-        $this->sModelName      = $sModelName;
-        $this->DAL             = $DAL;
-        $this->sTable          = isset($aConfig['table']) ? $aConfig['table'] : strtolower($sModelName);
-        $this->sPKName         = isset($aConfig['pk']) ? $aConfig['pk'] : 'id';
-        $this->sFKName         = isset($aConfig['fk']) ? $aConfig['fk'] : $this->sTable . '_id';
-        $this->aRelationConfig = isset($aConfig['relation']) ? $aConfig['relation'] : array();
-        $this->Factory         = $Factory;
-
-        # auto generate item class
-        $sCalledClassName = trim(get_called_class(), '\\');
-        $iPos             = strrpos($sCalledClassName, '\\');
-        if ($iPos === false) {
-            $sCalledNS = $sCalledPartClassName = '';
-        } else {
-            $sCalledNS            = substr($sCalledClassName, 0, $iPos);
-            $sCalledPartClassName = substr($sCalledClassName, $iPos + 1);
+        $this->sMName     = $sMName;
+        $this->Engine     = $Engine;
+        if ($this->sItemClass === null) {
+            $this->sItemClass = $sItemClass;
         }
-        if ($this->sItemClassNS === null) {
-            $this->sItemClassNS = $sCalledNS;
+        if ($this->sTable === null) {
+            $this->sTable = isset($aConf['table']) ? $aConf['table'] : strtolower($sMName);
         }
-        if ($this->sItemClassPartName === null) {
-            if ($sCalledNS === 'Slime\\Component\\RDBMS\\ORM' && $sCalledPartClassName === 'Model') {
-                $this->sItemClassPartName = 'Item';
-            } elseif (substr($sCalledPartClassName, 0, 6) === 'Model_') {
-                $this->sItemClassPartName = 'Item_' . substr($sCalledPartClassName, 6);
-            } else {
-                throw new \RuntimeException(
-                    '[MODEL] : Can not parse item class name through both automatic and defined'
-                );
-            }
+        if ($this->sPKName === null) {
+            $this->sPKName = isset($aConf['pk']) ? $aConf['pk'] : 'id';
         }
-        $this->sItemClassName = $this->sItemClassNS . '\\' . $this->sItemClassPartName;
+        if ($this->sFKName === null) {
+            $this->sFKName = isset($aConf['fk']) ? $aConf['fk'] : $this->sTable . '_id';
+        }
+        if ($this->aRelConf === null) {
+            $this->aRelConf = isset($aConf['relation']) ? $aConf['relation'] : array();
+        }
+        if ($this->naField === null) {
+            $this->naField = isset($aConf['fields']) ? $aConf['fields'] : null;
+        }
+        if ($this->bUseFull === null) {
+            $this->bUseFull = !empty($aConf['use_full_field_in_select']);
+        }
+        $this->Factory = $Factory;
     }
 
-    public function SQL_C()
+    public function SQL_INS()
     {
-        return SQL::C($this->sTable);
+        return SQL::INS($this->sTable);
     }
 
-    public function SQL_U()
+    public function SQL_UPD()
     {
-        return SQL::U($this->sTable);
+        return SQL::UPD($this->sTable);
     }
 
-    public function SQL_R()
+    public function SQL_SEL()
     {
-        return SQL::R($this->sTable);
+        return SQL::SEL($this->sTable, $this->bUseFull ? $this->naField : null);
     }
 
-    public function SQL_D()
+    public function SQL_DEL()
     {
-        return SQL::D($this->sTable);
+        return SQL::DEL($this->sTable);
     }
 
     /**
@@ -98,205 +113,198 @@ class Model
      */
     public function setFKTmp($sFKName)
     {
-        $this->sFKNameTmp = $this->sFKName;
-        $this->sFKName    = $sFKName;
+        $this->nsFKNameTmp = $this->sFKName;
+        $this->sFKName     = $sFKName;
     }
 
     public function resetFK()
     {
-        if ($this->sFKNameTmp !== null) {
-            $this->sFKName    = $this->sFKNameTmp;
-            $this->sFKNameTmp = null;
+        if ($this->nsFKNameTmp !== null) {
+            $this->sFKName     = $this->nsFKNameTmp;
+            $this->nsFKNameTmp = null;
         }
     }
 
-
     /**
-     * @param array $aKVMap
-     * @param bool  $bLastID
-     * @param null  $iLastID
-     *
-     * @return bool
-     */
-    public function add(array $aKVMap, $bLastID = false, &$iLastID = null)
-    {
-        $SQL = $this->SQL_C()->addData($aKVMap);
-        $bRS = $this->DAL->E($SQL);
-        if ($bLastID && $bRS!==false) {
-            $iLastID = $this->DAL->getInstance($SQL)->lastInsertId();
-        }
-
-        return $bRS;
-    }
-
-    /**
-     * @var \Slime\Component\RDBMS\DAL\SQL_INSERT
-     */
-    protected $SQL_BUFFER;
-    protected $iBufferMax;
-    protected $iBufferCount;
-
-    /**
-     * @param array $aKey
-     * @param int   $iMax
-     */
-    public function addBuffer_Start($aKey, $iMax = 100)
-    {
-        $this->SQL_BUFFER = $this->SQL_C();
-        $this->SQL_BUFFER->setKey($aKey);
-        $this->iBufferMax = $iMax;
-    }
-
-    /**
-     * @param array $aData
-     */
-    public function addBuffer(array $aData)
-    {
-        if (++$this->iBufferCount >= $this->iBufferMax) {
-            $this->flushBuffer();
-        }
-        $this->SQL_BUFFER->addData($aData);
-    }
-
-    public function addBuffer_End()
-    {
-        $this->flushBuffer();
-    }
-
-    protected function flushBuffer()
-    {
-        $this->DAL->E($this->SQL_BUFFER);
-        $this->iBufferCount = 0;
-    }
-
-    /**
-     * @param mixed $mPKOrWhere
-     * @param array $aKVMap
+     * @param array | SQL_INSERT $m_aKVData_SQL
+     * @param null | Bind        $m_n_Bind
      *
      * @return bool | int
      */
-    public function update($mPKOrWhere, $aKVMap)
+    public function insert($m_aKVData_SQL, $m_n_Bind = null)
     {
-        return $this->DAL->E(
-            $this->SQL_U()
-                ->setKV($aKVMap)
-                ->where(is_array($mPKOrWhere) ? $mPKOrWhere : array($this->sPKName => $mPKOrWhere))
-        );
+        return $this->Engine->E(
+            $SQL = is_array($m_aKVData_SQL) ?
+                $this->SQL_INS()->values($m_aKVData_SQL) :
+                $m_aKVData_SQL,
+            $m_n_Bind
+        ) ? $this->Engine->inst($SQL)->lastInsertId() : false;
     }
 
     /**
-     * @param mixed $mPKOrWhere
+     * @param null | string | int | Condition | SQL $m_n_siPK_Condition_SQL
+     * @param array                                 $aKVData
+     * @param null | Bind                           $m_n_Bind
+     *
+     * @return bool | int
+     */
+    public function update($m_n_siPK_Condition_SQL, array $aKVData, $m_n_Bind = null)
+    {
+        if ($m_n_siPK_Condition_SQL instanceof SQL_DELETE) {
+            $SQL = $m_n_siPK_Condition_SQL;
+        } else {
+            $SQL = $this->SQL_UPD();
+            if ($m_n_siPK_Condition_SQL !== null) {
+                $SQL->where(
+                    $m_n_siPK_Condition_SQL instanceof Condition ?
+                        $m_n_siPK_Condition_SQL :
+                        Condition::build()->set($this->sPKName, '=', $m_n_siPK_Condition_SQL)
+                );
+            }
+        }
+        $SQL->setMulti($aKVData);
+
+        return $this->Engine->E($SQL, $m_n_Bind);
+    }
+
+    /**
+     * @param null | string | int | Condition | SQL $m_n_siPK_Condition_SQL
+     * @param null | Bind                           $m_n_Bind
      *
      * @return bool
      */
-    public function delete($mPKOrWhere)
+    public function delete($m_n_siPK_Condition_SQL, $m_n_Bind = null)
     {
-        return $this->DAL->E(
-            $this->SQL_D()
-                ->where(is_array($mPKOrWhere) ? $mPKOrWhere : array($this->sPKName => $mPKOrWhere))
-        );
+        if ($m_n_siPK_Condition_SQL instanceof SQL_DELETE) {
+            $SQL = $m_n_siPK_Condition_SQL;
+        } else {
+            $SQL = $this->SQL_DEL();
+            if ($m_n_siPK_Condition_SQL !== null) {
+                $SQL->where(
+                    $m_n_siPK_Condition_SQL instanceof Condition ?
+                        $m_n_siPK_Condition_SQL :
+                        Condition::build()->set($this->sPKName, '=', $m_n_siPK_Condition_SQL)
+                );
+            }
+        }
+
+        return $this->Engine->E($SQL, $m_n_Bind);
     }
 
     /**
-     * @param mixed $mPKOrWhere
+     * @param Condition | SQL_SELECT | string | int $m_n_siPK_Condition_SQL
+     * @param Bind                                  $m_n_Bind
      *
      * @return Item | CItem | null
      */
-    public function find($mPKOrWhere)
+    public function find($m_n_siPK_Condition_SQL, $m_n_Bind = null)
     {
-        $mItem = $this->DAL->Q(
-            $this->SQL_R()
-                ->where(is_array($mPKOrWhere) ? $mPKOrWhere : array($this->sPKName => $mPKOrWhere))
-                ->limit(1)
-        );
+        if ($m_n_siPK_Condition_SQL instanceof SQL_SELECT) {
+            $SQL = $m_n_siPK_Condition_SQL;
+        } else {
+            $SQL = $this->SQL_SEL();
+            if ($m_n_siPK_Condition_SQL !== null) {
+                $SQL->where(
+                    $m_n_siPK_Condition_SQL instanceof Condition ?
+                        $m_n_siPK_Condition_SQL :
+                        Condition::build()->set($this->sPKName, '=', $m_n_siPK_Condition_SQL)
+                );
+            }
+        }
+        $SQL->limit(1);
+        $mItem = $this->Engine->Q($SQL, $m_n_Bind);
 
-        return empty($mItem) ?
-            ($this->Factory->isCompatibleMode() ? new CItem() : null) :
-            new $this->sItemClassName($mItem[0], $this);
+        return empty($mItem) ? Factory::newNull() : new $this->sItemClass($mItem[0], $this);
     }
 
     /**
-     * @param array | SQL_SELECT $aWhere_SQLSEL
-     * @param string             $nsOrderBy
-     * @param int                $niLimit
-     * @param int                $niOffset
+     * @param Condition | SQL_SELECT | null | array $m_n_aPK_Condition_SQL
+     * @param string | BindItem | array             $mOrderBy
+     * @param null | int                            $niLimit
+     * @param null | int                            $niOffset
+     * @param null | Bind                           $m_n_Bind
      *
      * @return Group | Item[]
      */
     public function findMulti(
-        array $aWhere_SQLSEL = array(),
-        $nsOrderBy = null,
+        $m_n_aPK_Condition_SQL = null,
+        $mOrderBy = null,
         $niLimit = null,
-        $niOffset = null
+        $niOffset = null,
+        $m_n_Bind = null
     ) {
-        if (is_array($aWhere_SQLSEL)) {
-            $SQL = $this->SQL_R();
-            if ($aWhere_SQLSEL !== null) {
-                $SQL->where($aWhere_SQLSEL);
-            }
-            if ($nsOrderBy !== null) {
-                $SQL->orderBy($nsOrderBy);
-            }
-            if ($niLimit !== null) {
-                $SQL->limit($niLimit);
-            }
-            if ($niOffset !== null) {
-                $SQL->offset($niOffset);
-            }
-            $aaData = $this->DAL->Q($SQL);
-        } else {
-            $aaData = $this->DAL->Q($aWhere_SQLSEL);
-        }
+        $aaData = $this->findCustom($m_n_aPK_Condition_SQL, $mOrderBy, $niLimit, $niOffset, $m_n_Bind);
 
         $Group = new Group($this);
         if (empty($aaData)) {
             return $Group;
         }
         foreach ($aaData as $aRow) {
-            $Group[$aRow[$this->sPKName]] = new $this->sItemClassName($aRow, $this, $Group);
+            $Group[$aRow[$this->sPKName]] = new $this->sItemClass($aRow, $this, $Group);
         }
         return $Group;
     }
 
     /**
-     * @param array | SQL_SELECT $aWhere_SQLSEL
+     * @param Condition | SQL_SELECT | null $m_n_aPK_Condition_SQL
+     * @param null | Bind                   $m_n_Bind
      *
      * @return int | bool
      */
-    public function findCount($aWhere_SQLSEL = null)
+    public function findCount($m_n_aPK_Condition_SQL = null, $m_n_Bind = null)
     {
-        $aItem = $this->DAL->Q(
-            is_array($aWhere_SQLSEL) ?
-                $this->SQL_R()
-                    ->where($aWhere_SQLSEL)
-                    ->fields(Val::Keyword('count(1) AS total'))
-                : $aWhere_SQLSEL
+        if ($m_n_aPK_Condition_SQL instanceof SQL_SELECT) {
+            $SQL = $m_n_aPK_Condition_SQL;
+        } else {
+            $SQL = $this->SQL_SEL();
+            if ($m_n_aPK_Condition_SQL !== null) {
+                if (is_array($m_n_aPK_Condition_SQL)) {
+                    $SQL->where(Condition::build()->set($this->sPKName, 'IN', $m_n_aPK_Condition_SQL));
+                } else {
+                    $SQL->where($m_n_aPK_Condition_SQL);
+                }
+            }
+        }
+        $SQL->fields(V::make('count(1) AS total'))->limit(1);
+        $aItem = $this->Engine->Q(
+            $SQL,
+            $m_n_Bind
         );
 
         return $aItem === false ? false : $aItem[0]['total'];
     }
 
     /**
-     * @param array | SQL_SELECT $aWhere_SQLSEL
-     * @param string             $nsOrderBy
-     * @param int                $niLimit
-     * @param int                $niOffset
+     * @param Condition | SQL_SELECT | null $m_n_Condition_SQL
+     * @param string | BindItem | array     $mOrderBy
+     * @param int                           $niLimit
+     * @param int                           $niOffset
+     * @param Bind | null                   $m_n_Bind
      *
      * @return bool | array
      */
     public function findCustom(
-        array $aWhere_SQLSEL = array(),
-        $nsOrderBy = null,
+        $m_n_Condition_SQL = null,
+        $mOrderBy = null,
         $niLimit = null,
-        $niOffset = null
+        $niOffset = null,
+        $m_n_Bind = null
     ) {
-        if (is_array($aWhere_SQLSEL)) {
-            $SQL = $this->SQL_R();
-            if ($aWhere_SQLSEL !== null) {
-                $SQL->where($aWhere_SQLSEL);
+        if ($m_n_Condition_SQL instanceof SQL_SELECT) {
+            $aaData = $this->Engine->Q($m_n_Condition_SQL, $m_n_Bind);
+        } else {
+            $SQL = $this->SQL_SEL();
+            if ($m_n_Condition_SQL !== null) {
+                $SQL->where($m_n_Condition_SQL);
             }
-            if ($nsOrderBy !== null) {
-                $SQL->orderBy($nsOrderBy);
+            if ($mOrderBy !== null) {
+                if (is_array($mOrderBy)) {
+                    foreach ($mOrderBy as $mItem) {
+                        $SQL->orderBy($mItem);
+                    }
+                } else {
+                    $SQL->orderBy($mOrderBy);
+                }
             }
             if ($niLimit !== null) {
                 $SQL->limit($niLimit);
@@ -304,9 +312,7 @@ class Model
             if ($niOffset !== null) {
                 $SQL->offset($niOffset);
             }
-            $aaData = $this->DAL->Q($SQL);
-        } else {
-            $aaData = $this->DAL->Q($aWhere_SQLSEL);
+            $aaData = $this->Engine->Q($SQL, $m_n_Bind);
         }
 
         return $aaData;

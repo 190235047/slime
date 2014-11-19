@@ -128,7 +128,8 @@ class FirePHP
 
     /**
      * Firebug ERROR level
-     * Logs a message to firebug console, displays an error icon before the message and colors the line yellow. Also increments the firebug error count.
+     * Logs a message to firebug console, displays an error icon before the message and colors the line yellow. Also
+     * increments the firebug error count.
      *
      * @var string
      */
@@ -1005,12 +1006,12 @@ class FirePHP
                                     'Function' => isset($trace[$i]['function']) ? $trace[$i]['function'] : '',
                                     'Message'  => $trace[$i]['args'][0],
                                     'File'     => isset($trace[$i]['file']) ? $this->_escapeTraceFile(
-                                            $trace[$i]['file']
-                                        ) : '',
+                                        $trace[$i]['file']
+                                    ) : '',
                                     'Line'     => isset($trace[$i]['line']) ? $trace[$i]['line'] : '',
                                     'Args'     => isset($trace[$i]['args']) ? $this->encodeObject(
-                                            $trace[$i]['args']
-                                        ) : '',
+                                        $trace[$i]['args']
+                                    ) : '',
                                     'Trace'    => $this->_escapeTrace(array_splice($trace, $i + 1))
                                 );
 
@@ -2018,9 +2019,11 @@ class FirePHP
  * @package     FirePHPCore
  */
 
+/*
 if (!class_exists('FirePHP')) {
     require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . 'FirePHP.php';
 }
+*/
 
 /**
  * Sends the given data to the FirePHP Firefox Extension.

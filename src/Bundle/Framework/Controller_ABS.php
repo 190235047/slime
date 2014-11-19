@@ -17,7 +17,7 @@ abstract class Controller_ABS
     /**
      * @var Context 上下文对象
      */
-    protected $Context;
+    protected $CTX;
 
     /**
      * @var \Slime\Component\Log\Logger 日志对象
@@ -34,88 +34,33 @@ abstract class Controller_ABS
      */
     protected $aParam;
 
-    public function __construct(array $aParam = array())
+    /**
+     * @param Context $CTX
+     * @param array   $aParam
+     */
+    public function __construct($CTX, array $aParam = array())
     {
-        $this->aParam  = $aParam;
-        $this->Context = Context::getInst();
-        $this->Log     = $this->Context->Log;
-        $this->Config  = $this->Context->Config;
-    }
-
-    public function innerCall($sController, $sMethod, $aParam = null)
-    {
-        if ($aParam === null) {
-            $aParam = $this->aParam;
-        }
-        $CallBack = new Route\CallBack($this->Context->sNS);
-        $CallBack->setCBObject($sController, $sMethod, $aParam);
-        $CallBack->call();
-        return $CallBack->mCallable->aData;
+        $this->CTX    = $CTX;
+        $this->aParam = $aParam;
+        $this->Log    = $CTX->Log;
+        $this->Config = $CTX->Config;
     }
 
     /**
-     * @param array                 $aArgs
-     * @param array|Log\Logger|null $mLogConfigOrLogObject
+     * @param string $sK
+     * @param mixed  $mDefault
+     * @param bool   $bForce
      *
      * @return mixed
+     * @throws \OutOfBoundsException
      */
-    public function outerCallAsCli($aArgs, $mLogConfigOrLogObject = null)
-    {
-        # pre
-        $sBootstrap = get_class($this->Context->Bootstrap);
-        if ($mLogConfigOrLogObject === null) {
-            $mLogConfigOrLogObject = $this->Log;
-        } elseif (is_array($mLogConfigOrLogObject) && !isset($mLogConfigOrLogObject['cli'])) {
-            $mLogConfigOrLogObject = array('cli' => $mLogConfigOrLogObject);
-        }
-
-        /** @var Bootstrap $Bootstrap */
-        $Bootstrap = new $sBootstrap(
-            'cli',
-            $this->Context->sENV,
-            $this->Context->sNS,
-            $mLogConfigOrLogObject,
-            $aArgs
-        );
-        $Bootstrap->run();
-        Context::destroy();
-    }
-
-    /**
-     * @param Http\HttpRequest      $HttpRequest
-     * @param array|Log\Logger|null $mLogConfigOrLogObject
-     */
-    public function outerCallAsHttp(
-        Http\HttpRequest $HttpRequest,
-        $mLogConfigOrLogObject = null
-    ) {
-        # pre
-        $sBootstrap = get_class($this->Context->Bootstrap);
-        if ($mLogConfigOrLogObject === null) {
-            $mLogConfigOrLogObject = $this->Log;
-        } elseif (is_array($mLogConfigOrLogObject) && !isset($mLogConfigOrLogObject['http'])) {
-            $mLogConfigOrLogObject = array('http' => $mLogConfigOrLogObject);
-        }
-
-        /** @var Bootstrap $Bootstrap */
-        $Bootstrap = new $sBootstrap(
-            'http',
-            $this->Context->sENV,
-            $this->Context->sNS,
-            $mLogConfigOrLogObject,
-            $HttpRequest
-        );
-        $Bootstrap->run();
-        Context::destroy();
-    }
-
     public function getParam($sK, $mDefault = null, $bForce = false)
     {
         if (array_key_exists($sK, $this->aParam)) {
             return $this->aParam[$sK];
         } else {
             if ($bForce) {
-                throw new \Exception("[CTRL] : Key[$sK] is not in param");
+                throw new \OutOfBoundsException("[CONTROLLER] ; Key[$sK] is not in param");
             } else {
                 return $mDefault;
             }

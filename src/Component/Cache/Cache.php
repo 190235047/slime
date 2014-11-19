@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\Cache;
 
-use Slime\Ext\Sugar;
+use Slime\Component\Support\Sugar;
 
 /**
  * Class Cache

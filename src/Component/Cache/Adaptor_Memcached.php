@@ -1,6 +1,8 @@
 <?php
 namespace Slime\Component\Cache;
 
+use Slime\Component\NoSQL\Memcached\Memcached;
+
 /**
  * Class Adaptor_Memcached
  *
@@ -9,20 +11,17 @@ namespace Slime\Component\Cache;
  */
 class Adaptor_Memcached implements IAdaptor
 {
-    /** @var \Memcached */
-    public $Obj;
+    /**
+     * @var \Memcached
+     */
+    protected $Inst = null;
 
     /**
-     * @param \Slime\Component\Memcached\PHPMemcached $Memcached
+     * @param Memcached $Obj
      */
-    public function __construct($Memcached)
+    public function __construct($Obj)
     {
-        $this->Obj = $Memcached;
-    }
-
-    public function __call($sMethod, $aParam)
-    {
-        return empty($aParam) ? $this->Obj->$sMethod() : call_user_func_array(array($this->Obj, $sMethod), $aParam);
+        $this->Inst = $Obj;
     }
 
     /**
@@ -32,7 +31,7 @@ class Adaptor_Memcached implements IAdaptor
      */
     public function get($sKey)
     {
-        return $this->Obj->get($sKey);
+        return $this->Inst->get($sKey);
     }
 
     /**
@@ -44,7 +43,7 @@ class Adaptor_Memcached implements IAdaptor
      */
     public function set($sKey, $mValue, $iExpire)
     {
-        return $this->Obj->set($sKey, $mValue, $iExpire);
+        return $this->Inst->set($sKey, $mValue, $iExpire);
     }
 
     /**
@@ -54,7 +53,7 @@ class Adaptor_Memcached implements IAdaptor
      */
     public function delete($sKey)
     {
-        return $this->Obj->delete($sKey);
+        return $this->Inst->delete($sKey);
     }
 
     /**
@@ -62,6 +61,6 @@ class Adaptor_Memcached implements IAdaptor
      */
     public function flush()
     {
-        return $this->Obj->flush();
+        return $this->Inst->flush();
     }
 }

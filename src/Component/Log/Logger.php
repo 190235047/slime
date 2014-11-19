@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\Log;
 
-use Slime\Ext\Sugar;
+use Slime\Component\Support\Sugar;
 
 /**
  * Class Logger
@@ -16,23 +16,23 @@ use Slime\Ext\Sugar;
 class Logger implements LoggerInterface
 {
     const DESC_EMERGENCY = 'emergency';
-    const DESC_ALERT     = 'alert';
-    const DESC_CRITICAL  = 'critical';
-    const DESC_ERROR     = 'error';
-    const DESC_WARNING   = 'warning';
-    const DESC_NOTICE    = 'notice';
-    const DESC_INFO      = 'info';
-    const DESC_DEBUG     = 'debug';
+    const DESC_ALERT = 'alert';
+    const DESC_CRITICAL = 'critical';
+    const DESC_ERROR = 'error';
+    const DESC_WARNING = 'warning';
+    const DESC_NOTICE = 'notice';
+    const DESC_INFO = 'info';
+    const DESC_DEBUG = 'debug';
 
-    const LEVEL_ALL       = 255;
+    const LEVEL_ALL = 255;
     const LEVEL_EMERGENCY = 128;
-    const LEVEL_ALERT     = 64;
-    const LEVEL_CRITICAL  = 32;
-    const LEVEL_ERROR     = 16;
-    const LEVEL_WARNING   = 8;
-    const LEVEL_NOTICE    = 4;
-    const LEVEL_INFO      = 2;
-    const LEVEL_DEBUG     = 1;
+    const LEVEL_ALERT = 64;
+    const LEVEL_CRITICAL = 32;
+    const LEVEL_ERROR = 16;
+    const LEVEL_WARNING = 8;
+    const LEVEL_NOTICE = 4;
+    const LEVEL_INFO = 2;
+    const LEVEL_DEBUG = 1;
 
     public static $aMap = array(
         self::LEVEL_EMERGENCY => 'emergency',
@@ -46,7 +46,7 @@ class Logger implements LoggerInterface
     );
 
     /**
-     * @param array $aWriterConf ['@File' => ['param1', 'param2'], '@FirePHP']
+     * @param array $aWriterConf ['File' => ['@File', 'param1', 'param2'], '@FirePHP']
      * @param int   $iLogLevel
      * @param null  $sRequestID
      */
@@ -59,7 +59,7 @@ class Logger implements LoggerInterface
             $this->aWriter[$sK] = Sugar::createObjAdaptor(__NAMESPACE__, $aClassAndArgs, 'IWriter', 'Writer_');
         }
         $this->iLogLevel = $iLogLevel;
-        $this->sGUID     = $sRequestID ? $sRequestID : md5(uniqid(__CLASS__, true));
+        $this->sGUID     = base_convert(rand(10, 99) . str_replace('.', '', round(microtime(true), 4)), 10, 32);
     }
 
     /**
@@ -214,16 +214,6 @@ class Logger implements LoggerInterface
         foreach ($this->aWriter as $Writer) {
             $Writer->acceptData($aRow);
         }
-    }
-
-    /**
-     * @param int $iLevel
-     *
-     * @return bool
-     */
-    public function needLog($iLevel)
-    {
-        return (bool)($iLevel & $this->iLogLevel);
     }
 
     public static function getLevelString($iLevel)

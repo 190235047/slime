@@ -2,14 +2,12 @@
 namespace Slime\Bundle\Framework;
 
 use Slime\Component\Http;
-use Slime\Component\XML\EasyXML;
+use Slime\Component\Support\XML;
 use Slime\Component\View;
-use Slime\Component\Log\Writer_WebPage;
 
 /**
  * Class Controller_API
  * Slime 内置Http控制器基类
- * 建议 Autoload View Module
  *
  * @package Slime\Bundle\Framework
  * @author  smallslime@gmail.com
@@ -24,17 +22,11 @@ abstract class Controller_Api extends Controller_ABS
 
     protected $aData = array();
 
-    public function __construct(array $aParam = array())
+    public function __construct($CTX, array $aParam = array())
     {
-        parent::__construct($aParam);
-        foreach ($this->Log->aWriter as $Writer) {
-            if ($Writer instanceof Writer_WebPage) {
-                $Writer->setDisable();
-            }
-        }
-
-        $this->HttpRequest  = $this->Context->HttpRequest;
-        $this->HttpResponse = $this->Context->HttpResponse;
+        parent::__construct($CTX, $aParam);
+        $this->REQ  = $this->CTX->REQ;
+        $this->RESP = $this->CTX->RESP;
     }
 
     protected function success(array $aData = array())
@@ -67,36 +59,39 @@ abstract class Controller_Api extends Controller_ABS
 
     protected function _renderXML()
     {
-        $this->HttpResponse->setHeader('Content-Type', 'text/xml', false);
-        $this->HttpResponse->setBody(
-            $this->sXmlTPL === null ?
-                EasyXML::Array2XML($this->aData) :
-                $this->Context->View->assignMulti($this->aData)->setTpl($this->sXmlTPL)->renderAsResult()
-        );
+        $this->RESP
+            ->setHeader('Content-Type', 'text/xml; charset=utf-8', false)
+            ->setBody(
+                $this->sXmlTPL === null ?
+                    XML::Array2XML($this->aData) :
+                    $this->CTX->View->assignMulti($this->aData)->setTpl($this->sXmlTPL)->renderAsResult()
+            );
     }
 
     protected function _renderJSON()
     {
-        $this->HttpResponse->setHeader('Content-Type', 'text/javascript', false);
-        $this->HttpResponse->setBody(
-            $this->sJsonTPL === null ?
-                json_encode($this->aData) :
-                $this->Context->View->assignMulti($this->aData)->setTpl($this->sJsonTPL)->renderAsResult()
-        );
+        $this->RESP
+            ->setHeader('Content-Type', 'text/javascript; charset=utf-8', false)
+            ->setBody(
+                $this->sJsonTPL === null ?
+                    json_encode($this->aData) :
+                    $this->CTX->View->assignMulti($this->aData)->setTpl($this->sJsonTPL)->renderAsResult()
+            );
     }
 
     protected function _renderJSONP()
     {
-        $sCB = $this->HttpRequest->getG($this->sJSCBParam);
+        $sCB = $this->REQ->getG($this->sJSCBParam);
         if ($sCB === null) {
             $sCB = 'cb';
         }
-        $this->HttpResponse->setHeader('Content-Type', 'text/javascript', false);
-        $this->HttpResponse->setBody(
-            $this->sJsonPTPL === null ?
-                $sCB . '(' . json_encode($this->aData) . ')' :
-                $this->Context->View->assignMulti($this->aData)->setTpl($this->sJsonPTPL)->renderAsResult()
-        );
+        $this->RESP
+            ->setHeader('Content-Type', 'text/javascript; charset=utf-8', false)
+            ->setBody(
+                $this->sJsonPTPL === null ?
+                    $sCB . '(' . json_encode($this->aData) . ')' :
+                    $this->CTX->View->assignMulti($this->aData)->setTpl($this->sJsonPTPL)->renderAsResult()
+            );
     }
 
     protected function _renderJS()

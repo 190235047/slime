@@ -4,18 +4,18 @@ namespace Slime\Bundle\BGJob;
 /**
  * Class Daemon
  *
- * @package Slime\Bundle\Framework\BGJob
+ * @package Slime\Bundle\BGJob
  * @author  smallslime@gmail.com
  */
 class Daemon
 {
     /**
      * @param IQueue                               $Queue
-     * @param \Slime\Component\Log\LoggerInterface $Log       same as psr3 LoggerInterface
+     * @param \Slime\Component\Log\LoggerInterface $Log same as psr3 LoggerInterface
      * @param int                                  $iMaxJob
      * @param null | string                        $nsPHPBin
      */
-    public static function run(IQueue $Queue, $Log, $iMaxJob = 20, $nsPHPBin = null)
+    public static function run($Queue, $Log, $iMaxJob = 20, $nsPHPBin = null)
     {
         $sPHPBin      = $nsPHPBin === null ? $_SERVER['_'] : $nsPHPBin;
         $aFD          = array();
@@ -40,7 +40,6 @@ class Daemon
             if ($sMessage === false) {
                 goto NEXT;
             }
-
             $Log->info("get queue message[{$sMessage}]");
 
             # run
@@ -65,7 +64,7 @@ class Daemon
                 }
             }
 
-            if (($iNewNum = count($aFD))!==$iCurChildren) {
+            if (($iNewNum = count($aFD)) !== $iCurChildren) {
                 $iCurChildren = $iNewNum;
                 $Log->info("Job running count[$iNewNum]");
             }

@@ -1,7 +1,7 @@
 <?php
 namespace Slime\Component\RDBMS\ORM;
 
-use Slime\Component\RDBMS\DAL\Engine;
+use Slime\Component\RDBMS\DBAL\EnginePool;
 
 /**
  * Class Factory
@@ -11,132 +11,152 @@ use Slime\Component\RDBMS\DAL\Engine;
  */
 class Factory
 {
-    /** @var string | null  null means disable auto_create function */
-    public $sDefaultDB = 'default';
-
-    protected $aDAL = array();
-    protected $bCompatibleMode = false;
-    protected $bTmpCompatibleMode = null;
+    /** @var \Slime\Component\RDBMS\DBAL\EnginePool */
+    protected $EnginePool;
+    protected $aConf;
+    protected $aDefault;
 
     /** @var Model[] */
-    protected $aModel = array();
+    protected $aM = array();
 
-    protected $sDefaultModelClass;
+    protected static $aDefaultSetting = array(
+        'db'         => 'default',
+        'model_pre'  => '\\',
+        'item_pre'   => '\\',
+        'model_base' => '\\Slime\\Component\\RDBMS\\ORM\\Model',
+        'item_base'  => '\\Slime\\Component\\RDBMS\\ORM\\Item'
+    );
 
     /**
-     * @param array  $aDBConfigAll
-     * @param array  $aModelConfig
-     * @param string $sAppModelNS
-     * @param string $sDefaultModelClass
-     * @param array  $aAOP
+     * @param array $aDBConf db conf
+     * @param array $aMConf  model conf  ['__MODEL__' => [], '__DEFAULT__' => []]
+     *
+     * @return Factory
      */
-    public function __construct(
-        $aDBConfigAll,
-        $aModelConfig,
-        $sAppModelNS = '',
-        $sDefaultModelClass = 'Slime\\Component\\RDS\\Model\\Model',
-        array $aAOP = array()
-    ) {
-        foreach ($aDBConfigAll as $sK => $aDBConfig) {
-            $this->aDAL[$sK] = new Engine(
-                $sK,
-                $aDBConfig['dsn'],
-                $aDBConfig['username'],
-                $aDBConfig['password'],
-                $aDBConfig['options'],
-                $aAOP
-            );
-        }
-        $this->aModelConf         = $aModelConfig;
-        $this->sAppModelNS        = $sAppModelNS;
-        $this->sDefaultModelClass = $sDefaultModelClass;
-    }
-
-    public function __call($sModel, $aArg = null)
+    public static function createFromConfig(array $aDBConf, array $aMConf)
     {
-        if (($sModel = substr($sModel, 3)) !== false) {
-            return $this->get($sModel);
-        }
-        throw new \BadMethodCallException("[MODEL] : Call $sModel error");
+        $EnginePool            = new EnginePool($aDBConf);
+        $aMConf['__DEFAULT__'] = empty($aMConf['__DEFAULT__']) ?
+            self::$aDefaultSetting :
+            array_merge(self::$aDefaultSetting, $aMConf['__DEFAULT__']);
+
+        return new self($EnginePool, empty($aMConf['__MODEL__']) ? array() : $aMConf['__MODEL__'],
+            $aMConf['__DEFAULT__']);
     }
 
     /**
-     * @param string $sModelName
+     * @param \Slime\Component\RDBMS\DBAL\EnginePool $EnginePool
+     * @param array                                  $aConf    model conf
+     * @param array                                  $aDefault model default setting
+     */
+    public function __construct($EnginePool, array $aConf, array $aDefault)
+    {
+        $this->EnginePool = $EnginePool;
+        $this->aConf      = $aConf;
+        $this->aDefault   = $aDefault;
+    }
+
+    /**
+     * @param string $sM Like M_User() first 2 letter can be anything
+     * @param array  $aArg
+     *
+     * @return Model
+     */
+    public function __call($sM, $aArg)
+    {
+        return $this->get(substr($sM, 2));
+    }
+
+    /**
+     * @param string $sM
      *
      * @return Model
      * @throws \OutOfRangeException
      */
-    public function get($sModelName)
+    public function get($sM)
     {
-        if (!isset($this->aModel[$sModelName])) {
-            if (
-                $this->sDefaultDB !== null &&
-                (!isset($this->aModelConf[$sModelName]) || !isset($this->aModelConf[$sModelName]['db']))
-            ) {
-                $this->aModelConf[$sModelName]['db'] = $this->sDefaultDB;
-            }
-
-            $aConf = $this->aModelConf[$sModelName];
-            $sDB   = $aConf['db'];
-            if (!isset($this->aDAL[$sDB])) {
-                throw new \OutOfRangeException("[MODEL] : There is no database config [$sDB] exist");
-            }
-
-            $sModelClassName = isset($aConf['model_class']) ?
-                $this->sAppModelNS . '\\' . $aConf['model_class'] :
-                $this->sDefaultModelClass;
-
-            $this->aModel[$sModelName] = new $sModelClassName(
-                $sModelName,
-                $this->aDAL[$sDB],
-                $aConf,
-                $this
-            );
+        if (isset($this->aM[$sM])) {
+            return $this->aM[$sM];
         }
 
-        return $this->aModel[$sModelName];
+        if (!isset($this->aConf[$sM])) {
+            $aConf = array();
+            if (empty($this->aDefault['own_config']) && empty($this->aDefault['auto_create'])) {
+                throw new \DomainException("[ORM] ; Model conf[$sM] is not exists");
+            }
+        } else {
+            $aConf = $this->aConf[$sM];
+        }
+
+        if (!isset($aConf['model'])) {
+            $sMClass    = $this->aDefault['model_base'];
+            $sItemClass = $this->aDefault['item_base'];
+        } else {
+            $sMClass    = "{$this->aDefault['model_pre']}{$aConf['model']}";
+            $sItemClass = "{$this->aDefault['item_pre']}{$aConf['model']}";
+        }
+        $this->aM[$sM] = new $sMClass(
+            $sItemClass,
+            $sM,
+            $this->EnginePool->get(isset($aConf[$sM]['db']) ? $aConf[$sM]['db'] : $this->aDefault['db']),
+            $aConf,
+            $this
+        );
+
+        return $this->aM[$sM];
     }
 
     /**
-     * @param bool $bCompatibleMode
+     * @param $sVar
      *
-     * @return void
+     * @return mixed
      */
-    public function setTmpCompatibleMode($bCompatibleMode = true)
+    public function __get($sVar)
     {
-        if ($bCompatibleMode !== $this->bCompatibleMode) {
-            $this->bTmpCompatibleMode = $this->bCompatibleMode;
-            $this->bCompatibleMode    = $bCompatibleMode;
+        return $this->$sVar;
+    }
+
+    protected static $bCMode = false;
+    protected static $bCMode_Tmp = false;
+
+    /**
+     * @param bool $b
+     */
+    public static function changeCMode_Tmp($b)
+    {
+        if (self::$bCMode !== $b) {
+            self::$bCMode_Tmp = self::$bCMode;
+            self::$bCMode     = $b;
+        }
+    }
+
+    public static function resetCMode()
+    {
+        if (self::$bCMode_Tmp !== null) {
+            self::$bCMode     = self::$bCMode_Tmp;
+            self::$bCMode_Tmp = null;
         }
     }
 
     /**
-     * @return void
+     * @param bool $b
      */
-    public function resetCompatibleMode()
+    public static function changeCMode($b)
     {
-        if ($this->bTmpCompatibleMode !== null) {
-            $this->bCompatibleMode    = $this->bTmpCompatibleMode;
-            $this->bTmpCompatibleMode = null;
-        }
+        self::$bCMode = $b;
     }
 
     /**
      * @return bool
      */
-    public function isCompatibleMode()
+    public static function isCMode()
     {
-        return (bool)$this->bCompatibleMode;
+        return (bool)self::$bCMode;
     }
 
-    /**
-     * @param bool $b
-     *
-     * @return void
-     */
-    public function setCompatibleMode($b = true)
+    public static function newNull()
     {
-        $this->bCompatibleMode = $b;
+        return self::isCMode() ? new CItem() : null;
     }
 
     /**
@@ -144,7 +164,7 @@ class Factory
      *
      * @return bool
      */
-    public static function isModelDataEmpty($mData)
+    public static function mEmpty($mData)
     {
         if ($mData === null ||
             $mData instanceof CItem ||
@@ -154,10 +174,5 @@ class Factory
         } else {
             return false;
         }
-    }
-
-    public function __get($sVar)
-    {
-        return $this->$sVar;
     }
 }

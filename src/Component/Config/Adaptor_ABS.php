@@ -9,41 +9,58 @@ namespace Slime\Component\Config;
  */
 abstract class Adaptor_ABS implements IAdaptor
 {
-    protected $bParseMode = true;
-    private $bToBeResetParseMode = false;
+    protected $nCTX;
 
-    /**
-     * @param bool $bParse
-     *
-     * @return $this
-     */
-    public function setParseMode($bParse = true)
+    public function __construct($nCTX)
     {
-        $this->bParseMode = $bParse;
-        return $this;
+        $this->nCTX = $nCTX;
     }
 
-    /**
-     * @param bool $bParse
-     *
-     * @return $this
-     */
-    public function setTmpParseMode($bParse = false)
+    public function parse($mData, $bForce)
     {
-        $this->bToBeResetParseMode = $this->bParseMode;
-        $this->bParseMode          = $bParse;
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function resetParseMode()
-    {
-        if ($this->bToBeResetParseMode !== null) {
-            $this->bParseMode          = $this->bToBeResetParseMode;
-            $this->bToBeResetParseMode = null;
+        if (is_string($mData) && strlen($mData) > 1) {
+            $sChr = $mData[0];
+            $sFix = $mData;
+            if ($mData[0] === '@' || $mData[0] === ':') {
+                $sFix = ltrim($mData, $sChr);
+            }
+            $iDiff = strlen($mData) - strlen($sFix);
+            $sFix  = str_repeat($sChr, (int)($iDiff / 2)) . $sFix;
+            if ($iDiff % 2 !== 0) {
+                if ($sChr === ':') {
+                    $mData = $this->nCTX->$sFix;
+                } else {
+                    $mData = $bForce ? $this->getForce($sFix) : $this->get($sFix);
+                }
+            } else {
+                $mData = $sFix;
+            }
+        } elseif (is_array($mData)) {
+            foreach ($mData as $mK => $mV) {
+                $mData[$mK] = $this->parse($mV, $bForce);
+            }
         }
-        return $this;
+
+        return $mData;
+    }
+
+
+    /**
+     * @param string $sKey
+     * @param bool   $bWithParse
+     *
+     * @return mixed
+     */
+    public function getForce($sKey, $bWithParse = false)
+    {
+        if (($mResult = $this->get($sKey, null, false)) === false) {
+            throw new \OutOfBoundsException("[CONFIG] ; Key[$sKey] is not found");
+        }
+
+        if ($bWithParse) {
+            $mResult = $this->parse($mResult, true);
+        }
+        return $mResult;
     }
 }
+

@@ -1,8 +1,7 @@
 <?php
 namespace Slime\Component\Config;
 
-use Slime\Bundle\Framework\Context;
-use Slime\Ext\Sugar;
+use Slime\Component\Support\Sugar;
 
 /**
  * Class Configure
@@ -22,28 +21,5 @@ final class Configure
     public static function factory($sAdaptor)
     {
         return Sugar::createObjAdaptor(__NAMESPACE__, func_get_args());
-    }
-
-    public static function parseRecursion($mResult, IAdaptor $Config)
-    {
-        if (is_string($mResult) && $mResult !== '') {
-            switch ($mResult[0]) {
-                case '@':
-                    $mResult = $Config->get(substr($mResult, 1));
-                    break;
-                case ':':
-                    $sModuleName = substr($mResult, 1);
-                    $mResult     = Context::getInst()->$sModuleName;
-                    break;
-                case '\\':
-                    $mResult = substr($mResult, 1);
-                    break;
-            }
-        } elseif (is_array($mResult)) {
-            foreach ($mResult as $mK => $mV) {
-                $mResult[$mK] = self::parseRecursion($mV, $Config);
-            }
-        }
-        return $mResult;
     }
 }

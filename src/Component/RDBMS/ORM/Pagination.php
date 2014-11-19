@@ -10,28 +10,31 @@ namespace Slime\Component\RDBMS\ORM;
 class Pagination
 {
     /**
-     * @param \Slime\Component\Http\HttpRequest $HttpRequest
-     * @param null|int                          $iNumPerPage
-     * @param null|mixed                        $m_PageVar_PageVarCB
-     * @param null|mixed                        $mCBRender
+     * @param \Slime\Component\Http\REQ $HttpREQ
+     * @param int                       $iNumPerPage
+     * @param null|mixed                $m_PageVar_PageVarCB
+     * @param null|mixed                $mCBRender
      */
     public function __construct(
-        $HttpRequest,
+        $HttpREQ,
         $iNumPerPage,
         $m_PageVar_PageVarCB = 'page',
-        $mCBRender = array('\\Slime\\Component\\RDBMS\\ORM\\Pagination', 'renderDefault')
+        $mCBRender = null
     ) {
-        $this->HttpRequest         = $HttpRequest;
+        $this->HttpRequest         = $HttpREQ;
         $this->iNumPerPage         = $iNumPerPage;
         $this->m_PageVar_PageVarCB = $m_PageVar_PageVarCB;
-        $this->mCBRender           = $mCBRender;
+        $this->mCBRender           = $mCBRender === null ? array(
+            '\\Slime\\Component\\RDBMS\\ORM\\Pagination',
+            'renderDefault'
+        ) : $mCBRender;
     }
 
     /**
-     * @param \Slime\Component\RDBMS\ORM\Model      $Model
-     * @param \Slime\Component\RDBMS\DAL\SQL_SELECT $SQL_SEL
+     * @param \Slime\Component\RDBMS\ORM\Model       $Model
+     * @param \Slime\Component\RDBMS\DBAL\SQL_SELECT $SQL_SEL
      *
-     * @return mixed
+     * @return array [page_string, List_Group, total_item, total_page, current_page, number_per_page]
      */
     public function generate($Model, $SQL_SEL)
     {
@@ -43,9 +46,9 @@ class Pagination
     }
 
     /**
-     * @param callable                              $mCBCount
-     * @param callable                              $mCBList
-     * @param \Slime\Component\RDBMS\DAL\SQL_SELECT $SQL_SEL
+     * @param callable                               $mCBCount
+     * @param callable                               $mCBList
+     * @param \Slime\Component\RDBMS\DBAL\SQL_SELECT $SQL_SEL
      *
      * @return array [page_string, List_Group, total_item, total_page, current_page, number_per_page]
      */
@@ -62,8 +65,9 @@ class Pagination
             max(1, (int)$this->HttpRequest->getG($this->m_PageVar_PageVarCB)) :
             (int)call_user_func($this->m_PageVar_PageVarCB);
 
+        $SQL_SEL_Total = clone $SQL_SEL;
         # get total
-        $iToTal = call_user_func($mCBCount, $SQL_SEL);
+        $iToTal = call_user_func($mCBCount, $SQL_SEL_Total);
 
         # get pagination data
         $aResult = self::doPagination($iToTal, $iNumPerPage, $iCurrentPage);
@@ -80,8 +84,8 @@ class Pagination
     }
 
     /**
-     * @param \Slime\Component\Http\HttpRequest $HttpRequest
-     * @param array                             $aResult
+     * @param \Slime\Component\Http\REQ $HttpRequest
+     * @param array                     $aResult
      *
      * @return string
      */
@@ -93,25 +97,24 @@ class Pagination
 
         $sURI             = strstr($HttpRequest->getRequestURI(), '?', true);
         $aGet             = $HttpRequest->BagGET->aData;
-        $sPage            = '<div class="pagination">';
+        $sPage            = '<ul class="pagination">';
         $aResult['first'] = 1;
         foreach (
             array(
-                'first' => '首页',
-                'pre'   => '&lt;&lt;',
-                'list'  => '',
-                'next'  => '&gt;&gt',
-                'total' => '末页'
+                'first'      => '首页',
+                'pre'        => '&lt;&lt;',
+                'list'       => $aResult['list'],
+                'next'       => '&gt;&gt',
+                'total_page' => '末页'
             ) as $sK => $sV
         ) {
-            $sPage .= "<span class=\"page-$sK\">";
             if ($sK === 'list') {
                 foreach ($aResult[$sK] as $iPage) {
                     $aGet['page'] = $iPage;
                     $sPage .= $iPage < 0 ?
-                        sprintf('<span>%s</span>', 0 - $iPage) :
+                        sprintf('<li><span>%s</span></li>', 0 - $iPage) :
                         sprintf(
-                            '<a href="%s?%s">%s</a>',
+                            '<li><a href="%s?%s">%s</a></li>',
                             $sURI,
                             http_build_query($aGet),
                             $iPage
@@ -121,17 +124,16 @@ class Pagination
                 $iPage        = $aResult[$sK];
                 $aGet['page'] = abs($iPage);
                 $sPage .= $iPage <= 0 ?
-                    $sV :
+                    "<li><span>{$sV}</span></li>" :
                     sprintf(
-                        '<a href="%s?%s">%s</a>',
+                        '<li><a href="%s?%s">%s</a></li>',
                         $sURI,
                         http_build_query($aGet),
                         $sV
                     );
             }
-            $sPage .= "</span>";
         }
-        $sPage .= '</div>';
+        $sPage .= '</ul>';
 
         return $sPage;
     }
@@ -143,12 +145,18 @@ class Pagination
      * @param int      $iDisplayBefore
      * @param int|null $iDisplayAfter
      *
-     * @return \ArrayObject [pre:int list:int[] next:int total:int] If pre||list[]||next < 0, it means abs(value) is current page
+     * @return \ArrayObject [pre:int list:int[] next:int total:int] If pre||list[]||next < 0, it means abs(value) is
+     *                      current page
      * @throws \InvalidArgumentException
      * @throws \LogicException
      */
-    public static function doPagination($iTotalItem, $iNumPerPage, $iCurrentPage, $iDisplayBefore = 3, $iDisplayAfter = null)
-    {
+    public static function doPagination(
+        $iTotalItem,
+        $iNumPerPage,
+        $iCurrentPage,
+        $iDisplayBefore = 3,
+        $iDisplayAfter = null
+    ) {
         if ($iCurrentPage < 1) {
             throw new \InvalidArgumentException('[PAG] : Offset can not be less than 1');
         }
@@ -192,6 +200,8 @@ class Pagination
             $iNext = 0 - $iTotalPage;
         }
 
-        return new \ArrayObject(array('pre' => $iPre, 'list' => $aResult, 'next' => $iNext, 'total_page' => $iTotalPage));
+        return new \ArrayObject(
+            array('pre' => $iPre, 'list' => $aResult, 'next' => $iNext, 'total_page' => $iTotalPage)
+        );
     }
 }

@@ -1,6 +1,8 @@
 <?php
 namespace Slime\Component\RDBMS\ORM;
 
+use Slime\Component\RDBMS\DBAL\Condition;
+
 /**
  * Class Group
  *
@@ -46,10 +48,10 @@ class Group implements \ArrayAccess, \Iterator, \Countable
      */
     public function relation($sModelName, $noModelItem = null)
     {
-        if (!isset($this->Model->aRelationConfig[$sModelName])) {
+        if (!isset($this->Model->aRelConf[$sModelName])) {
             throw new \OutOfRangeException("[MODEL] : Relation model $sModelName is not exist");
         }
-        $sMethod = $this->Model->aRelationConfig[$sModelName];
+        $sMethod = $this->Model->aRelConf[$sModelName];
         return $this->$sMethod($sModelName, $noModelItem);
     }
 
@@ -72,7 +74,9 @@ class Group implements \ArrayAccess, \Iterator, \Countable
 
         $aPK                          = array_keys($this->aModelItem);
         $Model                        = $this->Model->Factory->get($sModelName);
-        $this->aRelation[$sModelName] = $Group = $Model->findMulti(array($this->Model->sFKName . ' IN' => $aPK));
+        $this->aRelation[$sModelName] = $Group = $Model->findMulti(
+            Condition::build()->set($this->Model->sFKName, 'IN', $aPK)
+        );
 
         if ($noModelItem === null) {
             return $Group;
@@ -108,9 +112,11 @@ class Group implements \ArrayAccess, \Iterator, \Countable
 
         $aFK = array();
         foreach ($this->aModelItem as $Item) {
-            $aFK[] = $Item[$Model->sFKName];
+            if ($Item[$Model->sFKName] !== null) {
+                $aFK[] = $Item[$Model->sFKName];
+            }
         }
-        $this->aRelation[$sModelName] = $Model->findMulti(array($Model->sPKName . ' IN' => $aFK));
+        $this->aRelation[$sModelName] = $Model->findMulti(Condition::build()->set($Model->sPKName, 'IN', $aFK));
         if ($noModelItem === null) {
             return $this->aRelation[$sModelName];
         } else {
