@@ -218,25 +218,13 @@ class Call
         return $this->mRS;
     }
 
-    /**
-     * @throws HttpCallFailedException
-     *
-     */
+    /*
     public function asOBJ()
     {
         if ($this->mRS === false) {
             throw new HttpCallFailedException();
         }
-        return self::createFromCURLResult($this->mRS);
-    }
-
-    /**
-     * @param string $sRS
-     *
-     */
-    public static function createFromCURLResult($sRS)
-    {
-        $aArr = explode("\r\n\r\n", $sRS, 2);
+        $aArr = explode("\r\n\r\n", $this->mRS, 2);
         if (count($aArr) !== 2) {
             throw new \RuntimeException("[HTTP] : Data format error");
         }
@@ -263,10 +251,9 @@ class Call
                 $aTidyHeader[trim($aRow[0])] = ltrim($aRow[1]);
             }
         }
-
         //@todo
-        return $O;
     }
+    */
 }
 
 class HttpCallFailedException extends \LogicException
