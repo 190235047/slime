@@ -1,6 +1,8 @@
 <?php
 namespace Slime\Bundle\Framework;
 
+use Slime\Component\Support\Context;
+
 class Ext
 {
     public static function handleUncaughtException(\Exception $E)

@@ -13,9 +13,6 @@ use Slime\Component\Route\Router;
  */
 class Bootstrap
 {
-    /**
-     * @var \Slime\Bundle\Framework\Context
-     */
     protected $CTX;
 
     /**
@@ -65,7 +62,7 @@ class Bootstrap
     }
 
     /**
-     *
+     * @param \Slime\Component\Route\Router $Router
      */
     public function run($Router)
     {
@@ -73,11 +70,11 @@ class Bootstrap
         try {
             switch ($CTX->sRunMode) {
                 case 'http':
-                    $CTX->Route->runHttp($CTX->REQ, $CTX->RESP, $CTX);
+                    $Router->runHttp($CTX->REQ, $CTX->RESP, $CTX);
                     $CTX->RESP->send();
                     break;
                 case 'cli':
-                    $CTX->Route->runCli($CTX->aArgv, $CTX);
+                    $Router->runCli($CTX->aArgv, $CTX);
                     break;
                 default:
                     throw new \RuntimeException("[MAIN] : RunMode {$this->CTX->sRunMode} is not supported");
