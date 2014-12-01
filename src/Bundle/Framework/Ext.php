@@ -8,8 +8,8 @@ class Ext
         $C = Context::inst();
         $C->Log->error($E->getMessage());
         if ($C->sRunMode === 'http') {
-            if ($C->RESP->getResponseCode() < 400) {
-                $C->RESP->setResponseCode(500);
+            if ($C->RESP->getStatus() < 400) {
+                $C->RESP->setStatus(500);
             }
             $aArr = $E->getTrace();
             foreach ($aArr as $iK => $aItem) {

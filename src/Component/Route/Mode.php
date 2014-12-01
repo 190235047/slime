@@ -13,18 +13,17 @@ use Slime\Component\Support\Url;
 class Mode
 {
     /**
-     * @param \Slime\Component\Http\REQ            $REQ
-     * @param \Slime\Component\Http\RESP           $RESP
-     * @param \Slime\Component\Log\LoggerInterface $Log
-     * @param \Slime\Component\Support\Context     $CTX
-     * @param array                                $aSetting
+     * @param \Slime\Component\Http\REQ    $REQ
+     * @param \Slime\Component\Http\RESP   $RESP
+     * @param \Slime\Component\Support\Context $CTX
+     * @param array                            $aSetting
      *
      * @return bool
      * @throws RouteException
      */
-    public static function slimeHttp_Page($REQ, $RESP, $Log, $CTX, $aSetting)
+    public static function slimeHttp_Page($REQ, $RESP, $CTX, $aSetting)
     {
-        $aBlock = Url::parse($REQ->getRequestURI(), true, false);
+        $aBlock = Url::parse($REQ->getUrl(), true, false);
         $aPath  = $aBlock['path'];
         if ($aPath[($i = count($aPath) - 1)] === '') {
             $aPath[$i] = $aSetting['default_action'];
@@ -42,7 +41,7 @@ class Mode
             $sAction = substr($sAction, 0, $iPos);
         }
         $sAction = $aSetting['action_pre'] . Str::camel($sAction);
-        if (($sReqMethod = $REQ->getRequestMethod()) !== 'GET') {
+        if (($sReqMethod = $REQ->getMethod()) !== 'GET') {
             $sAction .= '__' . $sReqMethod;
         }
 
@@ -62,18 +61,17 @@ class Mode
     }
 
     /**
-     * @param \Slime\Component\Http\REQ            $REQ
-     * @param \Slime\Component\Http\RESP           $RESP
-     * @param \Slime\Component\Log\LoggerInterface $Log
-     * @param \Slime\Component\Support\Context     $CTX
-     * @param array                                $aSetting
+     * @param \Slime\Component\Http\REQ    $REQ
+     * @param \Slime\Component\Http\RESP   $RESP
+     * @param \Slime\Component\Support\Context $CTX
+     * @param array                            $aSetting
      *
      * @return bool
      * @throws RouteException
      */
-    public static function slimeHttp_REST($REQ, $RESP, $Log, $CTX, $aSetting)
+    public static function slimeHttp_REST($REQ, $RESP, $CTX, $aSetting)
     {
-        $aBlock = Url::parse($REQ->getRequestURI(), true, false);
+        $aBlock = Url::parse($REQ->getUrl(), true, false);
         $aPath  = $aBlock['path'];
         $iCount = count($aPath);
         $sLast  = &$aPath[$iCount - 1];
@@ -89,36 +87,36 @@ class Mode
             $sExt  = substr($sLast, $iPos + 1);
             $sLast = substr($sLast, 0, $iPos);
         }
-        $aParam = array('__EXT__' => $sExt);
+        $aParam = array('__EXT__' => $sExt, '__SETTING__' => $aSetting);
         $sVer   = strtoupper(array_shift($aPath));
         for ($i = 0, $iC = count($aPath); $i < $iC; $i += 2) {
             $aParam[$aPath[$i]] = $aPath[$i + 1];
         }
-        $sAction     = strtolower($REQ->getRequestMethod());
+        $sAction     = strtolower($REQ->getMethod());
         $sController = $sVer . '_' . Str::camel($sLast);
 
-        self::objCall($CTX, $sController, $sAction, array('__EXT__' => $sExt));
+        self::objCall($CTX, $sController, $sAction, $aParam);
 
         return false;
     }
 
     /**
-     * @param array                                $aArgv
-     * @param \Slime\Component\Log\LoggerInterface $Log
-     * @param \Slime\Component\Support\Context     $CTX
-     * @param array                                $aSetting
+     * @param array                            $aArgv
+     * @param \Slime\Component\Support\Context $CTX
+     * @param array                            $aSetting
      *
      * @return bool
      * @throws RouteException
      */
-    public static function slimeHttp_Cli($aArgv, $Log, $CTX, $aSetting)
+    public static function slimeHttp_Cli($aArgv, $CTX, $aSetting)
     {
         if (strpos($aArgv[1], '.') === false) {
             $aBlock = array($aArgv[1], $aSetting['default_controller']);
         } else {
             $aBlock = explode('.', $aArgv[1], 2);
         }
-        $aParam = empty($aArgv[2]) ? array() : json_decode($aArgv[2], true);
+        $aParam                = empty($aArgv[2]) ? array() : json_decode($aArgv[2], true);
+        $aParam['__SETTING__'] = $aSetting;
 
         self::objCall(
             $CTX,
@@ -150,7 +148,7 @@ class Mode
         spl_autoload_unregister($mAL);
 
 
-        if (isset($aSetting['aop']) && $aSetting['aop'] === false) {
+        if (isset($aParam['__SETTING__']['__AOP__']) && $aParam['__SETTING__']['__AOP__'] === false) {
             $Obj->$sAction();
         } else {
             $Ref = new \ReflectionClass($sController);

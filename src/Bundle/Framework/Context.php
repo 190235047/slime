@@ -15,8 +15,8 @@ namespace Slime\Bundle\Framework;
  * @property-read \Slime\Component\Event\Event               $Event          事件对象
  * @property-read \Slime\Component\Route\Router              $Route          路由对象
  * @property-read \Slime\Component\Route\CallBack            $CallBack       路由结果回调对象
- * @property-read \Slime\Component\HTTP\REQ                  $REQ            本次Http请求生成的HttpRequest对象
- * @property-read \Slime\Component\HTTP\RESP                 $RESP           响应本次Http请求的HttpResponse对象
+ * @property-read \Slime\Component\HTTP\REQ              $REQ            本次Http请求生成的HttpRequest对象
+ * @property-read \Slime\Component\HTTP\RESP             $RESP           响应本次Http请求的HttpResponse对象
  * @property-read array                                      $aArgv          本次CLI请求的参数数组
  * @property-read \Slime\Component\I18N\I18N                 $I18N           多语言对象
  * @property-read \Slime\Component\View\IAdaptor             $View           模板对象

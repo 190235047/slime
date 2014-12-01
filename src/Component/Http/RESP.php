@@ -2,14 +2,137 @@
 namespace Slime\Component\Http;
 
 /**
- * Class HttpResponse
+ * Class RESP_PHP
  *
  * @package Slime\Component\Http
  * @author  smallslime@gmail.com
+ *
  */
 class RESP
 {
-    public static function getString($iStatus)
+    protected $iStatus;
+    protected $nsProtocol;
+    protected $aHeader = array();
+    protected $sBody = '';
+    protected $aCookie = array();
+
+    /**
+     * @param int         $iStatus
+     * @param null|array  $naHeader
+     * @param null|string $nsBody
+     */
+    public function __construct($iStatus = 200, array $naHeader = null, $nsBody = null)
+    {
+        $this->setStatus($iStatus);
+
+        if ($naHeader !== null) {
+            $this->addHeader($naHeader);
+        }
+
+        if ($nsBody !== null) {
+            $this->setBody($nsBody);
+        }
+    }
+
+    /**
+     * @param null|string|array $nasK
+     *
+     * @return null|string|array
+     */
+    public function getHeader($nasK = null)
+    {
+        return $this->_getData($nasK, $this->aHeader);
+    }
+
+    /**
+     * @param array|string $m_aKV_sK
+     * @param null|string  $m_n_sV
+     *
+     * @return $this
+     */
+    public function addHeader($m_aKV_sK, $m_n_sV = null)
+    {
+        if (is_array($m_aKV_sK)) {
+            foreach ($m_aKV_sK as $sK => $mV) {
+                if (is_array($mV)) {
+                    $this->aHeader[$sK] = array_merge($this->aHeader[$sK], $mV);
+                } else {
+                    $this->aHeader[$sK][] = $mV;
+                }
+            }
+        } else {
+            $this->aHeader[$m_aKV_sK][] = $m_n_sV;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param array|string $m_aKV_sK
+     * @param null|string  $m_n_sV
+     * @param bool         $bOverwrite
+     *
+     * @return $this
+     */
+    public function setHeader($m_aKV_sK, $m_n_sV = null, $bOverwrite = true)
+    {
+        if (!isset($this->aHeader[$m_aKV_sK]) || $bOverwrite) {
+            $this->aHeader[$m_aKV_sK] = array($m_n_sV);
+        } else {
+            foreach ($m_aKV_sK as $sK => $mV) {
+                if (!isset($this->aHeader[$sK]) || $bOverwrite) {
+                    $this->aHeader[$sK] = (array)$mV;
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBody()
+    {
+        return $this->sBody;
+    }
+
+    /**
+     * @param string $sBody You can set a object witch can be stringed or iterator
+     *
+     * @return $this
+     */
+    public function setBody($sBody)
+    {
+        $this->sBody = $sBody;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStatus()
+    {
+        return $this->iStatus;
+    }
+
+    /**
+     * @param int $iStatus
+     *
+     * @return $this
+     */
+    public function setStatus($iStatus)
+    {
+        $this->iStatus = $iStatus;
+
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getStatusMessage()
     {
         static $aStatusTexts = array(
             100 => 'Continue',
@@ -74,57 +197,7 @@ class RESP
             511 => 'Network Authentication Required', // RFC6585
         );
 
-        if (isset($aStatusTexts[$iStatus])) {
-            return $aStatusTexts[$iStatus];
-        } else {
-            trigger_error(E_USER_WARNING, 'unknown status code');
-            return 'Unknown';
-        }
-    }
-
-    public function __construct($niCode = null, array $naHeader = null, $nsBody = null)
-    {
-        $this->BagHeader = new Bag_Base();
-
-        if ($niCode !== null) {
-            $this->setResponseCode($niCode);
-        }
-        if ($naHeader !== null) {
-            $this->setHeaders($naHeader);
-        }
-        if ($nsBody !== null) {
-            $this->setBody($nsBody);
-        }
-    }
-
-    /** @var int */
-    protected $iStatus = 200;
-
-    /**
-     * @param int $iCode
-     */
-    public function setResponseCode($iCode = 200)
-    {
-        $this->iStatus = $iCode;
-    }
-
-    /**
-     * @return int
-     */
-    public function getResponseCode()
-    {
-        return $this->iStatus;
-    }
-
-    /** @var string */
-    protected $sProtocol = 'HTTP/1.1';
-
-    /**
-     * @param string $sProtocol
-     */
-    public function setProtocol($sProtocol = 'HTTP/1.1')
-    {
-        $this->sProtocol = $sProtocol;
+        return isset($aStatusTexts[$this->iStatus]) ? $aStatusTexts[$this->iStatus] : null;
     }
 
     /**
@@ -132,200 +205,148 @@ class RESP
      */
     public function getProtocol()
     {
-        return $this->sProtocol;
+        return $this->nsProtocol;
     }
 
-    /** @var Bag_Base */
-    protected $BagHeader;
-
     /**
-     * @param string $sK
-     * @param string $sV
-     * @param bool   $bOverwrite
+     * @param string
      *
      * @return $this
      */
-    public function setHeader($sK, $sV, $bOverwrite = true)
+    public function setProtocol($sProtocol)
     {
-        $this->BagHeader->set($sK, $sV, $bOverwrite);
+        $this->nsProtocol = $sProtocol;
 
         return $this;
     }
-
-    /**
-     * @param array $aKV
-     * @param bool  $bOverwrite
-     *
-     * @return $this
-     */
-    public function setHeaders($aKV, $bOverwrite = true)
-    {
-        $this->BagHeader->setMulti($aKV, $bOverwrite);
-
-        return $this;
-    }
-
-    /**
-     * @param string $sKey
-     *
-     * @return mixed
-     */
-    public function getHeader($sKey)
-    {
-        return $this->BagHeader[$sKey];
-    }
-
-    /**
-     * @param bool $bOverwrite
-     *
-     * @return $this
-     */
-    public function setHeaderNoCache($bOverwrite = false)
-    {
-        $this->BagHeader->set(
-            array(
-                'Cache-Control' => 'no-cache, no-store, must-revalidate',
-                'Pragma'        => 'no-cache',
-                'Expires'       => 'Expires: Mon, 26 Jul 1997 05:00:00 GMT'
-            ),
-            $bOverwrite
-        );
-
-        return $this;
-    }
-
-    /**
-     * @param string $sURL
-     * @param int    $iCode
-     * @param bool   $bOverwrite
-     *
-     * @return $this
-     */
-    public function setHeaderRedirect($sURL, $iCode = null, $bOverwrite = true)
-    {
-        if ($iCode !== null) {
-            $this->iStatus = $iCode;
-        }
-
-        $this->BagHeader->set(array('Location' => $sURL), $bOverwrite);
-
-        return $this;
-    }
-
-    /** @var array */
-    protected $aPreCookie = array();
 
     /**
      * @param string      $sName
      * @param string      $sValue
-     * @param int|null    $iExpire
-     * @param string|null $sPath
-     * @param string|null $sDomain
-     * @param bool|null   $bSecure
-     * @param bool|null   $bHttpOnly
-     *
-     * @return RESP
-     */
-    public function setCookiePre(
-        $sName,
-        $sValue,
-        $iExpire = null,
-        $sPath = null,
-        $sDomain = null,
-        $bSecure = null,
-        $bHttpOnly = null
-    ) {
-        $this->aPreCookie[$sName] = array(
-            'value'       => $sValue,
-            'expire'      => $iExpire,
-            'path'        => $sPath,
-            'domain'      => $sDomain,
-            'is_secure'   => $bSecure,
-            'is_httponly' => $bHttpOnly
-        );
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function getCookiePre()
-    {
-        return $this->aPreCookie;
-    }
-
-    /** @var string */
-    protected $sBody;
-
-    /**
-     * @return string
-     */
-    public function getBody()
-    {
-        return $this->sBody;
-    }
-
-    /**
-     * @param string $sBody
+     * @param null|int    $niExpires
+     * @param null|string $nsPath
+     * @param null|string $nsDomain
+     * @param null|bool   $nbSecure
+     * @param null|bool   $nbHttpOnly
+     * @param null|array  $naOther
      *
      * @return $this
      */
-    public function setBody($sBody)
-    {
-        $this->sBody = $sBody;
+    public function setCookie(
+        $sName,
+        $sValue,
+        $niExpires = null,
+        $nsPath = null,
+        $nsDomain = null,
+        $nbSecure = null,
+        $nbHttpOnly = null,
+        $naOther = null
+    ) {
+        $this->aCookie[] = array(
+            'name'      => $sName,
+            'value'     => $sValue,
+            'Expires'   => $niExpires,
+            'Path'      => $nsPath,
+            'Domain'    => $nsDomain,
+            'Secure'    => $nbSecure,
+            'HttpOnly'  => $nbHttpOnly,
+            '__Other__' => $naOther
+        );
 
         return $this;
     }
 
     /**
-     * Sends content for the current web response.
+     * @param string   $sUrl
+     * @param null|int $niCode
+     *
+     * @return $this
      */
-    public function sendBody()
+    public function setRedirect($sUrl, $niCode = null)
     {
-        echo $this->sBody;
+        $this->addHeader('Location', $sUrl);
+        if ($niCode !== null) {
+            $this->setStatus($niCode);
+        }
+
+        return $this;
     }
 
-    /**
-     * Sends HTTP headers.
-     */
-    public function sendHeader()
-    {
-        // headers have already been sent by the developer
-        if (headers_sent()) {
-            trigger_error('header has sent', E_USER_NOTICE);
-            return;
-        }
-
-        // first line
-        if ($this->iStatus !== 200) {
-            header(sprintf('%s %d %s', $this->sProtocol, $this->iStatus, self::getString($this->iStatus)));
-        }
-
-        // headers
-        foreach ($this->BagHeader->getData() as $sK => $sV) {
-            header($sK . ': ' . $sV);
-        }
-
-        // cookies
-        foreach ($this->aPreCookie as $sName => $aCookie) {
-            setcookie(
-                $sName,
-                $aCookie['value'],
-                $aCookie['expire'],
-                $aCookie['path'],
-                $aCookie['domain'],
-                $aCookie['is_secure'],
-                $aCookie['is_httponly']
-            );
-        }
-    }
-
-    /**
-     * Sends HTTP headers and content.
-     */
     public function send()
     {
         $this->sendHeader();
         $this->sendBody();
+    }
+
+    public function sendHeader()
+    {
+        if (headers_sent()) {
+            trigger_error('[HTTP]; Header has sent before', E_USER_NOTICE);
+        } else {
+            // first line
+            if ($this->iStatus !== 200) {
+                header(sprintf('%s %d %s', $this->nsProtocol, $this->iStatus, $this->getStatusMessage()));
+            }
+
+            if (!empty($this->aHeader)) {
+                foreach ($this->aHeader as $sK => $mRow) {
+                    foreach ((array)$mRow as $sItem) {
+                        header("$sK: $sItem");
+                    }
+                }
+            }
+
+            if (!empty($this->aCookie)) {
+                foreach ($this->aCookie as $aArr) {
+                    if ($aArr[7] !== null) {
+                        $sK     = array_shift($aArr);
+                        $sN     = array_shift($aArr);
+                        $aOther = array_pop($aArr);
+                        $aTidy  = array("$sK=$sN");
+                        foreach (array_merge($aArr, $aOther) as $sK => $mV) {
+                            if ($mV === null) {
+                                continue;
+                            }
+                            $aTidy[] = is_bool($mV) ? $sK : "$sK=$mV";
+                        }
+                        header(sprintf('Set-Cookie: %s', implode('; ', $aTidy)));
+                    } else {
+                        call_user_func_array('setcookie', $aArr);
+                    }
+                }
+            }
+        }
+    }
+
+    public function sendBody()
+    {
+        if (is_object($this->sBody) || $this->sBody instanceof \Traversable) {
+            foreach ($this->sBody as $sPart) {
+                echo $sPart;
+            }
+        } else {
+            echo (string)$this->sBody;
+        }
+    }
+
+    /**
+     * @param null|string|array $nasK
+     * @param                   $aData
+     *
+     * @return null|string|array
+     */
+    protected function _getData($nasK, $aData)
+    {
+        if ($nasK === null) {
+            return $aData;
+        } elseif (is_array($nasK)) {
+            $aRS = array();
+            foreach ($nasK as $sK) {
+                $aRS[$sK] = isset($aData[$sK]) ? $aData[$sK] : null;
+            }
+            return $aRS;
+        } else {
+            return isset($aData[$sK = (string)$nasK]) ? $aData[$sK] : null;
+        }
     }
 }

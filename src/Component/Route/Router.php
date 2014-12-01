@@ -9,104 +9,85 @@ namespace Slime\Component\Route;
  */
 class Router
 {
-    const MODE_CB = 0;
-    const MODE_EASY = 1;
+    protected $aConfig = array();
 
-    protected $aConfig;
-
-    public function set($m_sRE_iIndex, $aConf)
+    public function addConfig(array $aConfig)
     {
-        $this->aConfig[is_int($m_sRE_iIndex) ? '' : $m_sRE_iIndex][] = $aConf;
+        $this->aConfig = array_merge($this->aConfig, $aConfig);
 
         return $this;
     }
 
-    public function setMulti($aArr)
+    public function addGET($sRE, $mCB)
     {
-        foreach ($aArr as $m_sRE_iIndex => $aConf) {
-            $this->aConfig[is_int($m_sRE_iIndex) ? '' : $m_sRE_iIndex][] = $aConf;
-        }
+        $this->aConfig[] = array('__FILTERS__' => '@isGET', '__RE__' => $sRE, '__CB__' => $mCB);
+
+        return $this;
+    }
+
+    public function addPOST($sRE, $mCB)
+    {
+        $this->aConfig[] = array('__FILTERS__' => '@isPOST', '__RE__' => $sRE, '__CB__' => $mCB);
+
+        return $this;
+    }
+
+    public function add($sRE, $mCB)
+    {
+        $this->aConfig[] = array('__RE__' => $sRE, '__CB__' => $mCB);
 
         return $this;
     }
 
     /**
-     * @param \Slime\Component\Http\REQ|array      $REQ
-     * @param \Slime\Component\Http\RESP|null      $RESP
-     * @param \Slime\Component\Log\LoggerInterface $Log
+     * @param \Slime\Component\Http\REQ   $REQ
+     * @param \Slime\Component\Http\RESP  $RESP
      * @param \Slime\Component\Support\Context     $CTX
      */
-    public function run($REQ, $RESP, $Log, $CTX)
+    public function runHttp($REQ, $RESP, $CTX)
     {
-        $aParamDefault = $RESP === null ? array($REQ, $Log, $CTX) : array($REQ, $RESP, $Log, $CTX);
-        foreach ($this->aConfig as $sRE => $aArr) {
-            # param to callback
-            if ($sRE === '') {
-                $aParam = $aParamDefault;
-            } else {
-                if (!preg_match($sRE, $REQ->getRequestURI(), $aMatch)) {
+        $aDefaultParam = array($REQ, $RESP, $CTX);
+        $sUrl = $REQ->getUrl();
+
+        foreach ($this->aConfig as $aArr) {
+            $aParam = $aDefaultParam;
+
+            if (isset($aArr['__RE__'])) {
+                if (!preg_match($aArr['__RE__'], $sUrl, $aMatch)) {
                     continue;
                 }
                 array_shift($aMatch);
-                $aParam = array_merge(array($aMatch), $aParamDefault);
+                $aParam = array_merge($aParam, $aMatch);
             }
 
-            foreach ($aArr as $mRow) {
-                # filter
-                if (isset($mRow['filter']) && !call_user_func_array($mRow['filter'], $aParam)) {
-                    continue;
-                }
+            if (isset($aArr['__PARAM__'])) {
+                $aParam[] = $aArr['__PARAM__'];
+            }
 
-                # callback by rule
-                if (empty($mRow['easy_mode'])) {
-                    if (isset($mRow['setting'])) {
-                        $aParam[] = $mRow['setting'];
+            if (isset($aArr['__FILTERS__'])) {
+                foreach ($aArr['__FILTERS__'] as $mFilter) {
+                    if (is_string($mFilter) && $mFilter[0]==='@') {
+                        $mFilter = array('\\Slime\\Component\\Route\\Filter', substr($mFilter, 1));
                     }
-                    if (!call_user_func_array($mRow['callback'], $aParam)) {
-                        break;
+                    if (!call_user_func_array($mFilter, $aParam)) {
+                        continue 2;
                     }
-                    continue;
                 }
+            }
 
-                # callback by RE
-                if (is_array($aParam[0])) { // has done preg
-                    $aSearch = $aReplace = array();
-                    foreach ($aParam as $iK => $sV) {
-                        if (!is_string($sV)) {
-                            continue;
-                        }
-                        $aSearch[$iK]  = '$' . $iK;
-                        $aReplace[$iK] = $sV;
-                    }
-                    $mCBItem   = self::replaceRec($mRow, $aSearch, $aReplace);
-                    $aParam[0] = $mCBItem['params'];
-                }
-                // callback direct
-                if (isset($mCBItem['callback'])) {
-                    if (!call_user_func_array($mCBItem['callback'], $aParam)) {
-                        break;
-                    }
-                    continue;
-                }
-                // callback as object
-                if (!Mode::objCall($mCBItem['controller'], $mCBItem['action'], $aParam)) {
-                    break;
-                }
+            if (!call_user_func_array($aArr['__CB__'], $aParam)) {
+                break;
             }
         }
     }
 
-    public static function replaceRec($aArr, $aSearch, $aReplace)
+    public function runCli($aArgv, $CTX)
     {
-        foreach ($aArr as $mK => $mRow) {
-            if (!is_array($mRow) || !is_string($mRow)) {
-                continue;
+        foreach ($this->aConfig as $aArr) {
+            if (!call_user_func($aArr['__CB__'], $aArgv, $CTX)) {
+                break;
             }
-            $aArr[$mK] = is_array($mRow) ?
-                self::replaceRec($mRow, $aSearch, $aReplace) :
-                str_replace($aSearch, $aReplace, $mRow);
         }
-        return $aArr;
     }
 }
 

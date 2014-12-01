@@ -2,17 +2,11 @@
 namespace Slime\Component\Http;
 
 /**
- * Class HttpRequest
+ * Class REQ_PHP
  *
  * @package Slime\Component\Http
  * @author  smallslime@gmail.com
  *
- * @property-read array        $aSERVER
- * @property-read Bag_Param    $BagGET
- * @property-read Bag_Param    $BagPOST
- * @property-read Bag_Param    $BagCOOKIE
- * @property-read Bag_File     $BagFILE
- * @property-read Bag_Param    $BagGPC
  */
 class REQ
 {
@@ -21,7 +15,8 @@ class REQ
         return new self($_SERVER, $_GET, $_POST, $_COOKIE, $_FILES, $_REQUEST);
     }
 
-    protected $aSERVER;
+    protected $naTidyHeader = null;
+    protected $nsBody;
 
     /**
      * @param array $aSERVER
@@ -33,101 +28,126 @@ class REQ
      */
     public function __construct($aSERVER, $aGET, $aPOST, $aCOOKIE, $aFILE, $aREQUEST)
     {
-        $this->aSERVER   = $aSERVER;
-        $this->BagGET    = new Bag_Param($aGET);
-        $this->BagPOST   = new Bag_Param($aPOST);
-        $this->BagCOOKIE = new Bag_Param($aCOOKIE);
-        $this->BagFILE   = new Bag_File($aFILE);
-        $this->BagGPC    = new Bag_Param($aREQUEST);
+        $this->aSERVER = $aSERVER;
+        $this->aGET    = $aGET;
+        $this->aPOST   = $aPOST;
+        $this->aCOOKIE = $aCOOKIE;
+        $this->aFILE   = $aFILE;
+        $this->aGPC    = $aREQUEST;
     }
 
-    public function __get($sKey)
+    public function preTidyHeader()
     {
-        return $this->$sKey;
+        $this->naTidyHeader = array();
+        foreach ($this->aSERVER as $sK => $sV) {
+            if (substr($sK, 0, 5) === 'HTTP_') {
+                $this->naTidyHeader[str_replace('_', '-', substr($sK, 5))] = $sV;;
+            }
+        }
+    }
+
+    /**
+     * @param null|string|array $nasK
+     *
+     * @return null|string|array
+     */
+    public function getHeader($nasK = null)
+    {
+        if ($this->naTidyHeader === null) {
+            if (is_string($nasK)) {
+                return isset($this->aSERVER[$sK = 'HTTP_' . str_replace('-', '_',
+                            strtoupper($nasK))]) ? $this->aSERVER[$sK] : null;
+            } else {
+                $this->preTidyHeader();
+                return $this->_getData($nasK, $this->naTidyHeader);
+            }
+        } else {
+            return $this->_getData($nasK, $this->naTidyHeader);
+        }
     }
 
     /**
      * @return string
-     */
-    public function getRequestMethod()
-    {
-        return (string)$this->aSERVER['REQUEST_METHOD'];
-    }
-
-    /**
-     * @return string
-     */
-    public function getRequestURI()
-    {
-        return (string)$this->aSERVER['REQUEST_URI'];
-    }
-
-    /**
-     * @return string
-     */
-    public function getProtocol()
-    {
-        return (string)$this->aSERVER['SERVER_PROTOCOL'];
-    }
-
-    /**
-     * @param $sKey
-     *
-     * @return null|string
-     */
-    public function getHeader($sKey)
-    {
-        $sKeyFix = 'HTTP_' . strtoupper($sKey);
-        return isset($this->aSERVER[$sKeyFix]) ? $this->aSERVER[$sKeyFix] : null;
-    }
-
-    /**
-     * @param string $m_n_sKey_aKeys
-     *
-     * @return array|null|string
-     */
-    public function getC($m_n_sKey_aKeys)
-    {
-        return $this->BagCOOKIE->find($m_n_sKey_aKeys);
-    }
-
-    /**
-     * @param string $m_n_sKey_aKeys
-     *
-     * @return array|null|string
-     */
-    public function getG($m_n_sKey_aKeys)
-    {
-        return $this->BagGET->find($m_n_sKey_aKeys);
-    }
-
-    /**
-     * @param string $m_n_sKey_aKeys
-     *
-     * @return array|null|string
-     */
-    public function getP($m_n_sKey_aKeys)
-    {
-        return $this->BagPOST->find($m_n_sKey_aKeys);
-    }
-
-    /**
-     * @param string $m_n_sKey_aKeys
-     *
-     * @return array|null|string
-     */
-    public function getGPC($m_n_sKey_aKeys)
-    {
-        return $this->BagGPC->find($m_n_sKey_aKeys);
-    }
-
-    /**
-     * @return string|bool
      */
     public function getBody()
     {
         return file_get_contents('php://input');
     }
+
+    /**
+     * @return string upper chars
+     */
+    public function getMethod()
+    {
+        return strtoupper($this->aSERVER['REQUEST_METHOD']);
+    }
+
+    /**
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->aSERVER['REQUEST_URI'];
+    }
+
+    /**
+     * @return string upper chars
+     */
+    public function getProtocol()
+    {
+        return strtoupper($this->aSERVER['SERVER_PROTOCOL']);
+    }
+
+    /**
+     * @param null|string|array $nasK
+     *
+     * @return null|string|array
+     */
+    public function getG($nasK = null)
+    {
+        return $this->_getData($nasK, $this->aGET);
+    }
+
+    /**
+     * @param null|string|array $nasK
+     *
+     * @return null|string|array
+     */
+    public function getP($nasK = null)
+    {
+        return $this->_getData($nasK, $this->aPOST);
+    }
+
+    /**
+     * @param null|string|array $nasK
+     *
+     * @return null|string|array
+     */
+    public function getC($nasK = null)
+    {
+        return $this->_getData($nasK, $this->aCOOKIE);
+    }
+
+    /**
+     * @param null|string|array $nasK
+     *
+     * @return null|string|array
+     */
+    public function getGPC($nasK = null)
+    {
+        return $this->_getData($nasK, $this->aGPC);
+    }
+
+    /**
+     * @param null|string|array $nasK
+     *
+     * @return null|string|array
+     */
+    public function getFile($nasK)
+    {
+        return $this->_getData($nasK, $this->aFILE);
+    }
+
 
     /**
      * @return bool
@@ -138,44 +158,58 @@ class REQ
     }
 
     /**
-     * @return string
+     * @return null|string
      */
-    public function getClientIP()
+    public function guessClientIP()
     {
-        $sIp = '';
         if (!empty($this->aSERVER['HTTP_CLIENT_IP'])) {
-            $sIp = $this->aSERVER['HTTP_CLIENT_IP'];
-            goto RET;
+            return $this->aSERVER['HTTP_CLIENT_IP'];
         }
-        if (
-            !empty($this->aSERVER['HTTP_X_FORWARDED_FOR']) &&
+
+        if (!empty($this->aSERVER['HTTP_X_FORWARDED_FOR']) &&
             strcasecmp($this->aSERVER['HTTP_X_FORWARDED_FOR'], 'unknown')
         ) {
             $sTmpIp = $this->aSERVER['HTTP_X_FORWARDED_FOR'];
-        } elseif (
-            !empty($this->aSERVER['REMOTE_ADDR']) &&
+        } elseif (!empty($this->aSERVER['REMOTE_ADDR']) &&
             strcasecmp($this->aSERVER['REMOTE_ADDR'], 'unknown')
         ) {
             $sTmpIp = $this->aSERVER['REMOTE_ADDR'];
         } else {
-            $sTmpIp = '';
+            return null;
         }
-        if ($sTmpIp === '') {
-            goto RET;
-        }
+
         $aIp = explode(',', $sTmpIp);
         if (count($aIp) === 1) {
-            $sIp = $aIp[0];
-            goto RET;
+            return $aIp[0];
         }
+
         foreach ($aIp as $sOneIp) {
             if (ip2long($sOneIp) !== false) {
-                $sIp = $sOneIp;
-                break;
+                return $sOneIp;
             }
         }
 
-        RET:
-        return $sIp;
+        return null;
+    }
+
+    /**
+     * @param null|string|array $nasK
+     * @param                   $aData
+     *
+     * @return null|string|array
+     */
+    protected function _getData($nasK, $aData)
+    {
+        if ($nasK === null) {
+            return $aData;
+        } elseif (is_array($nasK)) {
+            $aRS = array();
+            foreach ($nasK as $sK) {
+                $aRS[$sK] = isset($aData[$sK]) ? $aData[$sK] : null;
+            }
+            return $aRS;
+        } else {
+            return isset($aData[$sK = (string)$nasK]) ? $aData[$sK] : null;
+        }
     }
 }

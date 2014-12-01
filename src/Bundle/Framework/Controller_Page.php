@@ -48,9 +48,12 @@ abstract class Controller_Page extends Controller_ABS
             return;
         } elseif ($this->isJumpRender()) {
             $sJump = $this->sJumpUrl === null ? $this->REQ->getHeader('Referer') : $this->sJumpUrl;
-            $this->RESP->setHeaderRedirect($sJump === null ? '/' : $sJump, $this->iJumpCode);
+            $this->RESP->setRedirect($sJump === null ? '/' : $sJump, $this->iJumpCode);
         } else {
-            $this->RESP->setHeader('Content-Type', 'text/html; charset=utf-8', false)->setBody(
+            if ($this->RESP->getHeader('Content-Type')===null) {
+                $this->RESP->addHeader('Content-Type', 'text/html; charset=utf-8');
+            }
+            $this->RESP->setBody(
                 $this->CTX->View
                     ->assignMulti($this->aData)
                     ->setTpl($this->sTPL === null ? $this->getDefaultTPL() : $this->sTPL)
@@ -102,7 +105,7 @@ abstract class Controller_Page extends Controller_ABS
     protected function isPageRender()
     {
         return $this->iRender === self::RENDER_PAGE ||
-        ($this->iRender === self::RENDER_AUTO && $this->REQ->getRequestMethod() === 'GET');
+        ($this->iRender === self::RENDER_AUTO && $this->REQ->getMethod() === 'GET');
     }
 
     /**
@@ -126,6 +129,6 @@ abstract class Controller_Page extends Controller_ABS
     protected function isJumpRender()
     {
         return $this->iRender === self::RENDER_JUMP ||
-        ($this->iRender === self::RENDER_AUTO && $this->REQ->getRequestMethod() !== 'GET');
+        ($this->iRender === self::RENDER_AUTO && $this->REQ->getMethod() !== 'GET');
     }
 }

@@ -221,9 +221,8 @@ class Call
     /**
      * @throws HttpCallFailedException
      *
-     * @return RESP
      */
-    public function asResp()
+    public function asOBJ()
     {
         if ($this->mRS === false) {
             throw new HttpCallFailedException();
@@ -234,7 +233,6 @@ class Call
     /**
      * @param string $sRS
      *
-     * @return RESP
      */
     public static function createFromCURLResult($sRS)
     {
@@ -259,17 +257,14 @@ class Call
             } else {
                 $aRow = explode(':', $sRow, 2);
                 if (count($aRow) !== 2) {
-                    trigger_error("[HTTP] Header formate error[{$sRow}]", E_WARNING);
+                    trigger_error("[HTTP] Header format error[{$sRow}]", E_WARNING);
                     continue;
                 }
                 $aTidyHeader[trim($aRow[0])] = ltrim($aRow[1]);
             }
         }
 
-        $O = new RESP($niCode, $aTidyHeader, $aArr[1]);
-        if ($nsProtocol !== null) {
-            $O->setProtocol($nsProtocol);
-        }
+        //@todo
         return $O;
     }
 }
