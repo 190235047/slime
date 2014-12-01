@@ -1,6 +1,8 @@
 <?php
 namespace Slime\Bundle\Framework;
 
+use Slime\Component\Support\Context;
+
 /**
  * Class Controller_Page
  * Slime 内置 Page 控制器基类
@@ -15,6 +17,11 @@ abstract class Controller_Page extends Controller_ABS
     const RENDER_AUTO = 0;
     const RENDER_PAGE = 1;
     const RENDER_JUMP = 2;
+
+    /** @var \Slime\Component\Http\REQ */
+    protected $REQ;
+    /** @var \Slime\Component\Http\RESP */
+    protected $RESP;
 
     # for render
     protected $sTPL = null;

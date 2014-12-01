@@ -11,6 +11,11 @@ class Router
 {
     protected $aConfig = array();
 
+    /**
+     * @param array $aConfig
+     *
+     * @return $this
+     */
     public function addConfig(array $aConfig)
     {
         $this->aConfig = array_merge($this->aConfig, $aConfig);
@@ -18,36 +23,55 @@ class Router
         return $this;
     }
 
+    /**
+     * @param string $sRE
+     * @param mixed  $mCB
+     *
+     * @return $this
+     */
     public function addGET($sRE, $mCB)
     {
-        $this->aConfig[] = array('__FILTERS__' => '@isGET', '__RE__' => $sRE, '__CB__' => $mCB);
-
-        return $this;
-    }
-
-    public function addPOST($sRE, $mCB)
-    {
-        $this->aConfig[] = array('__FILTERS__' => '@isPOST', '__RE__' => $sRE, '__CB__' => $mCB);
-
-        return $this;
-    }
-
-    public function add($sRE, $mCB)
-    {
-        $this->aConfig[] = array('__RE__' => $sRE, '__CB__' => $mCB);
+        $this->aConfig[] = array('__FILTERS__' => array('@isGET'), '__RE__' => $sRE, '__CB__' => $mCB);
 
         return $this;
     }
 
     /**
-     * @param \Slime\Component\Http\REQ   $REQ
-     * @param \Slime\Component\Http\RESP  $RESP
-     * @param \Slime\Component\Support\Context     $CTX
+     * @param string $sRE
+     * @param mixed  $mCB
+     *
+     * @return $this
+     */
+    public function addPOST($sRE, $mCB)
+    {
+        $this->aConfig[] = array('__FILTERS__' => array('@isPOST'), '__RE__' => $sRE, '__CB__' => $mCB);
+
+        return $this;
+    }
+
+    /**
+     * @param   string   $sRE
+     * @param   mixed    $mCB
+     * @param null|array $naFilter
+     *
+     * @return $this
+     */
+    public function add($sRE, $mCB, $naFilter = null)
+    {
+        $this->aConfig[] = array('__RE__' => $sRE, '__CB__' => $mCB, '__FILTERS__' => $naFilter);
+
+        return $this;
+    }
+
+    /**
+     * @param \Slime\Component\Http\REQ        $REQ
+     * @param \Slime\Component\Http\RESP       $RESP
+     * @param \Slime\Component\Support\Context $CTX
      */
     public function runHttp($REQ, $RESP, $CTX)
     {
         $aDefaultParam = array($REQ, $RESP, $CTX);
-        $sUrl = $REQ->getUrl();
+        $sUrl          = $REQ->getUrl();
 
         foreach ($this->aConfig as $aArr) {
             $aParam = $aDefaultParam;
@@ -66,7 +90,7 @@ class Router
 
             if (isset($aArr['__FILTERS__'])) {
                 foreach ($aArr['__FILTERS__'] as $mFilter) {
-                    if (is_string($mFilter) && $mFilter[0]==='@') {
+                    if (is_string($mFilter) && $mFilter[0] === '@') {
                         $mFilter = array('\\Slime\\Component\\Route\\Filter', substr($mFilter, 1));
                     }
                     if (!call_user_func_array($mFilter, $aParam)) {

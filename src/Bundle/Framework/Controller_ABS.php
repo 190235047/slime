@@ -1,10 +1,6 @@
 <?php
 namespace Slime\Bundle\Framework;
 
-use Slime\Component\Log;
-use Slime\Component\Route;
-use Slime\Component\Http;
-
 /**
  * Class Controller_Cli
  * Slime 内置控制器基类
@@ -15,7 +11,7 @@ use Slime\Component\Http;
 abstract class Controller_ABS
 {
     /**
-     * @var Context 上下文对象
+     * @var \Slime\Component\Support\Context 上下文对象
      */
     protected $CTX;
 
