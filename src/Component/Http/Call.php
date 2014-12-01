@@ -24,21 +24,43 @@ class Call
     const EV_EXEC_BEFORE = 'slime.component.http.http_call.exec_before';
     const EV_EXEC_AFTER = 'slime.component.http.http_call.exec_after';
 
-    protected $sUrl;
+    protected $nsUrl;
+    protected $iConnTimeout;
+    protected $iTimeout;
+    protected $nsIP = null;
+    protected $niPort = null;
+    protected $aPostData = array();
+    protected $aFileMap = array();
+    protected $aOpt = array(
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_HEADER         => true,
+        CURLOPT_NOBODY         => false
+    );
+    protected $aHeader = array();
+    protected $mRS;
 
     /**
-     * @param string                       $sUrl
-     * @param \Slime\Component\Event\Event $nEV
+     * @param int                               $iConnTimeoutMS
+     * @param int                               $iTimeoutMS
+     * @param null|\Slime\Component\Event\Event $nEV
      */
-    public function __construct($sUrl, $nEV = null)
+    public function __construct($iConnTimeoutMS = 3000, $iTimeoutMS = 3000, $nEV = null)
     {
-        $this->sUrl = $sUrl;
-        $this->nEV  = $nEV;
+        $this->setTimeOut($iConnTimeoutMS, $iTimeoutMS);
+        $this->nEV = $nEV;
     }
 
     public function __get($sVar)
     {
         return $this->$sVar;
+    }
+
+    /**
+     * @param string $sUrl
+     */
+    public function setUrl($sUrl)
+    {
+        $this->nsUrl = $sUrl;
     }
 
     /**
@@ -51,8 +73,6 @@ class Call
         $this->aOpt[CURLOPT_NOBODY] = !$bGetBody;
     }
 
-    protected $iConnTimeout = 3000;
-    protected $iTimeout = 3000;
 
     /**
      * @param int $iConnTimeoutMS
@@ -68,9 +88,6 @@ class Call
         return $this;
     }
 
-    protected $nsIP = null;
-    protected $niPort = null;
-
     /**
      * @param string   $sIP
      * @param null|int $niPort
@@ -81,7 +98,6 @@ class Call
         $this->niPort = $niPort;
     }
 
-    protected $aPostData = array();
 
     /**
      * @param array $aKV
@@ -95,7 +111,6 @@ class Call
         return $this;
     }
 
-    protected $aFileMap = array();
 
     /**
      * @param array $aKVName2File
@@ -109,11 +124,6 @@ class Call
         return $this;
     }
 
-    protected $aOpt = array(
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_HEADER         => true,
-        CURLOPT_NOBODY         => false
-    );
 
     /**
      * @param array $aOpt
@@ -123,7 +133,6 @@ class Call
         $this->aOpt = empty($this->aOpt) ? $aOpt : array_merge($aOpt, $this->aOpt);
     }
 
-    protected $aHeader = array();
 
     /**
      * @param array $aKV
@@ -133,14 +142,15 @@ class Call
         $this->aHeader = empty($this->aHeader) ? $aKV : array_merge($this->aHeader, $aKV);
     }
 
-    protected $mRS;
-
     public function __call($sMethodName, $aArgv)
     {
         $aOpt = $this->aOpt;
 
         # url
-        $sUrl = $this->sUrl;
+        $sUrl = $this->nsUrl;
+        if ($sUrl === null) {
+            throw new \RuntimeException("[HTTP] ; Please call setUrl first");
+        }
         if ($this->nsIP !== null) {
             $aBlock                = parse_url($sUrl);
             $this->aHeader['Host'] = isset($aBlock['port']) ? "{$aBlock['host']}:{$aBlock['port']}" : "{$aBlock['host']}";
@@ -154,7 +164,7 @@ class Call
         $rCurl = curl_init($sUrl);
 
         # preset opt https
-        if (substr($this->sUrl, 0, 8) === 'https://') {
+        if (substr($this->nsUrl, 0, 8) === 'https://') {
             if (!isset($aOpt[CURLOPT_SSL_VERIFYHOST])) {
                 $aOpt[CURLOPT_SSL_VERIFYHOST] = 1;
             }
