@@ -17,7 +17,7 @@ class Ext
     {
         $EV->listen(Call::EV_EXEC_BEFORE,
             function ($Obj, $sMethod, $aArg, $Local) use ($Log) {
-                $Log->info("[HTTP] ; Call[$sMethod] start[{$Obj->sUrl}]");
+                $Log->info("[HTTP] ; Call[$sMethod] start[{$Obj->nsUrl}]");
                 $Local['start'] = microtime(true);
             }
         );

@@ -11,9 +11,9 @@ abstract class Adaptor_ABS implements IAdaptor
 {
     protected $nCTX;
 
-    public function __construct($nCTX)
+    public function setCTX($CTX)
     {
-        $this->nCTX = $nCTX;
+        $this->nCTX = $CTX;
     }
 
     public function parse($mData, $bForce)

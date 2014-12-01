@@ -57,10 +57,14 @@ class Call
 
     /**
      * @param string $sUrl
+     *
+     * @return $this
      */
     public function setUrl($sUrl)
     {
         $this->nsUrl = $sUrl;
+
+        return $this;
     }
 
     /**
@@ -205,7 +209,7 @@ class Call
 
         if ($this->nEV) {
             $Local  = new \ArrayObject();
-            $aParam = array($this, $sMethodName, $Local);
+            $aParam = array($this, $sMethodName, $aArgv, $Local);
             $this->nEV->fire(self::EV_EXEC_BEFORE, $aParam);
             if (!isset($Local['__RESULT__'])) {
                 $Local['__RESULT__'] = curl_exec($rCurl);
