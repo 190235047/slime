@@ -15,10 +15,10 @@ list($sAuthorName, $sAppName, $sNS) = $aArr;
 
 $sTargetDir = $argv[2];
 
-$sMode     = empty($argv[3]) ? 'standard' : $argv[3];
+$sMode     = empty($argv[3]) ? 'AppSTD' : $argv[3];
 $sTimeZone = empty($argv[4]) ? 'PRC' : $argv[4];
 
-generate_app(__DIR__ . "/create_app/$sMode", $sTargetDir, $sAuthorName, $sAppName, $sNS, $sTimeZone);
+generate_app(dirname(__DIR__) . "/src/Bundle/Framework/__{$sMode}__", $sTargetDir, $sAuthorName, $sAppName, $sNS, $sTimeZone);
 
 function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $sTimeZone, $i = 0)
 {
@@ -51,7 +51,7 @@ function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $
             $b = file_put_contents(
                 $sTargetFile,
                 str_replace(
-                    array('{{{NS}}}', '{{{APP_NAME}}}', '{{{AUTHOR}}}', '{{{TIME_ZONE}}}'),
+                    array('{{{APP}}}', '{{{APP_NAME}}}', '{{{AUTHOR}}}', '{{{TIME_ZONE}}}'),
                     array($sNS, $sAppName, $sAuthorName, $sTimeZone),
                     file_get_contents($sTargetFile)
                 )

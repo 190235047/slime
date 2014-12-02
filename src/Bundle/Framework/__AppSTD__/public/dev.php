@@ -1,4 +1,5 @@
 <?php
+die('qq');
 require '__init__.php';
 
 # set error handle if you need
