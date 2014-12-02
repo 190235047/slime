@@ -11,6 +11,11 @@ abstract class Adaptor_ABS implements IAdaptor
 {
     protected $nCTX;
 
+    /**
+     * @param \Slime\Component\Support\Context $CTX
+     *
+     * @return void
+     */
     public function setCTX($CTX)
     {
         $this->nCTX = $CTX;

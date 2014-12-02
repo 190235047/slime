@@ -5,6 +5,7 @@ use Slime\Component\Http\REQ;
 use Slime\Component\Http\RESP;
 use Slime\Component\Route\RouteException;
 use Slime\Component\Route\Router;
+use Slime\Component\Support\Context;
 
 /**
  * Class Bootstrap
@@ -13,82 +14,42 @@ use Slime\Component\Route\Router;
  */
 class Bootstrap
 {
-    protected $CTX;
-
-    /**
-     * @param \Slime\Component\Support\Context $CTX
-     * @param array                            $aCTXMap
-     * @param mixed                            $mErrorHandle
-     * @param mixed                            $mUncaughtExceptionHandle
-     */
-    public function __construct($CTX, $aCTXMap = array(), $mErrorHandle = null, $mUncaughtExceptionHandle = null)
+    public static function run(Router $Router, Context $CTX)
     {
-        $this->CTX = $CTX;
-
-        $CTX->bindCB(
-            '__UncaughtException__',
-            $mUncaughtExceptionHandle === null ?
-                array('\\Slime\\Bundle\\Framework\\Ext', 'handleUncaughtException') :
-                $mUncaughtExceptionHandle
-        );
-
-        set_error_handler(
-            $mErrorHandle === null ?
-                array('\\Slime\\Bundle\\Framework\\Ext', 'handleError') :
-                $mErrorHandle,
-            E_ALL | E_STRICT
-        );
-
-        if (!isset($aCTXMap['sRunMode'])) {
-            $aCTXMap['sRunMode'] = strtolower(PHP_SAPI) === 'cli' ? 'cli' : 'http';
-        }
-        if (!isset($aCTXMap['Bootstrap'])) {
-            $aCTXMap['Bootstrap'] = $this;
-        }
-        if ($aCTXMap['sRunMode'] === 'cli') {
-            if (!isset($aCTXMap['aArgv'])) {
-                $aMap['aArgv'] = $GLOBALS['argv'];
-            }
+        if (PHP_SAPI == 'cli') {
+            self::runCli($Router, $CTX);
         } else {
-            if (!isset($aCTXMap['REQ'])) {
-                $aCTXMap['REQ'] = REQ::createFromGlobal();
-            }
-            if (!isset($aCTXMap['RESP'])) {
-                $aCTXMap['RESP'] = new RESP();
-            }
+            self::runHttp($Router, $CTX);
         }
-
-        $CTX->bindMulti($aCTXMap);
     }
 
-    /**
-     * @param \Slime\Component\Route\Router $Router
-     */
-    public function run($Router)
+    protected static function runCli(Router $Router, Context $CTX)
     {
-        $CTX = $this->CTX;
         try {
-            switch ($CTX->sRunMode) {
-                case 'http':
-                    $Router->runHttp($CTX->REQ, $CTX->RESP, $CTX);
-                    $CTX->RESP->send();
-                    break;
-                case 'cli':
-                    $Router->runCli($CTX->aArgv, $CTX);
-                    break;
-                default:
-                    throw new \RuntimeException("[MAIN] : RunMode {$this->CTX->sRunMode} is not supported");
-            }
+            $CTX->bind('aArgv', $GLOBALS['argv']);
+            $Router->runCli($GLOBALS['argv'], $CTX);
+        } catch (\Exception $E) {
+            $CTX->callIgnore('__Uncaught__', array($E));
+            exit(1);
+        }
+    }
+
+    protected static function runHttp(Router $Router, Context $CTX)
+    {
+        try {
+            $REQ  = REQ::createFromGlobal();
+            $RESP = new RESP();
+            $CTX->bindMulti(array('REQ' => $REQ, 'RESP' => $RESP));
+            $Router->runHttp($REQ, $RESP, $CTX);
+            $RESP->send();
         } catch (RouteException $E) {
-            if ($CTX->sRunMode == 'http') {
-                $CTX->RESP->setStatus($E->getCode());
+            if (isset($RESP)) {
+                $RESP->setStatus($E->getCode());
             }
-            $CTX->call('__UncaughtException__', array($E));
+            $CTX->callIgnore('__Uncaught__', array($E));
             exit(1);
         } catch (\Exception $E) {
-            if ($CTX->isCBBound('__UncaughtException__')) {
-                $CTX->call('__UncaughtException__', array($E));
-            }
+            $CTX->callIgnore('__Uncaught__', array($E));
             exit(1);
         }
     }

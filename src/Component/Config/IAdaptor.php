@@ -10,6 +10,13 @@ namespace Slime\Component\Config;
 interface IAdaptor
 {
     /**
+     * @param \Slime\Component\Support\Context $CTX
+     *
+     * @return void
+     */
+    public function setCTX($CTX);
+
+    /**
      * @param string $sKey
      * @param mixed  $mDefault
      * @param bool   $bWithParse

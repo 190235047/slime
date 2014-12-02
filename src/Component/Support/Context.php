@@ -18,7 +18,7 @@ class Context
      * @param mixed  $CFG
      * @param string $sCBDataKey
      *
-     * @return \Slime\Component\Support\Context
+     * @return Context
      */
     public static function create($CFG, $sCBDataKey)
     {
@@ -47,6 +47,7 @@ class Context
     {
         $this->CFG         = $CFG;
         $this->aDataConfig = $CFG->get($sCBDataKey, array());
+        $CFG->setCTX($this);
     }
 
     public function __get($sName)

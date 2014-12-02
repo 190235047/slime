@@ -10,20 +10,22 @@ namespace Slime\Component\Http;
  */
 class RESP
 {
-    protected $iStatus;
-    protected $nsProtocol;
+    protected $niStatus = null;
+    protected $nsProtocol = null;
     protected $aHeader = array();
     protected $sBody = '';
     protected $aCookie = array();
 
     /**
-     * @param int         $iStatus
+     * @param int         $niStatus
      * @param null|array  $naHeader
      * @param null|string $nsBody
      */
-    public function __construct($iStatus = 200, array $naHeader = null, $nsBody = null)
+    public function __construct($niStatus = null, array $naHeader = null, $nsBody = null)
     {
-        $this->setStatus($iStatus);
+        if ($niStatus !== null) {
+            $this->setStatus($niStatus);
+        }
 
         if ($naHeader !== null) {
             $this->addHeader($naHeader);
@@ -110,11 +112,11 @@ class RESP
     }
 
     /**
-     * @return int
+     * @return null|int
      */
     public function getStatus()
     {
-        return $this->iStatus;
+        return $this->niStatus;
     }
 
     /**
@@ -124,13 +126,13 @@ class RESP
      */
     public function setStatus($iStatus)
     {
-        $this->iStatus = $iStatus;
+        $this->niStatus = $iStatus;
 
         return $this;
     }
 
     /**
-     * @return string|null
+     * @return null|string
      */
     public function getStatusMessage()
     {
@@ -197,11 +199,11 @@ class RESP
             511 => 'Network Authentication Required', // RFC6585
         );
 
-        return isset($aStatusTexts[$this->iStatus]) ? $aStatusTexts[$this->iStatus] : null;
+        return isset($aStatusTexts[$this->niStatus]) ? $aStatusTexts[$this->niStatus] : null;
     }
 
     /**
-     * @return string
+     * @return null|string
      */
     public function getProtocol()
     {
@@ -284,8 +286,8 @@ class RESP
             trigger_error('[HTTP]; Header has sent before', E_USER_NOTICE);
         } else {
             // first line
-            if ($this->iStatus !== 200) {
-                header(sprintf('%s %d %s', $this->nsProtocol, $this->iStatus, $this->getStatusMessage()));
+            if ($this->niStatus !== null && $this->niStatus !== 200) {
+                header(sprintf('%s %d %s', $this->nsProtocol, $this->niStatus, $this->getStatusMessage()));
             }
 
             if (!empty($this->aHeader)) {

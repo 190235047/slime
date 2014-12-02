@@ -17,24 +17,24 @@ class I18N
     );
 
     /**
-     * @param \Slime\Component\Http\REQ $HttpRequest
-     * @param string                    $sLanguageBaseDir
-     * @param string                    $sDefaultLanguageDir
+     * @param \Slime\Component\Http\REQ $REQ
+     * @param string                    $sLangBaseDir
+     * @param string                    $sDefaultLangDir
      * @param string                    $sCookieKey
      *
      * @return I18N
      */
     public static function createFromHttp(
-        $HttpRequest,
-        $sLanguageBaseDir,
-        $sDefaultLanguageDir = 'english',
+        $REQ,
+        $sLangBaseDir,
+        $sDefaultLangDir = 'english',
         $sCookieKey = null
     ) {
         $nsLangFromC = null;
         if ($sCookieKey !== null) {
-            $nsLangFromC = $HttpRequest->getC($sCookieKey);
+            $nsLangFromC = $REQ->getC($sCookieKey);
         }
-        $nsLangFromH = $HttpRequest->getHeader('Accept_Language');
+        $nsLangFromH = $REQ->getHeader('Accept_Language');
         if (empty($nsLangFromC)) {
             if ($nsLangFromH === null) {
                 $sLang = 'en-us';
@@ -45,10 +45,10 @@ class I18N
             $sLang = $nsLangFromC;
         }
 
-        return new self($sLanguageBaseDir, $sLang, $sDefaultLanguageDir);
+        return new self($sLangBaseDir, $sLang, $sDefaultLangDir);
     }
 
-    public static function createFromCli($sLanguageBaseDir, array $aArg, $sDefaultLanguageDir = 'english')
+    public static function createFromCli(array $aArg, $sLanguageBaseDir, $sDefaultLanguageDir = 'english')
     {
         $sLanguage = $aArg[count($aArg) - 1];
         if (array_search($sLanguage, self::$aLangMapDir) === false) {
@@ -58,11 +58,11 @@ class I18N
         return new self($sLanguageBaseDir, $sLanguage, $sDefaultLanguageDir);
     }
 
-    public function __construct($sLanguageBaseDir, $sLanguage, $sDefaultLanguageDir, $sConfigAdaptor = '@PHP')
+    public function __construct($sLangBaseDir, $sLang, $sDefaultLanguageDir, $sConfigAdaptor = '@PHP')
     {
         $sCurrentLanguageDir = null;
         foreach (self::$aLangMapDir as $sK => $sV) {
-            if (preg_match($sK, $sLanguage)) {
+            if (preg_match($sK, $sLang)) {
                 $sCurrentLanguageDir = $sV;
                 break;
             }
@@ -70,15 +70,15 @@ class I18N
 
         $this->sLangDir = $sCurrentLanguageDir;
 
-        $this->Configure = Config\Configure::factory(
+        $this->Obj = Config\Configure::factory(
             $sConfigAdaptor,
-            $sLanguageBaseDir . DIRECTORY_SEPARATOR . $sCurrentLanguageDir,
-            $sLanguageBaseDir . DIRECTORY_SEPARATOR . $sDefaultLanguageDir
+            $sLangBaseDir . DIRECTORY_SEPARATOR . $sCurrentLanguageDir,
+            $sLangBaseDir . DIRECTORY_SEPARATOR . $sDefaultLanguageDir
         );
     }
 
     public function get($sString)
     {
-        return $this->Configure->get($sString);
+        return $this->Obj->get($sString);
     }
 }
