@@ -8,6 +8,6 @@ namespace Slime\Bundle\Framework;
  * @package Slime\Bundle\Framework
  * @author  smallslime@gmail.com
  */
-abstract class Controller_Cli extends Controller_ABS
+abstract class Controller_CLI extends Controller_ABS
 {
 }

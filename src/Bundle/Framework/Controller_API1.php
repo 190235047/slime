@@ -12,7 +12,7 @@ use Slime\Component\View;
  * @package Slime\Bundle\Framework
  * @author  smallslime@gmail.com
  */
-abstract class Controller_Api extends Controller_ABS
+abstract class Controller_API extends Controller_ABS
 {
     protected $sDefaultRender = '_renderJSON';
     protected $sJSCBParam = 'cb';
