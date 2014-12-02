@@ -31,8 +31,8 @@ abstract class Controller_ABS
     protected $aParam;
 
     /**
-     * @param Context $CTX
-     * @param array   $aParam
+     * @param \Slime\Component\Support\Context $CTX
+     * @param array                            $aParam
      */
     public function __construct($CTX, array $aParam = array())
     {

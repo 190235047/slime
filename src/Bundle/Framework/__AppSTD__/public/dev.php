@@ -1,16 +1,15 @@
 <?php
-die('qq');
 require '__init__.php';
 
 # set error handle if you need
-set_error_handler(array('\\Slime\\Bundle\\Framework\\Ext', 'Error'), E_ALL | E_STRICT);
+set_error_handler(array('\\Slime\\Bundle\\Framework\\Ext', 'hError'), E_ALL | E_STRICT);
 
 # init object
-$CFG = \Slime\Component\Config\Configure::factory('@PHP', DIR_CONFIG . '/development', DIR_CONFIG . 'publish');
+$CFG = \Slime\Component\Config\Configure::factory('@PHP', DIR_CONFIG . '/development', DIR_CONFIG . '/publish');
 /** @var \APPStd\System\Support\CTX $CTX */
 $CTX    = \AppSTD\System\Support\CTX::create($CFG, 'module_http');
 $Router = new \Slime\Component\Route\Router();
-$Router->addConfig($CFG->get('route_http'));
+$Router->addConfig((array)$CFG->get('route_http'));
 
 # bind if you need
 $CTX->bindMulti(array('Config' => $CFG, 'Router' => $Router));

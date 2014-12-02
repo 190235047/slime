@@ -3,23 +3,34 @@ namespace AppSTD\C_Page;
 
 use AppSTD\System\Framework\C_Page;
 use Slime\Component\Http\Ext;
+use Slime\Component\RDBMS\DBAL\Bind;
+use Slime\Component\RDBMS\DBAL\Condition;
 
 class C_Main extends C_Page
 {
     public function actionDefault()
     {
-        $this->aData['h1'] = 'Hell world!';
+        $this->aData['h1'] = 'Hello world!';
+
+        $B = new Bind();
+        $aGET = $this->REQ->getG(array('id_min'));
+        $B->setMulti($aGET);
+
+        $aWhere = array();
+        if (isset($aGET['id_min'])) {
+            $aWhere[] = array('id', '>=', $B['id_min']);
+        }
 
         /** @var \AppSTD\Model\M_User $M_U */
-        $M_U = $this->CTX->ORM->M_User();
-        $this->aData['G_User'] = $M_U->findMulti();
+        $M_U                   = $this->CTX->ORM->M_User();
+        $this->aData['G_User'] = $M_U->findMulti(Condition::buildAnd()->setMulti($aWhere));
     }
 
     public function actionFetch()
     {
         Ext::ev_LogCost($this->CTX->Event, $this->CTX->Log);
 
-        $HC = $this->CTX->HttpCall;
+        $HC  = $this->CTX->HttpCall;
         $mRS = $HC->setUrl('http://www.baidu.com')->get()->asString();
         var_dump($mRS);
 
@@ -29,11 +40,11 @@ class C_Main extends C_Page
     public function actionCreateRandom()
     {
         /** @var \AppSTD\Model\M_User $U */
-        $U = $this->CTX->ORM->M_User();
+        $U   = $this->CTX->ORM->M_User();
         $bRS = $U->insert(
             array(
-                'name' => base64_encode(microtime(true)),
-                'password' => md5(mt_rand(1,10)),
+                'name'        => base64_encode(microtime(true)),
+                'password'    => md5(mt_rand(1, 10)),
                 'create_time' => date('Y-m-d H:i:s')
             )
         );

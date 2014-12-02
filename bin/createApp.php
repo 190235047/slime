@@ -18,7 +18,8 @@ $sTargetDir = $argv[2];
 $sMode     = empty($argv[3]) ? 'AppSTD' : $argv[3];
 $sTimeZone = empty($argv[4]) ? 'PRC' : $argv[4];
 
-generate_app(dirname(__DIR__) . "/src/Bundle/Framework/__{$sMode}__", $sTargetDir, $sAuthorName, $sAppName, $sNS, $sTimeZone);
+generate_app(dirname(__DIR__) . "/src/Bundle/Framework/__{$sMode}__", $sTargetDir, $sAuthorName, $sAppName, $sNS,
+    $sTimeZone);
 
 function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $sTimeZone, $i = 0)
 {

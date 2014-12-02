@@ -13,8 +13,8 @@ use Slime\Component\Support\Url;
 class Mode
 {
     /**
-     * @param \Slime\Component\Http\REQ    $REQ
-     * @param \Slime\Component\Http\RESP   $RESP
+     * @param \Slime\Component\Http\REQ        $REQ
+     * @param \Slime\Component\Http\RESP       $RESP
      * @param \Slime\Component\Support\Context $CTX
      * @param array                            $aSetting
      *
@@ -61,8 +61,8 @@ class Mode
     }
 
     /**
-     * @param \Slime\Component\Http\REQ    $REQ
-     * @param \Slime\Component\Http\RESP   $RESP
+     * @param \Slime\Component\Http\REQ        $REQ
+     * @param \Slime\Component\Http\RESP       $RESP
      * @param \Slime\Component\Support\Context $CTX
      * @param array                            $aSetting
      *

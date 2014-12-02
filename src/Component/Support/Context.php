@@ -74,7 +74,7 @@ class Context
             } else {
                 try {
                     $this->bindDataAutomatic($sName);
-                } catch (\DomainException $E) {
+                } catch (\OutOfBoundsException $E) {
                     return false;
                 }
                 return true;
@@ -139,7 +139,7 @@ class Context
     public function get($sName)
     {
         if (!$this->isBound($sName, true)) {
-            throw new \OutOfBoundsException("[CTX] ; Data[$sName] has no bound");
+            throw new \OutOfBoundsException("[CTX] ; Data[$sName] has not bound");
         }
         return $this->aData[$sName];
     }
@@ -169,7 +169,7 @@ class Context
     public function call($sName, $aArgv = array())
     {
         if (!$this->isCBBound($sName)) {
-            throw new \OutOfBoundsException("[CTX] ; CB[$sName] has no bound");
+            throw new \OutOfBoundsException("[CTX] ; CB[$sName] has not bound");
         }
         $aArgv[] = $this;
         return call_user_func_array($this->aCB[$sName], $aArgv);

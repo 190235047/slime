@@ -62,8 +62,8 @@ class Model
      */
     public function __construct($sItemClass, $sMName, $Engine, $aConf, $Factory)
     {
-        $this->sMName     = $sMName;
-        $this->Engine     = $Engine;
+        $this->sMName = $sMName;
+        $this->Engine = $Engine;
         if ($this->sItemClass === null) {
             $this->sItemClass = $sItemClass;
         }

@@ -10,7 +10,7 @@ class C_Main extends Controller_Cli
     {
         Ext::ev_LogCost($this->CTX->Event, $this->CTX->Log);
 
-        $HC = $this->CTX->HttpCall;
+        $HC  = $this->CTX->HttpCall;
         $mRS = $HC->setUrl('http://www.baidu.com')->get()->asString();
         var_dump($mRS);
     }

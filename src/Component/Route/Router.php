@@ -72,7 +72,7 @@ class Router
     {
         $aDefaultParam = array($REQ, $RESP, $CTX);
         $sUrl          = $REQ->getUrl();
-        $bHit = false;
+        $bHit          = false;
         foreach ($this->aConfig as $aArr) {
             $aParam = $aDefaultParam;
 
@@ -107,7 +107,7 @@ class Router
             }
         }
 
-        if (!$bHit && $RESP->getStatus()===null) {
+        if (!$bHit && $RESP->getStatus() === null) {
             throw new RouteException('[ROUTE] ; None routes hit!', 404);
         }
     }

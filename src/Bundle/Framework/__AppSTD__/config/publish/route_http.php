@@ -23,7 +23,7 @@ return array(
         '__PARAM__' => array(
             'default_controller' => 'Main',
             'default_action'     => 'Default',
-            'controller_pre'     => '\\AppSTD\\ControllerHTTP\\C_',
+            'controller_pre'     => '\\AppSTD\\C_Page\\C_',
             'action_pre'         => 'action'
         ),
     ),

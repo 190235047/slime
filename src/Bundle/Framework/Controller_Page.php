@@ -57,7 +57,7 @@ abstract class Controller_Page extends Controller_ABS
             $sJump = $this->sJumpUrl === null ? $this->REQ->getHeader('Referer') : $this->sJumpUrl;
             $this->RESP->setRedirect($sJump === null ? '/' : $sJump, $this->iJumpCode);
         } else {
-            if ($this->RESP->getHeader('Content-Type')===null) {
+            if ($this->RESP->getHeader('Content-Type') === null) {
                 $this->RESP->addHeader('Content-Type', 'text/html; charset=utf-8');
             }
             $this->RESP->setBody(
