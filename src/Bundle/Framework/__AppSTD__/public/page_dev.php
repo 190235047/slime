@@ -1,5 +1,5 @@
 <?php
-require '__init__.php';
+require __DIR__ . '/__init__.php';
 
 # set error handle if you need
 set_error_handler(array('\\Slime\\Bundle\\Framework\\Ext', 'hError'), E_ALL | E_STRICT);
