@@ -45,10 +45,10 @@ abstract class Controller_API extends Controller_ABS
 
     public function __after__()
     {
-        if (empty($this->aParam['__ext__'])) {
+        if (empty($this->aParam['__EXT__'])) {
             $sMethodName = $this->sDefaultRender;
         } else {
-            $sMethodName = '_render' . strtoupper($this->aParam['__ext__']);
+            $sMethodName = '_render' . strtoupper($this->aParam['__EXT__']);
             if ($this->sDefaultRender !== null && !method_exists($this, $sMethodName)) {
                 $sMethodName = $this->sDefaultRender;
             }

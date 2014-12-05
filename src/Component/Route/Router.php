@@ -115,7 +115,10 @@ class Router
     public function runCli($aArgv, $CTX)
     {
         foreach ($this->aConfig as $aArr) {
-            if (!call_user_func($aArr['__CB__'], $aArgv, $CTX)) {
+            if (!call_user_func($aArr['__CB__'],
+                $aArgv, $CTX,
+                isset($aArr['__PARAM__']) ? $aArr['__PARAM__'] : array())
+            ) {
                 break;
             }
         }

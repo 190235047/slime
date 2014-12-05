@@ -44,9 +44,8 @@ class Adaptor_PHP extends Adaptor_ABS
         if ($this->bIsDefault) {
             $mResult = $this->_find($sKey, $this->sBaseDir);
         } else {
-            $mDefaultResult    = $this->_find($sKey, $this->sDefaultBaseDir);
-            $mCurrentENVResult = $this->_find($sKey, $this->sBaseDir);
-            $mResult           = $mCurrentENVResult === null ? $mDefaultResult : $mCurrentENVResult;
+            $mResult = (($mCurResult = $this->_find($sKey, $this->sBaseDir)) === null) ?
+                $this->_find($sKey, $this->sDefaultBaseDir) : $mCurResult;
         }
 
         if ($bWithParse) {

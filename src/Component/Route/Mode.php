@@ -93,9 +93,14 @@ class Mode
             $aParam[$aPath[$i]] = $aPath[$i + 1];
         }
         $sAction     = strtolower($REQ->getMethod());
-        $sController = $sVer . '_' . Str::camel($sLast);
+        $sController = Str::camel($sLast);
 
-        self::objCall($CTX, $sController, $sAction, $aParam);
+        self::objCall(
+            $CTX,
+            str_replace('{__VERSION__}', $sVer, $aSetting['controller_pre']) . $sController,
+            $aSetting['action_pre'] . $sAction,
+            $aParam
+        );
 
         return false;
     }
@@ -108,20 +113,24 @@ class Mode
      * @return bool
      * @throws RouteException
      */
-    public static function slimeHttp_Cli($aArgv, $CTX, $aSetting)
+    public static function slimeHttp_CLI($aArgv, $CTX, $aSetting)
     {
-        if (strpos($aArgv[1], '.') === false) {
-            $aBlock = array($aArgv[1], $aSetting['default_controller']);
+        if (!isset($aArgv[1])) {
+            $aBlock = array($aSetting['default_controller'], $aSetting['default_action']);
         } else {
             $aBlock = explode('.', $aArgv[1], 2);
+            if (!isset($aBlock[1])) {
+                $aBlock[1] = $aSetting['default_action'];
+            }
         }
+
         $aParam                = empty($aArgv[2]) ? array() : json_decode($aArgv[2], true);
         $aParam['__SETTING__'] = $aSetting;
 
         self::objCall(
             $CTX,
-            $aSetting['default_controller'] . $aBlock[0],
-            $aSetting['default_action'] . $aBlock[1],
+            $aSetting['controller_pre'] . $aBlock[0],
+            $aSetting['action_pre'] . $aBlock[1],
             $aParam
         );
 

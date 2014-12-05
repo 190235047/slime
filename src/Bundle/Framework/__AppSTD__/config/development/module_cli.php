@@ -6,7 +6,8 @@ return array(
         'class'  => 'Slime\\Component\\Log\\Logger',
         'params' => array(
             array(
-                'File' => array('@File', '/tmp/php_AppSTD_cli_{level}_{date}.log', 50)
+                'STDFD' => array('@STDFD'),
+                'File'  => array('@File', '/tmp/php_AppSTD_cli_{level}_{date}.log')
             ),
             Logger::LEVEL_ALL ^ Logger::LEVEL_DEBUG
         ),

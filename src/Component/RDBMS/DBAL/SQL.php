@@ -217,6 +217,9 @@ abstract class SQL
      */
     protected function parseCondition($Condition)
     {
+        if (count($Condition->aData) === 0) {
+            return '1';
+        }
         $aRS = array();
         foreach ($Condition->aData as $mItem) {
             if ($mItem instanceof Condition) {

@@ -9,12 +9,17 @@ namespace Slime\Component\Log;
  */
 class Writer_File implements IWriter
 {
+    protected $nsBufFilePath = null;
+    protected $aBuf = array();
+
     public function __construct(
         $sFileFormat,
+        $iBufMax = 0,
         $nsContentFormat = null,
-        $naLevelMap = null,
-        $aVarMap = null
+        $aVarMap = null,
+        $naLevelMap = null
     ) {
+        $this->iBufMax        = $iBufMax;
         $this->sFileFormat    = $sFileFormat;
         $this->sContentFormat = $nsContentFormat === null ? '[{iLevel}] : {sTime} ; {sGuid} ; {sMessage}' : (string)$nsContentFormat;
         $this->aVarMap        = $aVarMap === null ? array('{date}' => date('Y-m-d')) : (array)$aVarMap;
@@ -45,6 +50,29 @@ class Writer_File implements IWriter
                 $this->sContentFormat
             ) . PHP_EOL;
 
-        file_put_contents($sFilePath, $sStr, FILE_APPEND | LOCK_EX);
+        if ($this->iBufMax > 0) {
+            if (count($this->aBuf) > $this->iBufMax) {
+                $this->_flush();
+            } else {
+                $this->nsBufFilePath = $sFilePath;
+                $this->aBuf[] = $sStr;
+            }
+        } else {
+            file_put_contents($sFilePath, $sStr, FILE_APPEND | LOCK_EX);
+        }
+    }
+
+    protected function _flush()
+    {
+        if (empty($this->aBuf) || $this->nsBufFilePath === null) {
+            return;
+        }
+
+        file_put_contents($this->nsBufFilePath, implode('', $this->aBuf), FILE_APPEND | LOCK_EX);
+    }
+
+    public function __destruct()
+    {
+        $this->_flush();
     }
 }

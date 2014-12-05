@@ -2,7 +2,6 @@
 namespace AppSTD\C_Page;
 
 use AppSTD\System\Framework\C_Page;
-use Slime\Component\Http\Ext;
 use Slime\Component\RDBMS\DBAL\Bind;
 use Slime\Component\RDBMS\DBAL\Condition;
 
@@ -12,7 +11,7 @@ class C_Main extends C_Page
     {
         $this->aData['h1'] = 'Hello world!';
 
-        $B = new Bind();
+        $B    = new Bind();
         $aGET = $this->REQ->getG(array('id_min'));
         $B->setMulti($aGET);
 
@@ -24,17 +23,6 @@ class C_Main extends C_Page
         /** @var \AppSTD\Model\M_User $M_U */
         $M_U                   = $this->CTX->ORM->M_User();
         $this->aData['G_User'] = $M_U->findMulti(Condition::buildAnd()->setMulti($aWhere));
-    }
-
-    public function actionFetch()
-    {
-        Ext::ev_LogCost($this->CTX->Event, $this->CTX->Log);
-
-        $HC  = $this->CTX->HttpCall;
-        $mRS = $HC->setUrl('http://www.baidu.com')->get()->asString();
-        var_dump($mRS);
-
-        $this->setAsNoneRender();
     }
 
     public function actionCreateRandom()

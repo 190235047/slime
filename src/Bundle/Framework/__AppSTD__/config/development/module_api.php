@@ -3,12 +3,10 @@ use Slime\Component\Log\Logger;
 
 return array(
     'Log'   => array(
-        'module' => 'Log',
         'class'  => 'Slime\\Component\\Log\\Logger',
         'params' => array(
             array(
-                'WebPage' => array('@WebPage'),
-                'File'    => array('@File', '/tmp/php_APP1_http_{level}_{date}.log')
+                'File' => array('@File', '/tmp/php_AppSTD_api_{level}_{date}.log')
             ),
             Logger::LEVEL_ALL ^ Logger::LEVEL_DEBUG
         ),
