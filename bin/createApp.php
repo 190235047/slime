@@ -1,6 +1,6 @@
 <?php
 if (!isset($argv[1])) {
-    exit("please print Author:AppName:NS for argv1\n");
+    exit("Args Format: php createApp.php Author:AppName:NS TargetDir\n");
 }
 if (!isset($argv[2])) {
     exit("please print TargetDir for argv2\n");
@@ -16,12 +16,10 @@ list($sAuthorName, $sAppName, $sNS) = $aArr;
 $sTargetDir = $argv[2];
 
 $sMode     = empty($argv[3]) ? 'AppSTD' : $argv[3];
-$sTimeZone = empty($argv[4]) ? 'PRC' : $argv[4];
 
-generate_app(dirname(__DIR__) . "/src/Bundle/Framework/__{$sMode}__", $sTargetDir, $sAuthorName, $sAppName, $sNS,
-    $sTimeZone);
+generate_app(dirname(__DIR__) . "/src/Bundle/Framework/__{$sMode}__", $sTargetDir, $sAuthorName, $sAppName, $sNS);
 
-function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $sTimeZone, $i = 0)
+function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $i = 0)
 {
     if (!is_dir($sTargetDir)) {
         mkdir($sTargetDir);
@@ -52,8 +50,8 @@ function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $
             $b = file_put_contents(
                 $sTargetFile,
                 str_replace(
-                    array('{{{APP}}}', '{{{APP_NAME}}}', '{{{AUTHOR}}}', '{{{TIME_ZONE}}}'),
-                    array($sNS, $sAppName, $sAuthorName, $sTimeZone),
+                    array('AppSTD', '{{{APP_NAME}}}', '{{{AUTHOR}}}'),
+                    array($sNS, $sAppName, $sAuthorName),
                     file_get_contents($sTargetFile)
                 )
             );
@@ -63,7 +61,7 @@ function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $
                 echo str_repeat("\t", $i) . "Generate $sTargetFile ok\n";
             }
         } else {
-            generate_app($sSourceFile, "$sTargetDir/$sFile", $sAuthorName, $sAppName, $sNS, $sTimeZone, $i + 1);
+            generate_app($sSourceFile, "$sTargetDir/$sFile", $sAuthorName, $sAppName, $sNS, $i + 1);
         }
     }
 }
