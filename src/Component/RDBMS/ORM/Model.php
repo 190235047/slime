@@ -5,6 +5,7 @@ use Slime\Component\RDBMS\DBAL\Engine;
 use Slime\Component\RDBMS\DBAL\Bind;
 use Slime\Component\RDBMS\DBAL\BindItem;
 use Slime\Component\RDBMS\DBAL\Condition;
+use Slime\Component\RDBMS\DBAL\EnginePool;
 use Slime\Component\RDBMS\DBAL\SQL;
 use Slime\Component\RDBMS\DBAL\SQL_DELETE;
 use Slime\Component\RDBMS\DBAL\SQL_INSERT;
@@ -25,6 +26,7 @@ use Slime\Component\RDBMS\DBAL\V;
  * @property-read null|array $naField
  * @property-read bool       $bUseFull
  *
+ * @property-read EnginePool $EnginePool
  * @property-read Engine     $Engine
  * @property-read Factory    $Factory
  * @property-read string     $sItemClass
@@ -32,10 +34,11 @@ use Slime\Component\RDBMS\DBAL\V;
 class Model
 {
     protected $Factory;
+    protected $EnginePool;
     protected $Engine;
-
     protected $sMName;
 
+    protected $nsDB;
     protected $sItemClass;
     protected $sTable;
     protected $sPKName;
@@ -52,40 +55,42 @@ class Model
     }
 
     /**
-     * @param string  $sItemClass
-     * @param string  $sMName
-     * @param Engine  $Engine
-     * @param array   $aConf
-     * @param Factory $Factory
+     * @param Factory    $Factory
+     * @param string     $sMName
+     * @param string     $sItemClass
+     * @param EnginePool $EnginePool
+     * @param string     $sDB
+     * @param array      $naConf
      *
      * @throws \RuntimeException
      */
-    public function __construct($sItemClass, $sMName, $Engine, $aConf, $Factory)
+    public function __construct($Factory, $sMName, $sItemClass, $EnginePool, $sDB, array $naConf = null)
     {
-        $this->sMName = $sMName;
-        $this->Engine = $Engine;
+        $this->Factory    = $Factory;
+        $this->sMName     = $sMName;
+        $this->sItemClass = $sItemClass;
+        $this->Engine     = $EnginePool->get($this->nsDB === null ? $sDB : $this->nsDB);
         if ($this->sItemClass === null) {
             $this->sItemClass = $sItemClass;
         }
         if ($this->sTable === null) {
-            $this->sTable = isset($aConf['table']) ? $aConf['table'] : strtolower($sMName);
+            $this->sTable = isset($naConf['table']) ? $naConf['table'] : strtolower($sMName);
         }
         if ($this->sPKName === null) {
-            $this->sPKName = isset($aConf['pk']) ? $aConf['pk'] : 'id';
+            $this->sPKName = isset($naConf['pk']) ? $naConf['pk'] : 'id';
         }
         if ($this->sFKName === null) {
-            $this->sFKName = isset($aConf['fk']) ? $aConf['fk'] : $this->sTable . '_id';
+            $this->sFKName = isset($naConf['fk']) ? $naConf['fk'] : $this->sTable . '_id';
         }
         if ($this->aRelConf === null) {
-            $this->aRelConf = isset($aConf['relation']) ? $aConf['relation'] : array();
+            $this->aRelConf = isset($naConf['relation']) ? $naConf['relation'] : array();
         }
         if ($this->naField === null) {
-            $this->naField = isset($aConf['fields']) ? $aConf['fields'] : null;
+            $this->naField = isset($naConf['fields']) ? $naConf['fields'] : null;
         }
         if ($this->bUseFull === null) {
-            $this->bUseFull = !empty($aConf['use_full_field_in_select']);
+            $this->bUseFull = !empty($naConf['use_full_field_in_select']);
         }
-        $this->Factory = $Factory;
     }
 
     public function SQL_INS()

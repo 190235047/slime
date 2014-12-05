@@ -18,12 +18,12 @@ return array(
         */
     ],
     '__DEFAULT__' => [
-        'own_config'  => true,
-        'auto_create' => false,
-        'db'          => 'default',
-        'model_pre'   => '\\AppSTD\\Model\\M_',
-        'item_pre'    => '\\AppSTD\\Model\\Item_',
-        'model_base'  => '\\AppSTD\\System\\ORM\\Model',
-        'item_base'   => '\\AppSTD\\System\\ORM\\Item'
+        'auto_create'   => false,
+        'create_direct' => true,
+        'db'            => 'default',
+        'model_pre'     => '\\AppSTD\\Model\\Model_',
+        'item_pre'      => '\\AppSTD\\Model\\Item_',
+        'model_base'    => '\\AppSTD\\System\\ORM\\Model',
+        'item_base'     => '\\AppSTD\\System\\ORM\\Item'
     ]
 );

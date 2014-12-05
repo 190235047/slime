@@ -14,7 +14,7 @@ class Factory
     /** @var \Slime\Component\RDBMS\DBAL\EnginePool */
     protected $EnginePool;
     protected $aConf;
-    protected $aDefault;
+    protected $aDFT;
 
     /** @var Model[] */
     protected $aM = array();
@@ -53,7 +53,7 @@ class Factory
     {
         $this->EnginePool = $EnginePool;
         $this->aConf      = $aConf;
-        $this->aDefault   = $aDefault;
+        $this->aDFT       = $aDefault;
     }
 
     /**
@@ -76,33 +76,37 @@ class Factory
     public function get($sM)
     {
         if (isset($this->aM[$sM])) {
-            return $this->aM[$sM];
+            goto END;
         }
 
         if (!isset($this->aConf[$sM])) {
-            $aConf = array();
-            if (empty($this->aDefault['own_config']) && empty($this->aDefault['auto_create'])) {
+            if (!empty($this->aDFT['create_direct'])) {
+                $sMClass       = "{$this->aDFT['model_pre']}{$sM}";
+                $sItemClass    = "{$this->aDFT['item_pre']}{$sM}";
+                $this->aM[$sM] = new $sMClass($this, $sM, $sItemClass, $this->EnginePool, $this->aDFT['db'], null);
+                goto END;
+            }
+            if (empty($this->aDFT['auto_create'])) {
                 throw new \DomainException("[ORM] ; Model conf[$sM] is not exists");
             }
         } else {
-            $aConf = $this->aConf[$sM];
+            $naConf = $this->aConf[$sM];
         }
 
-        if (!isset($aConf['model'])) {
-            $sMClass    = $this->aDefault['model_base'];
-            $sItemClass = $this->aDefault['item_base'];
+        if (!isset($naConf['model'])) {
+            $sMClass    = $this->aDFT['model_base'];
+            $sItemClass = $this->aDFT['item_base'];
         } else {
-            $sMClass    = "{$this->aDefault['model_pre']}{$aConf['model']}";
-            $sItemClass = "{$this->aDefault['item_pre']}{$aConf['model']}";
+            $sMClass    = "{$this->aDFT['model_pre']}{$naConf['model']}";
+            $sItemClass = "{$this->aDFT['item_pre']}{$naConf['model']}";
         }
         $this->aM[$sM] = new $sMClass(
-            $sItemClass,
-            $sM,
-            $this->EnginePool->get(isset($aConf[$sM]['db']) ? $aConf[$sM]['db'] : $this->aDefault['db']),
-            $aConf,
-            $this
+            $this, $sM, $sItemClass, $this->EnginePool,
+            isset($naConf[$sM]['db']) ? $naConf[$sM]['db'] : $this->aDFT['db'],
+            $naConf
         );
 
+        END:
         return $this->aM[$sM];
     }
 

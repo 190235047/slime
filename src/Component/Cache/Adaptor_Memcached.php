@@ -24,6 +24,11 @@ class Adaptor_Memcached implements IAdaptor
         $this->Inst = $Obj;
     }
 
+    public function __call($sMethod, $aParam)
+    {
+        return empty($aParam) ? $this->Inst->$sMethod() : call_user_func_array(array($this->Inst, $sMethod), $aParam);
+    }
+
     /**
      * @param string $sKey
      *

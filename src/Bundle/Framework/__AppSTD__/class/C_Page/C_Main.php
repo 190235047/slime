@@ -20,14 +20,16 @@ class C_Main extends C_Page
             $aWhere[] = array('id', '>=', $B['id_min']);
         }
 
-        /** @var \AppSTD\Model\M_User $M_U */
+        /** @var \AppSTD\Model\Model_User $M_U */
         $M_U                   = $this->CTX->ORM->M_User();
-        $this->aData['G_User'] = $M_U->findMulti(Condition::buildAnd()->setMulti($aWhere));
+        $this->aData['G_User'] = $M_U->findMulti(
+            Condition::buildAnd()->setMulti($aWhere)
+        );
     }
 
     public function actionCreateRandom()
     {
-        /** @var \AppSTD\Model\M_User $U */
+        /** @var \AppSTD\Model\Model_User $U */
         $U   = $this->CTX->ORM->M_User();
         $bRS = $U->insert(
             array(
