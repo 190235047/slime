@@ -16,32 +16,13 @@ define('DIR_VIEW', DIR_BASE . '/view');
 $AL = require DIR_BASE . '/../../../../vendor/autoload.php';
 $AL->addPsr4('AppSTD\\', DIR_CLASS);
 
-function dd($mV, $i=0)
+function __($sStr)
 {
-    echo $i===0 ? '<pre>' : '';
-    if (is_array($mV)) {
-        $iC = count($mV);
-        echo ("Array[$iC]->\n");
-        foreach ($mV as $mK => $mVV) {
-            __dd("\t$mK:", $i);
-            dd($mVV, $i+1);
-            echo "\n";
-        }
-    } else {
-        if (is_object($mV)) {
-            $Ref = new \ReflectionObject($mV);
-            echo '(OBJ) ' . get_class($mV);
-            foreach ($Ref->getProperties() as $mVVV) {
-                var_dump($mVVV);
-            }
-        } else {
-            echo '(' . gettype($mV) . ") $mV";
-        }
+    /** @var \Slime\Component\I18N\I18N $I18N */
+    static $I18N = null;
+    if ($I18N === null) {
+        $I18N = \AppSTD\System\Support\CTX::inst()->get('I18N');
     }
-    echo $i===0 ? '</pre>' : '';
-}
 
-function __dd($sStr, $i)
-{
-    echo str_repeat("\t", $i) . $sStr;
+    return $I18N->get($sStr);
 }

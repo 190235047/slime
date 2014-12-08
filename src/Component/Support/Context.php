@@ -66,21 +66,17 @@ class Context
      *
      * @return bool
      */
-    public function isBound($sName, $bAttemptAutoBind = false)
+    public function checkBound($sName, $bAttemptAutoBind = false)
     {
+        if (isset($this->aData[$sName])) {
+            return true;
+        }
+
         if ($bAttemptAutoBind) {
-            if (isset($this->aData[$sName])) {
-                return true;
-            } else {
-                try {
-                    $this->bindDataAutomatic($sName);
-                } catch (\OutOfBoundsException $E) {
-                    return false;
-                }
-                return true;
-            }
+            $this->bindDataAutomatic($sName);
+            return true;
         } else {
-            return isset($this->aData[$sName]);
+            return false;
         }
     }
 
@@ -138,24 +134,21 @@ class Context
      */
     public function get($sName)
     {
-        if (!$this->isBound($sName, true)) {
-            throw new \OutOfBoundsException("[CTX] ; Data[$sName] has not bound");
-        }
+        $this->checkBound($sName, true);
         return $this->aData[$sName];
     }
 
     /**
      * @param string $sName
-     * @param bool   $bHasGot
      *
-     * @return null
+     * @return mixed
      */
-    public function getIgnore($sName, &$bHasGot = true)
+    public function getIgnore($sName)
     {
-        if ($this->isBound($sName, true)) {
+        try {
+            $this->checkBound($sName, true);
             return $this->aData[$sName];
-        } else {
-            $bHasGot = false;
+        } catch (\OutOfBoundsException $E) {
             return null;
         }
     }
@@ -178,16 +171,14 @@ class Context
     /**
      * @param string $sName
      * @param array  $aArgv
-     * @param bool   $bCalled
      *
-     * @return mixed|null
+     * @return mixed
      */
-    public function callIgnore($sName, $aArgv = array(), &$bCalled = true)
+    public function callIgnore($sName, $aArgv = array())
     {
         if ($this->isCBBound($sName)) {
             return call_user_func_array($this->aCB[$sName], $aArgv);
         } else {
-            $bCalled = false;
             return null;
         }
     }

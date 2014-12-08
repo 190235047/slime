@@ -19,8 +19,8 @@ return array(
     ),
     'I18N'     => array(
         'class'        => 'Slime\\Component\\I18N\\I18N',
+        'creator'      => 'createFromCli',
         'params'       => array(':aArgv', DIR_I18N),
-        'factory'      => 'createFromCli',
         'parse_params' => true
     ),
     'Event'    => array(

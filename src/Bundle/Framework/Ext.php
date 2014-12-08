@@ -8,7 +8,7 @@ class Ext
     public static function hUncaught(\Exception $E)
     {
         $CTX = Context::inst();
-        if (!$CTX->isBound('Log', true)) {
+        if (!$CTX->checkBound('Log', true)) {
             var_dump($E->getMessage(), $E->getTrace());
             exit(1);
         }
@@ -16,7 +16,7 @@ class Ext
         $Log = $CTX->Log;
 
         $Log->error($E->getMessage());
-        if ($CTX->isBound('RESP')) {
+        if ($CTX->checkBound('RESP')) {
             $RESP = $CTX->RESP;
             if ($RESP->getStatus() < 400) {
                 $RESP->setStatus(500);
@@ -47,7 +47,7 @@ class Ext
             throw new \ErrorException($sStr);
         }
         $CTX  = Context::inst();
-        if (!$CTX->isBound('Log', true)) {
+        if (!$CTX->checkBound('Log', true)) {
             echo $sStr;
             return;
         }

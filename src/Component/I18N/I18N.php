@@ -1,8 +1,6 @@
 <?php
 namespace Slime\Component\I18N;
 
-use Slime\Component\Config;
-
 /**
  * Class I18N
  *
@@ -16,9 +14,12 @@ class I18N
         '#zh-.*#' => 'zh-cn'
     );
 
+    /** @var \Slime\Component\Config\IAdaptor */
+    protected $Obj;
+
     /**
      * @param \Slime\Component\Http\REQ $REQ
-     * @param string                    $sLangBaseDir
+     * @param string                    $sBaseDir
      * @param string                    $sDefaultLangDir
      * @param string                    $sCookieKey
      *
@@ -26,7 +27,7 @@ class I18N
      */
     public static function createFromHttp(
         $REQ,
-        $sLangBaseDir,
+        $sBaseDir,
         $sDefaultLangDir = 'english',
         $sCookieKey = null
     ) {
@@ -44,41 +45,47 @@ class I18N
         } else {
             $sLang = $nsLangFromC;
         }
+        $nsLangDir = self::_getCurLang($sLang);
+        $sDefaultPath = $sBaseDir . '/' . $sDefaultLangDir;
 
-        return new self($sLangBaseDir, $sLang, $sDefaultLangDir);
+        return new self('@PHP', $nsLangDir === null ? $sDefaultPath : $sBaseDir . '/' . $nsLangDir, $sDefaultPath);
     }
 
-    public static function createFromCli(array $aArg, $sLanguageBaseDir, $sDefaultLanguageDir = 'english')
+    public static function createFromCli(array $aArg, $sBaseDir, $sDefaultLangDir = 'english')
     {
-        $sLanguage = $aArg[count($aArg) - 1];
-        if (array_search($sLanguage, self::$aLangMapDir) === false) {
-            $sLanguage = $sDefaultLanguageDir;
+        $sLang = $aArg[count($aArg) - 1];
+        if (array_search($sLang, self::$aLangMapDir) === false) {
+            $sLang = $sDefaultLangDir;
         }
+        $nsLangDir = self::_getCurLang($sLang);
+        $sDefaultPath = $sBaseDir . '/' . $sDefaultLangDir;
 
-        return new self($sLanguageBaseDir, $sLanguage, $sDefaultLanguageDir);
+        return new self('@PHP', $nsLangDir === null ? $sDefaultPath : $sBaseDir . '/' . $nsLangDir, $sDefaultPath);
     }
 
-    public function __construct($sLangBaseDir, $sLang, $sDefaultLanguageDir, $sConfigAdaptor = '@PHP')
+    protected static function _getCurLang($sLang)
     {
-        $sCurrentLanguageDir = null;
+        $nsLangDir = null;
         foreach (self::$aLangMapDir as $sK => $sV) {
             if (preg_match($sK, $sLang)) {
-                $sCurrentLanguageDir = $sV;
+                $nsLangDir = $sV;
                 break;
             }
         }
 
-        $this->sLangDir = $sCurrentLanguageDir;
+        return $nsLangDir;
+    }
 
-        $this->Obj = Config\Configure::factory(
-            $sConfigAdaptor,
-            $sLangBaseDir . DIRECTORY_SEPARATOR . $sCurrentLanguageDir,
-            $sLangBaseDir . DIRECTORY_SEPARATOR . $sDefaultLanguageDir
+    public function __construct($sConfigAdaptor)
+    {
+        $this->Obj = call_user_func_array(
+            array('\\Slime\\Component\\Config\\Configure', 'factory'),
+            func_get_args()
         );
     }
 
     public function get($sString)
     {
-        return $this->Obj->get($sString);
+        return $this->Obj->get($sString, $sString, false);
     }
 }

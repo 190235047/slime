@@ -24,8 +24,8 @@ return array(
     ),
     'I18N'  => array(
         'class'        => 'Slime\\Component\\I18N\\I18N',
-        'params'       => array(':HttpRequest', DIR_I18N),
-        'factory'      => 'createFromHttp',
+        'creator'      => 'createFromHttp',
+        'params'       => array(':REQ', DIR_I18N),
         'parse_params' => true
     ),
     'Event' => array(

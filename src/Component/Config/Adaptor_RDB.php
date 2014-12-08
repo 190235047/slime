@@ -51,12 +51,12 @@ class Adaptor_RDB extends Adaptor_ABS
             return null;
         }
 
-        $mRS = $this->aData[$sKey];
+        $mResult = $this->aData[$sKey];
         if ($bWithParse) {
-            $mRS = $this->parse($mRS, false);
+            $mResult = $this->parse($mResult, false);
         }
 
-        return $mRS;
+        return $mResult===null ? $mDefault : $mResult;
     }
 
 }

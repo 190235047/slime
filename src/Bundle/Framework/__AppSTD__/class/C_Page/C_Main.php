@@ -10,6 +10,12 @@ class C_Main extends C_Page
     public function actionDefault()
     {
         $this->aData['h1'] = 'Hello world!';
+        $this->aData['say'] = 'hi';
+    }
+
+    public function actionUser()
+    {
+        $this->aData['h1'] = 'UserList';
 
         $B    = new Bind();
         $aGET = $this->REQ->getG(array('id_min'));

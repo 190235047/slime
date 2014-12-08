@@ -10,7 +10,11 @@
 </head>
 <body>
 <h1><?= $h1 ?></h1>
-<pre><?=__('main.say')?></pre>
+<ul>
+    <?php foreach ($G_User as $Item_User): ?>
+        <li><?= $Item_User ?></li>
+    <?php endforeach; ?>
+</ul>
 
 <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
 <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>

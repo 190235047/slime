@@ -52,7 +52,7 @@ class Adaptor_PHP extends Adaptor_ABS
             $mResult = $this->parse($mResult, false);
         }
 
-        return $mResult;
+        return $mResult === null ? $mDefault : $mResult;
     }
 
     protected function _find($sKey, $sBaseDir)
