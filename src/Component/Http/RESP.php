@@ -2,18 +2,17 @@
 namespace Slime\Component\Http;
 
 /**
- * Class RESP_PHP
+ * Class RESP
  *
  * @package Slime\Component\Http
  * @author  smallslime@gmail.com
- *
  */
 class RESP
 {
     protected $niStatus = null;
     protected $nsProtocol = null;
     protected $aHeader = array();
-    protected $sBody = '';
+    protected $nsBody;
     protected $aCookie = array();
 
     /**
@@ -96,7 +95,7 @@ class RESP
      */
     public function getBody()
     {
-        return $this->sBody;
+        return $this->nsBody;
     }
 
     /**
@@ -106,7 +105,7 @@ class RESP
      */
     public function setBody($sBody)
     {
-        $this->sBody = $sBody;
+        $this->nsBody = $sBody;
 
         return $this;
     }
@@ -322,12 +321,14 @@ class RESP
 
     public function sendBody()
     {
-        if (is_object($this->sBody) || $this->sBody instanceof \Traversable) {
-            foreach ($this->sBody as $sPart) {
+        if (is_object($this->nsBody) || $this->nsBody instanceof \Traversable) {
+            foreach ($this->nsBody as $sPart) {
                 echo $sPart;
             }
         } else {
-            echo (string)$this->sBody;
+            if ($this->nsBody !== null) {
+                echo $this->nsBody;
+            }
         }
     }
 

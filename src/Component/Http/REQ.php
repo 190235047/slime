@@ -2,11 +2,10 @@
 namespace Slime\Component\Http;
 
 /**
- * Class REQ_PHP
+ * Class REQ
  *
  * @package Slime\Component\Http
  * @author  smallslime@gmail.com
- *
  */
 class REQ
 {

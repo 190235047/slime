@@ -9,7 +9,7 @@ if (!extension_loaded('curl')) {
 }
 
 /**
- * Class HttpCall
+ * Class Call
  *
  * @package Slime\Component\Http
  *
