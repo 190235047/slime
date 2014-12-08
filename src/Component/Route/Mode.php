@@ -73,32 +73,38 @@ class Mode
     {
         $aBlock = Url::parse($REQ->getUrl(), true, false);
         $aPath  = $aBlock['path'];
-        $iCount = count($aPath);
-        $sLast  = &$aPath[$iCount - 1];
-        if ($sLast == '') {
-            $sLast = $aSetting['default_controller'];
-        }
-        if (($iC = count($aPath)) < 2 || $iC % 2 !== 0) {
+        if (count($aPath) < 2) {
             throw new RouteException('[ROUTE] ; Url path block count I must accord with: I >= 2 && I % 2 == 0', 400);
         }
-        if (($iPos = strrpos($sLast, '.')) === false) {
+        $sLast = array_pop($aPath);
+        $sVer = strtoupper(array_shift($aPath));
+        if (count($aPath) % 2 !== 0) {
+            throw new RouteException('[ROUTE] ; Url path block count I must accord with: I >= 2 && I % 2 == 0', 400);
+        }
+
+        if ($sLast == '') {
+            $sController = $aSetting['default_controller'];
             $sExt = $aSetting['default_ext'];
         } else {
-            $sExt  = substr($sLast, $iPos + 1);
-            $sLast = substr($sLast, 0, $iPos);
+            $aArr = explode('.', $sLast, 2);
+            if (count($aArr)===2) {
+                $sController = $aArr[0];
+                $sExt  = $aArr[1];
+            } else {
+                $sController = $aArr[0];
+                $sExt = $aSetting['default_ext'];
+            }
         }
+
         $aParam = array('__EXT__' => $sExt, '__SETTING__' => $aSetting);
-        $sVer   = strtoupper(array_shift($aPath));
         for ($i = 0, $iC = count($aPath); $i < $iC; $i += 2) {
             $aParam[$aPath[$i]] = $aPath[$i + 1];
         }
-        $sAction     = strtolower($REQ->getMethod());
-        $sController = Str::camel($sLast);
 
         self::objCall(
             $CTX,
-            str_replace('{__VERSION__}', $sVer, $aSetting['controller_pre']) . $sController,
-            $aSetting['action_pre'] . $sAction,
+            str_replace('{__VERSION__}', $sVer, $aSetting['controller_pre']) . Str::camel($sController),
+            $aSetting['action_pre'] . strtolower($REQ->getMethod()),
             $aParam
         );
 

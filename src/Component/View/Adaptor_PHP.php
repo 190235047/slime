@@ -9,7 +9,8 @@ namespace Slime\Component\View;
  */
 class Adaptor_PHP implements IAdaptor
 {
-    const EV_RENDER = 'slime.component.view.adaptor_php.render';
+    const EV_RENDER_BEFORE = 'slime.component.view.adaptor_php.render_before';
+    const EV_RENDER_AFTER  = 'slime.component.view.adaptor_php.render_after';
 
     protected $sBaseDir;
     protected $sTpl;
@@ -100,17 +101,24 @@ class Adaptor_PHP implements IAdaptor
     public function renderAsResult()
     {
         $sFile = $this->sBaseDir . DIRECTORY_SEPARATOR . $this->sTpl;
-        if ($this->nEV) {
-            $this->nEV->fire(self::EV_RENDER, array($this, __METHOD__, array(), array('file' => $sFile)));
-        }
         if (!file_exists($sFile)) {
             throw new \RuntimeException("[VIEW] ; Template file[{$sFile}] is not exist");
+        }
+        if ($this->nEV) {
+            $Local = new \ArrayObject();
+            $Local['file'] = $sFile;
+            $this->nEV->fire(self::EV_RENDER_BEFORE, array($this, __METHOD__, array(), $Local));
         }
         extract($this->aData);
         ob_start();
         require $sFile;
         $sResult = ob_get_contents();
         ob_end_clean();
+
+        if ($this->nEV) {
+            $this->nEV->fire(self::EV_RENDER_AFTER, array($this, __METHOD__, array(), $Local));
+        }
+
         return $sResult;
     }
 

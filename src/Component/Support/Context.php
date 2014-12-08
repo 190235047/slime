@@ -73,7 +73,7 @@ class Context
         }
 
         if ($bAttemptAutoBind) {
-            $this->bindDataAutomatic($sName);
+            $this->aData[$sName] = $this->make($sName);
             return true;
         } else {
             return false;
@@ -92,13 +92,12 @@ class Context
 
     /**
      * @param string $sName
+     *
+     * @return object
+     * @throws \OutOfBoundsException
      */
-    public function bindDataAutomatic($sName)
+    public function make($sName)
     {
-        if (isset($this->aData[$sName])) {
-            return null;
-        }
-
         if (!isset($this->aDataConfig[$sName])) {
             throw new \OutOfBoundsException("[CTX] ; [$sName] can not found in config");
         }
@@ -120,11 +119,8 @@ class Context
                 $Obj = $Ref->newInstanceArgs($aArr['params']);
             }
         }
-        if (isset($aArr['packer'])) {
-            $Obj = new Packer($Obj, empty($aArr['packer']) || !is_array($aArr['packer']) ? array() : $aArr['packer']);
-        }
 
-        $this->aData[$sName] = $Obj;
+        return isset($aArr['packer']) ? new Packer($Obj, (array)$aArr['packer']): $Obj;
     }
 
     /**

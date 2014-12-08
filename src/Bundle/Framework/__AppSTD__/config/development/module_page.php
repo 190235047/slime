@@ -7,14 +7,15 @@ return array(
         'params' => array(
             array(
                 'WebPage' => array('@WebPage'),
-                'File'    => array('@File', '/tmp/php_AppSTD_page_{level}_{date}.log')
+                'File'    => array('@File', '/tmp/php_AppSTD_page_{level}_{date}.log', 0)
             ),
-            Logger::LEVEL_ALL ^ Logger::LEVEL_DEBUG
-        ),
+            Logger::LEVEL_ALL
+        )
     ),
     'View'  => array(
-        'class'  => 'Slime\\Component\\View\\Adaptor_PHP',
-        'params' => array(DIR_VIEW)
+        'class'        => 'Slime\\Component\\View\\Adaptor_PHP',
+        'params'       => array(DIR_VIEW, ':Event'),
+        'parse_params' => true
     ),
     'ORM'   => array(
         'class'        => 'AppSTD\\System\\ORM\\Factory',

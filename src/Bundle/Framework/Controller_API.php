@@ -16,9 +16,9 @@ abstract class Controller_API extends Controller_ABS
 {
     protected $sDefaultRender = '_renderJSON';
     protected $sJSCBParam = 'cb';
-    protected $sXmlTPL = null;
-    protected $sJsonTPL = null;
-    protected $sJsonPTPL = null;
+    protected $nsXmlTPL = null;
+    protected $nsJsonTPL = null;
+    protected $nsJsonPTPL = null;
 
     protected $aData = array();
 
@@ -62,9 +62,9 @@ abstract class Controller_API extends Controller_ABS
         $this->RESP
             ->setHeader('Content-Type', 'text/xml; charset=utf-8', false)
             ->setBody(
-                $this->sXmlTPL === null ?
+                $this->nsXmlTPL === null ?
                     XML::Array2XML($this->aData) :
-                    $this->CTX->View->assignMulti($this->aData)->setTpl($this->sXmlTPL)->renderAsResult()
+                    $this->CTX->View->assignMulti($this->aData)->setTpl($this->nsXmlTPL)->renderAsResult()
             );
     }
 
@@ -73,9 +73,9 @@ abstract class Controller_API extends Controller_ABS
         $this->RESP
             ->setHeader('Content-Type', 'text/javascript; charset=utf-8', false)
             ->setBody(
-                $this->sJsonTPL === null ?
+                $this->nsJsonTPL === null ?
                     json_encode($this->aData) :
-                    $this->CTX->View->assignMulti($this->aData)->setTpl($this->sJsonTPL)->renderAsResult()
+                    $this->CTX->View->assignMulti($this->aData)->setTpl($this->nsJsonTPL)->renderAsResult()
             );
     }
 
@@ -88,9 +88,9 @@ abstract class Controller_API extends Controller_ABS
         $this->RESP
             ->setHeader('Content-Type', 'text/javascript; charset=utf-8', false)
             ->setBody(
-                $this->sJsonPTPL === null ?
+                $this->nsJsonPTPL === null ?
                     $sCB . '(' . json_encode($this->aData) . ')' :
-                    $this->CTX->View->assignMulti($this->aData)->setTpl($this->sJsonPTPL)->renderAsResult()
+                    $this->CTX->View->assignMulti($this->aData)->setTpl($this->nsJsonPTPL)->renderAsResult()
             );
     }
 

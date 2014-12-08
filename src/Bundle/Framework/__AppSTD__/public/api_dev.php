@@ -15,12 +15,16 @@ $CTX->bindMulti(array('Config' => $CFG, 'Router' => $Router));
 $CTX->bindCB('__Uncaught__', array('\\Slime\\Bundle\\Framework\\Ext', 'hUncaught'));
 
 # register event if you need
-//$Ev  = $CTX->Event;
-//$Log = $CTX->Log;
+/** @var \Slime\Component\Event\Event $Ev */
+$Ev  = $CTX->Event;
+/** @var \Slime\Component\Log\Logger $Log */
+$Log = $CTX->Log;
 //\Slime\Component\Http\Ext::ev_LogCost($Ev, $Log);
 //\Slime\Component\NoSQL\Redis\Ext::ev_LogCost($Ev, $Log);
 //\Slime\Component\NoSQL\Memcached\Ext::ev_LogCost($Ev, $Log);
-//\Slime\Component\View\Ext::ev_LogPHPRender($Ev, $Log);
+\Slime\Component\View\Ext::ev_LogPHPRender($Ev, $Log);
 
 # run
+$Log->debug('[SYSTEM] ; run start');
 \Slime\Bundle\Framework\Bootstrap::run($Router, $CTX);
+$Log->debug('[SYSTEM] ; run finish');

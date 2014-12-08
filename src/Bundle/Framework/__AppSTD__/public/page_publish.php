@@ -15,7 +15,9 @@ $CTX->bindMulti(array('Config' => $CFG, 'Router' => $Router));
 $CTX->bindCB('__Uncaught__', array('\\Slime\\Bundle\\Framework\\Ext', 'hUncaught'));
 
 # register event if you need
+/** @var \Slime\Component\Event\Event $Ev */
 //$Ev  = $CTX->Event;
+/** @var \Slime\Component\Log\Logger $Log */
 //$Log = $CTX->Log;
 //\Slime\Component\Http\Ext::ev_LogCost($Ev, $Log);
 //\Slime\Component\NoSQL\Redis\Ext::ev_LogCost($Ev, $Log);

@@ -1,8 +1,6 @@
 <?php
 namespace Slime\Component\Log;
 
-use Slime\Component\Support\Context;
-
 /**
  * Class Writer_WebPage
  *
@@ -12,44 +10,27 @@ use Slime\Component\Support\Context;
 class Writer_WebPage implements IWriter
 {
     protected $aData = array();
-    protected $bDisabled = false;
+    public $bDisabled = false;
 
     public function __construct($sDebugLayer = null)
     {
         $this->sDebugLayer = $sDebugLayer;
     }
 
-    public function disable()
-    {
-        $this->bDisabled = true;
-    }
-
-    public function enable()
-    {
-        $this->bDisabled = false;
-    }
-
     public function acceptData($aRow)
     {
-        if ($this->bDisabled) {
-            return;
-        }
         $this->aData[] = $aRow;
     }
 
     public function __destruct()
     {
+        if (class_exists('\\Slime\\Component\\Support\\Context')) {
+            $REQ = \Slime\Component\Support\Context::inst()->getIgnore('REQ');
+            if ($REQ instanceof \Slime\Component\Http\REQ && $REQ->isAjax()) {
+                $this->bDisabled = true;
+            }
+        }
         if ($this->bDisabled || empty($this->aData)) {
-            return;
-        }
-        $C = Context::inst();
-        if (!$C->isBound('REQ')) {
-            return;
-        }
-        /** @var \Slime\Component\Http\REQ $REQ */
-        $REQ = $C->REQ;
-        if (($sCT = $REQ->getHeader('Context-type')) !== null && substr(strtolower(ltrim($sCT)), 0, 9) !== 'text/html'
-        ) {
             return;
         }
         if ($this->sDebugLayer === null) {
