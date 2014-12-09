@@ -5,8 +5,9 @@ require __DIR__ . '/__init__.php';
 set_error_handler(array('\\Slime\\Bundle\\Framework\\Ext', 'hError'), E_ALL);
 
 # init object
+/** @var \AppSTD\System\Support\CTX_API $CTX */
 $CFG    = \Slime\Component\Config\Configure::factory('@PHP', DIR_CONFIG . '/publish');
-$CTX    = \AppSTD\System\Support\CTX::create($CFG, 'module_api');
+$CTX    = \AppSTD\System\Support\CTX_API::create($CFG, 'module_api');
 $Router = new \Slime\Component\Route\Router();
 $Router->addConfig((array)$CFG->get('route_api'));
 
@@ -15,9 +16,7 @@ $CTX->bindMulti(array('Config' => $CFG, 'Router' => $Router));
 $CTX->bindCB('__Uncaught__', array('\\Slime\\Bundle\\Framework\\Ext', 'hUncaught'));
 
 # register event if you need
-/** @var \Slime\Component\Event\Event $Ev */
 //$Ev  = $CTX->Event;
-/** @var \Slime\Component\Log\Logger $Log */
 //$Log = $CTX->Log;
 //\Slime\Component\Http\Ext::ev_LogCost($Ev, $Log);
 //\Slime\Component\NoSQL\Redis\Ext::ev_LogCost($Ev, $Log);

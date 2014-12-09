@@ -14,12 +14,12 @@ if (count($aArr) !== 3) {
 list($sAuthorName, $sAppName, $sNS) = $aArr;
 
 $sTargetDir = $argv[2];
+$sMode      = empty($argv[3]) ? 'AppSTD' : $argv[3];
 
-$sMode     = empty($argv[3]) ? 'AppSTD' : $argv[3];
+generate_app($sMode, dirname(__DIR__) . "/src/Bundle/Framework/__{$sMode}__",
+    $sTargetDir, $sAuthorName, $sAppName, $sNS);
 
-generate_app(dirname(__DIR__) . "/src/Bundle/Framework/__{$sMode}__", $sTargetDir, $sAuthorName, $sAppName, $sNS);
-
-function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $i = 0)
+function generate_app($sMode, $sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $i = 0)
 {
     if (!is_dir($sTargetDir)) {
         mkdir($sTargetDir);
@@ -35,7 +35,7 @@ function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $
         }
         $sSourceFile = "$sSourceDir/$sFile";
         if (is_file($sSourceFile)) {
-            $sTargetFile = $sTargetDir . '/' . substr($sFile, 0, strlen($sFile) - 4);
+            $sTargetFile = $sTargetDir . '/' . $sFile;
 
             if (file_exists($sTargetFile)) {
                 echo str_repeat("\t", $i) . "File $sTargetFile has been exists\n";
@@ -50,7 +50,7 @@ function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $
             $b = file_put_contents(
                 $sTargetFile,
                 str_replace(
-                    array('AppSTD', '{{{APP_NAME}}}', '{{{AUTHOR}}}'),
+                    array($sMode, '{{{APP_NAME}}}', '{{{AUTHOR}}}'),
                     array($sNS, $sAppName, $sAuthorName),
                     file_get_contents($sTargetFile)
                 )
@@ -61,7 +61,7 @@ function generate_app($sSourceDir, $sTargetDir, $sAuthorName, $sAppName, $sNS, $
                 echo str_repeat("\t", $i) . "Generate $sTargetFile ok\n";
             }
         } else {
-            generate_app($sSourceFile, "$sTargetDir/$sFile", $sAuthorName, $sAppName, $sNS, $i + 1);
+            generate_app($sMode, $sSourceFile, "$sTargetDir/$sFile", $sAuthorName, $sAppName, $sNS, $i + 1);
         }
     }
 }

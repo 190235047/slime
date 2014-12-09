@@ -196,7 +196,7 @@ class Item implements \ArrayAccess
             return null;
         }
         $bRS = $this->M->update(
-            Condition::build()->set($this->M->sPKName, '=', $this->aData[$this->M->sPKName]),
+            Condition::build()->add($this->M->sPKName, '=', $this->aData[$this->M->sPKName]),
             $aUpdate,
             $m_n_Bind
         );
@@ -215,7 +215,7 @@ class Item implements \ArrayAccess
     public function delete($m_n_Bind = null)
     {
         return $this->M->delete(
-            Condition::build()->set($this->M->sPKName, '=', $this->aData[$this->M->sPKName]),
+            Condition::build()->add($this->M->sPKName, '=', $this->aData[$this->M->sPKName]),
             $m_n_Bind
         );
     }
@@ -228,7 +228,7 @@ class Item implements \ArrayAccess
     public function hasOne($sModelName)
     {
         $M = $this->M->Factory->get($sModelName);
-        return $M->find(Condition::build()->set($this->M->sFKName, '=', $this->aData[$this->M->sPKName]));
+        return $M->find(Condition::build()->add($this->M->sFKName, '=', $this->aData[$this->M->sPKName]));
     }
 
     /**
@@ -239,7 +239,7 @@ class Item implements \ArrayAccess
     public function belongsTo($sModelName)
     {
         $M = $this->M->Factory->get($sModelName);
-        return $M->find(Condition::build()->set($M->sPKName, '=', $this->aData[$M->sFKName]));
+        return $M->find(Condition::build()->add($M->sPKName, '=', $this->aData[$M->sFKName]));
     }
 
     /**
@@ -263,7 +263,7 @@ class Item implements \ArrayAccess
             return $M->findMulti($m_n_Condition_SQLSEL);
         }
 
-        $Condition = Condition::build()->set($this->M->sFKName, '=', $this->aData[$M->sPKName]);
+        $Condition = Condition::build()->add($this->M->sFKName, '=', $this->aData[$M->sPKName]);
         if ($m_n_Condition_SQLSEL === null) {
             $Condition->sub($m_n_Condition_SQLSEL);
         }
@@ -283,7 +283,7 @@ class Item implements \ArrayAccess
             return $M->findCount($m_n_Condition_SQLSEL);
         }
 
-        $Condition = Condition::build()->set($this->M->sFKName, '=', $this->aData[$M->sPKName]);
+        $Condition = Condition::build()->add($this->M->sFKName, '=', $this->aData[$M->sPKName]);
         if ($m_n_Condition_SQLSEL === null) {
             $Condition->sub($m_n_Condition_SQLSEL);
         }
@@ -314,7 +314,7 @@ class Item implements \ArrayAccess
             $SQL = $MOrg->SQL_SEL()
                 ->join(
                     $sRelTName,
-                    Condition::build()->set(
+                    Condition::build()->add(
                         "{$MTarget->sTable}.{$MTarget->sPKName}",
                         '=',
                         V::make("$sRelTName.{$MTarget->sFKName}")
@@ -350,7 +350,7 @@ class Item implements \ArrayAccess
         $MOrg      = $this->M;
         $sRelTName = self::getTableNameFromManyThrough($MTarget, $MOrg);
 
-        $JoinCondition = Condition::build()->set(
+        $JoinCondition = Condition::build()->add(
             "{$MTarget->sTable}.{$MTarget->sPKName}",
             '=',
             V::make("$sRelTName.{$MTarget->sFKName}")

@@ -75,7 +75,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
         $aPK                          = array_keys($this->aModelItem);
         $Model                        = $this->Model->Factory->get($sModelName);
         $this->aRelation[$sModelName] = $Group = $Model->findMulti(
-            Condition::build()->set($this->Model->sFKName, 'IN', $aPK)
+            Condition::build()->add($this->Model->sFKName, 'IN', $aPK)
         );
 
         if ($noModelItem === null) {
@@ -116,7 +116,7 @@ class Group implements \ArrayAccess, \Iterator, \Countable
                 $aFK[] = $Item[$Model->sFKName];
             }
         }
-        $this->aRelation[$sModelName] = $Model->findMulti(Condition::build()->set($Model->sPKName, 'IN', $aFK));
+        $this->aRelation[$sModelName] = $Model->findMulti(Condition::build()->add($Model->sPKName, 'IN', $aFK));
         if ($noModelItem === null) {
             return $this->aRelation[$sModelName];
         } else {

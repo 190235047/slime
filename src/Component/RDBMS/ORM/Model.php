@@ -131,6 +131,30 @@ class Model
     }
 
     /**
+     * @param mixed $mSQL
+     */
+    public function beginTransaction($mSQL = null)
+    {
+        $this->Engine->inst($mSQL)->beginTransaction();
+    }
+
+    /**
+     * @param mixed $mSQL
+     */
+    public function commit($mSQL = null)
+    {
+        $this->Engine->inst($mSQL)->commit();
+    }
+
+    /**
+     * @param mixed $mSQL
+     */
+    public function rollback($mSQL = null)
+    {
+        $this->Engine->inst($mSQL)->rollBack();
+    }
+
+    /**
      * @param array | SQL_INSERT $m_aKVData_SQL
      * @param null | Bind        $m_n_Bind
      *
@@ -163,7 +187,7 @@ class Model
                 $SQL->where(
                     $m_n_siPK_Condition_SQL instanceof Condition ?
                         $m_n_siPK_Condition_SQL :
-                        Condition::build()->set($this->sPKName, '=', $m_n_siPK_Condition_SQL)
+                        Condition::build()->add($this->sPKName, '=', $m_n_siPK_Condition_SQL)
                 );
             }
         }
@@ -188,7 +212,7 @@ class Model
                 $SQL->where(
                     $m_n_siPK_Condition_SQL instanceof Condition ?
                         $m_n_siPK_Condition_SQL :
-                        Condition::build()->set($this->sPKName, '=', $m_n_siPK_Condition_SQL)
+                        Condition::build()->add($this->sPKName, '=', $m_n_siPK_Condition_SQL)
                 );
             }
         }
@@ -212,7 +236,7 @@ class Model
                 $SQL->where(
                     $m_n_siPK_Condition_SQL instanceof Condition ?
                         $m_n_siPK_Condition_SQL :
-                        Condition::build()->set($this->sPKName, '=', $m_n_siPK_Condition_SQL)
+                        Condition::build()->add($this->sPKName, '=', $m_n_siPK_Condition_SQL)
                 );
             }
         }
@@ -264,7 +288,7 @@ class Model
             $SQL = $this->SQL_SEL();
             if ($m_n_aPK_Condition_SQL !== null) {
                 if (is_array($m_n_aPK_Condition_SQL)) {
-                    $SQL->where(Condition::build()->set($this->sPKName, 'IN', $m_n_aPK_Condition_SQL));
+                    $SQL->where(Condition::build()->add($this->sPKName, 'IN', $m_n_aPK_Condition_SQL));
                 } else {
                     $SQL->where($m_n_aPK_Condition_SQL);
                 }
@@ -298,6 +322,9 @@ class Model
         if ($m_n_Condition_SQL instanceof SQL_SELECT) {
             $aaData = $this->Engine->Q($m_n_Condition_SQL, $m_n_Bind);
         } else {
+            if (is_array($m_n_Condition_SQL)) {
+                $m_n_Condition_SQL = Condition::build()->add($this->sPKName, 'IN', $m_n_Condition_SQL);
+            }
             $SQL = $this->SQL_SEL();
             if ($m_n_Condition_SQL !== null) {
                 $SQL->where($m_n_Condition_SQL);

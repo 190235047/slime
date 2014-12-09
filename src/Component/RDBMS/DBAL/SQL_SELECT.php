@@ -25,6 +25,23 @@ class SQL_SELECT extends SQL
     protected $nHaving = null;
 
     /**
+     * @var null | array
+     */
+    protected $naDFTField = null;
+
+    /**
+     * @param string $sTable
+     * @param null|array $naDFTField
+     */
+    public function __construct($sTable, array $naDFTField = null)
+    {
+        $this->sTable = $sTable;
+        if ($naDFTField !== null) {
+            $this->naDFTField = $naDFTField;
+        }
+    }
+
+    /**
      * @param string | V $sField_V
      *
      * multi param as param one
@@ -63,7 +80,7 @@ class SQL_SELECT extends SQL
     protected function parseField()
     {
         if (empty($this->naField)) {
-            return '*';
+            return $this->naDFTField === null ? '*' : '`' . implode('`,`', $this->naDFTField) . '`';
         }
         $aField = array();
         foreach ($this->naField as $mItem) {

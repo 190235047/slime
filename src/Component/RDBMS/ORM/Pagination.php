@@ -31,17 +31,17 @@ class Pagination
     }
 
     /**
-     * @param \Slime\Component\RDBMS\ORM\Model       $Model
-     * @param \Slime\Component\RDBMS\DBAL\SQL_SELECT $SQL_SEL
+     * @param \Slime\Component\RDBMS\ORM\Model            $Model
+     * @param null|\Slime\Component\RDBMS\DBAL\SQL_SELECT $nSEL
      *
      * @return array [page_string, List_Group, total_item, total_page, current_page, number_per_page]
      */
-    public function generate($Model, $SQL_SEL)
+    public function generate($Model, $nSEL = null)
     {
         return $this->_generate(
             array($Model, 'findCount'),
             array($Model, 'findMulti'),
-            $SQL_SEL
+            $nSEL === null ? $Model->SQL_SEL() : $nSEL
         );
     }
 
@@ -84,19 +84,19 @@ class Pagination
     }
 
     /**
-     * @param \Slime\Component\Http\REQ $HttpRequest
+     * @param \Slime\Component\Http\REQ $REQ
      * @param array                     $aResult
      *
      * @return string
      */
-    public static function renderDefault($HttpRequest, $aResult)
+    public static function renderDefault($REQ, $aResult)
     {
         if (empty($aResult['list'])) {
             return '';
         }
 
-        $sURI             = strstr($HttpRequest->getRequestURI(), '?', true);
-        $aGet             = $HttpRequest->BagGET->aData;
+        $sURI             = strstr($REQ->getUrl(), '?', true);
+        $aGet             = $REQ->getG();
         $sPage            = '<ul class="pagination">';
         $aResult['first'] = 1;
         foreach (
@@ -158,7 +158,7 @@ class Pagination
         $iDisplayAfter = null
     ) {
         if ($iCurrentPage < 1) {
-            throw new \InvalidArgumentException('[PAG] : Offset can not be less than 1');
+            throw new \LogicException('[PAG] ; Offset can not be less than 1');
         }
         if ($iTotalItem == 0) {
             return array();
@@ -170,7 +170,7 @@ class Pagination
 
         $iTotalPage = (int)ceil($iTotalItem / $iNumPerPage);
         if ($iCurrentPage > $iTotalPage) {
-            throw new \LogicException('[PAG] : Offset can not be more than total page');
+            throw new \LogicException('[PAG] ; Offset can not be more than total page');
         }
 
         # count start

@@ -18,17 +18,13 @@ abstract class SQL
 {
     /**
      * @param string|SQL_SELECT $sTable_SQLSEL
-     * @param null|array        $naField
+     * @param null|array        $naDFTField
      *
      * @return SQL_SELECT
      */
-    public static function SEL($sTable_SQLSEL, $naField = null)
+    public static function SEL($sTable_SQLSEL, array $naDFTField = null)
     {
-        $Obj = new SQL_SELECT($sTable_SQLSEL, $naField);
-        if (is_array($naField) && !empty($naField)) {
-            call_user_func_array(array($Obj, 'fields'), $naField);
-        }
-        return $Obj;
+        return new SQL_SELECT($sTable_SQLSEL, $naDFTField);
     }
 
     /**

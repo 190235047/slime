@@ -9,10 +9,9 @@
     "require": {
         "slime/slime": "2.0"
     },
-
     "autoload": {
         "psr-4": {
-            "{{{NS}}}\\": "class/"
+            "AppSTD\\": "class/"
         }
     }
 }

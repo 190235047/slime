@@ -16,6 +16,8 @@
     <?php endforeach; ?>
 </ul>
 
+<?=isset($sPage) ? $sPage : ''?>
+
 <!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
 <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
 <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->

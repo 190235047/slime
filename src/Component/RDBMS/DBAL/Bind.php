@@ -13,6 +13,33 @@ class Bind implements \Countable, \ArrayAccess
     protected $aBind = array();
 
     /**
+     * @param null|array $naData
+     * @param bool       $bFilterNull
+     */
+    public function __construct(array $naData = null, $bFilterNull = true)
+    {
+        if ($naData !== null) {
+            $this->setMulti($naData, $bFilterNull);
+        }
+    }
+
+    /**
+     * @param string $sK 可以传多个参数
+     *
+     * @return bool
+     */
+    public function has($sK)
+    {
+        foreach (func_get_args() as $sK) {
+            if (!isset($this->aBind[$sK])) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * @param string $sK
      * @param mixed  $mV
      *
@@ -27,12 +54,16 @@ class Bind implements \Countable, \ArrayAccess
 
     /**
      * @param array $aArr
+     * @param bool  $bFilterNull
      *
      * @return $this
      */
-    public function setMulti($aArr)
+    public function setMulti($aArr, $bFilterNull = true)
     {
         foreach ($aArr as $sK => $mV) {
+            if ($mV === null && $bFilterNull) {
+                continue;
+            }
             $this->aBind[$sK] = new BindItem($this, $sK, $mV);
         }
 

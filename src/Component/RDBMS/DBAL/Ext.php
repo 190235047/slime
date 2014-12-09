@@ -32,6 +32,8 @@ class Ext
 
         if ($m_s_SQL instanceof SQL) {
             return $m_s_SQL instanceof SQL_SELECT ? 'slave' : 'master';
+        } elseif (is_string($m_s_SQL) && ($m_s_SQL[0]==='@')) {
+            return substr($m_s_SQL, 1);
         } else {
             return strtoupper(substr(trim($m_s_SQL), 0, 6) === 'SELECT') ? 'slave' : 'master';
         }

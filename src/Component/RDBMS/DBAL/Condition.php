@@ -62,7 +62,7 @@ class Condition
      *
      * @return $this
      */
-    public function set($sK, $mOP, $mV = null)
+    public function add($sK, $mOP, $mV = null)
     {
         $this->aData[] = $mV === null ? array($sK, '=', $mOP) : array($sK, (string)$mOP, $mV);
 
@@ -74,7 +74,7 @@ class Condition
      *
      * @return $this
      */
-    public function setMulti($aCondition)
+    public function addMulti($aCondition)
     {
         foreach ($aCondition as $aRow) {
             $this->aData[] = !isset($aRow[2]) ? array($aRow[0], '=', $aRow[1]) : array(

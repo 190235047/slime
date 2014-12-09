@@ -32,4 +32,9 @@ return array(
         'class'  => 'Slime\\Component\\Event\\Event',
         'params' => array()
     ),
+    'Pagination' => array(
+        'class' => 'Slime\\Component\\RDBMS\\ORM\\Pagination',
+        'params' => array(':REQ', 20),
+        'parse_params' => true
+    ),
 );
