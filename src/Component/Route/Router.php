@@ -74,8 +74,25 @@ class Router
         $sUrl          = $REQ->getUrl();
         $bHit          = false;
         foreach ($this->aConfig as $aArr) {
-            $aParam = $aDefaultParam;
+            # filters
+            if (isset($aArr['__FILTERS__'])) {
+                foreach ($aArr['__FILTERS__'] as $aItem) {
+                    if (!is_array($aItem) || empty($aItem)) {
+                        trigger_error('[ROUTE] ; Every filter must be an array[cb, param1, ...]', E_USER_WARNING);
+                        continue;
+                    }
+                    $mCB = array_shift($aItem);
+                    if (is_string($mCB) && $mCB[0] === '@') {
+                        $mCB = array('\\Slime\\Component\\Route\\Filter', substr($mCB, 1));
+                    }
+                    if (!call_user_func_array($mCB, array_merge($aDefaultParam, $aItem))) {
+                        continue 2;
+                    }
+                }
+            }
 
+            # match
+            $aParam = $aDefaultParam;
             if (isset($aArr['__RE__'])) {
                 if (!preg_match($aArr['__RE__'], $sUrl, $aMatch)) {
                     continue;
@@ -83,22 +100,9 @@ class Router
                 array_shift($aMatch);
                 $aParam = array_merge($aParam, $aMatch);
             }
-
             if (isset($aArr['__PARAM__'])) {
                 $aParam[] = $aArr['__PARAM__'];
             }
-
-            if (isset($aArr['__FILTERS__'])) {
-                foreach ($aArr['__FILTERS__'] as $mFilter) {
-                    if (is_string($mFilter) && $mFilter[0] === '@') {
-                        $mFilter = array('\\Slime\\Component\\Route\\Filter', substr($mFilter, 1));
-                    }
-                    if (!call_user_func_array($mFilter, $aParam)) {
-                        continue 2;
-                    }
-                }
-            }
-
             if (!$bHit) {
                 $bHit = true;
             }

@@ -1,23 +1,14 @@
 <?php
 return array(
-    /*
     array(
-        '__FILTERS__' => array('@isPOST'),
+        '__FILTERS__' => array(array('@matchHOST', 'app_std'), array('@isGET')),
         '__RE__' => '#^/hello/(.*)#',
         '__CB__' => function($REQ, $RESP, $CTX, $sP1) {
-            $RESP->setBody("ResultPOST: {$sP1}");
+            /** @var \Slime\Component\Http\RESP $RESP */
+            $RESP->setBody("Result: {$sP1}");
             return false;
         },
     ),
-    array(
-        '__FILTERS__' => array('@isGET'),
-        '__RE__' => '#^/hello/(.*)#',
-        '__CB__' => function($REQ, $RESP, $CTX, $sP1) {
-            $RESP->setBody("ResultGET: {$sP1}");
-            return false;
-        },
-    ),
-    */
     array(
         '__CB__'    => array('\\Slime\\Component\\Route\\Mode', 'slimeHttp_Page'),
         '__PARAM__' => array(
