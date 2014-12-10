@@ -9,6 +9,7 @@ namespace Slime\Component\RDBMS\DBAL;
  */
 class V
 {
+    //@todo '`a`+%d', $Bind['a']
     public static function make($mV)
     {
         return new self($mV);

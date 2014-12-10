@@ -10,18 +10,21 @@ namespace Slime\Component\Http;
 class RESP
 {
     protected $niStatus = null;
-    protected $nsProtocol = null;
+    protected $sProtocol = null;
     protected $aHeader = array();
     protected $nsBody;
     protected $aCookie = array();
 
     /**
+     * @param string      $sProtocol
      * @param int         $niStatus
      * @param null|array  $naHeader
      * @param null|string $nsBody
      */
-    public function __construct($niStatus = null, array $naHeader = null, $nsBody = null)
+    public function __construct($sProtocol, $niStatus = null, array $naHeader = null, $nsBody = null)
     {
+        $this->sProtocol = $sProtocol;
+
         if ($niStatus !== null) {
             $this->setStatus($niStatus);
         }
@@ -37,12 +40,13 @@ class RESP
 
     /**
      * @param null|string|array $nasK
+     * @param bool              $bNotNullFill
      *
      * @return null|string|array
      */
-    public function getHeader($nasK = null)
+    public function getHeader($nasK = null, $bNotNullFill = false)
     {
-        return $this->_getData($nasK, $this->aHeader);
+        return $this->_getData($nasK, $this->aHeader, $bNotNullFill);
     }
 
     /**
@@ -206,7 +210,7 @@ class RESP
      */
     public function getProtocol()
     {
-        return $this->nsProtocol;
+        return $this->sProtocol;
     }
 
     /**
@@ -216,7 +220,7 @@ class RESP
      */
     public function setProtocol($sProtocol)
     {
-        $this->nsProtocol = $sProtocol;
+        $this->sProtocol = $sProtocol;
 
         return $this;
     }
@@ -286,7 +290,7 @@ class RESP
         } else {
             // first line
             if ($this->niStatus !== null && $this->niStatus !== 200) {
-                header(sprintf('%s %d %s', $this->nsProtocol, $this->niStatus, $this->getStatusMessage()));
+                header(sprintf('%s %d %s', $this->sProtocol, $this->niStatus, $this->getStatusMessage()));
             }
 
             if (!empty($this->aHeader)) {
@@ -334,20 +338,25 @@ class RESP
 
     /**
      * @param null|string|array $nasK
-     * @param                   $aData
+     * @param array             $aData
+     * @param bool              $bNotNullFill
      *
      * @return null|string|array
      */
-    protected function _getData($nasK, $aData)
+    protected function _getData($nasK, $aData, $bNotNullFill)
     {
         if ($nasK === null) {
             return $aData;
         } elseif (is_array($nasK)) {
-            $aRS = array();
-            foreach ($nasK as $sK) {
-                $aRS[$sK] = isset($aData[$sK]) ? $aData[$sK] : null;
+            if ($bNotNullFill) {
+                return array_intersect_key(array_flip($nasK), $aData);
+            } else {
+                $aRS = array();
+                foreach ($nasK as $sK) {
+                    $aRS[$sK] = isset($aData[$sK]) ? $aData[$sK] : null;
+                }
+                return $aRS;
             }
-            return $aRS;
         } else {
             return isset($aData[$sK = (string)$nasK]) ? $aData[$sK] : null;
         }

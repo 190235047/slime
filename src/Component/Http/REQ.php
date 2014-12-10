@@ -47,10 +47,11 @@ class REQ
 
     /**
      * @param null|string|array $nasK
+     * @param bool              $bNotNullFill
      *
      * @return null|string|array
      */
-    public function getHeader($nasK = null)
+    public function getHeader($nasK = null, $bNotNullFill = false)
     {
         if ($this->naTidyHeader === null) {
             if (is_string($nasK)) {
@@ -58,10 +59,10 @@ class REQ
                             strtoupper($nasK))]) ? $this->aSERVER[$sK] : null;
             } else {
                 $this->preTidyHeader();
-                return $this->_getData($nasK, $this->naTidyHeader);
+                return $this->_getData($nasK, $this->naTidyHeader, $bNotNullFill);
             }
         } else {
-            return $this->_getData($nasK, $this->naTidyHeader);
+            return $this->_getData($nasK, $this->naTidyHeader, $bNotNullFill);
         }
     }
 
@@ -99,52 +100,57 @@ class REQ
 
     /**
      * @param null|string|array $nasK
+     * @param bool              $bNotNullFill
      *
      * @return null|string|array
      */
-    public function getG($nasK = null)
+    public function getG($nasK = null, $bNotNullFill = false)
     {
-        return $this->_getData($nasK, $this->aGET);
+        return $this->_getData($nasK, $this->aGET, $bNotNullFill);
     }
 
     /**
      * @param null|string|array $nasK
+     * @param bool              $bNotNullFill
      *
      * @return null|string|array
      */
-    public function getP($nasK = null)
+    public function getP($nasK = null, $bNotNullFill = false)
     {
-        return $this->_getData($nasK, $this->aPOST);
+        return $this->_getData($nasK, $this->aPOST, $bNotNullFill);
     }
 
     /**
      * @param null|string|array $nasK
+     * @param bool              $bNotNullFill
      *
      * @return null|string|array
      */
-    public function getC($nasK = null)
+    public function getC($nasK = null, $bNotNullFill = false)
     {
-        return $this->_getData($nasK, $this->aCOOKIE);
+        return $this->_getData($nasK, $this->aCOOKIE, $bNotNullFill);
     }
 
     /**
      * @param null|string|array $nasK
+     * @param bool              $bNotNullFill
      *
      * @return null|string|array
      */
-    public function getGPC($nasK = null)
+    public function getGPC($nasK = null, $bNotNullFill = false)
     {
-        return $this->_getData($nasK, $this->aGPC);
+        return $this->_getData($nasK, $this->aGPC, $bNotNullFill);
     }
 
     /**
      * @param null|string|array $nasK
+     * @param bool              $bNotNullFill
      *
      * @return null|string|array
      */
-    public function getFile($nasK)
+    public function getFile($nasK, $bNotNullFill = false)
     {
-        return $this->_getData($nasK, $this->aFILE);
+        return $this->_getData($nasK, $this->aFILE, $bNotNullFill);
     }
 
 
@@ -193,20 +199,25 @@ class REQ
 
     /**
      * @param null|string|array $nasK
-     * @param                   $aData
+     * @param array             $aData
+     * @param bool              $bNotNullFill
      *
      * @return null|string|array
      */
-    protected function _getData($nasK, $aData)
+    protected function _getData($nasK, $aData, $bNotNullFill)
     {
         if ($nasK === null) {
             return $aData;
         } elseif (is_array($nasK)) {
-            $aRS = array();
-            foreach ($nasK as $sK) {
-                $aRS[$sK] = isset($aData[$sK]) ? $aData[$sK] : null;
+            if ($bNotNullFill) {
+                return array_intersect_key($aData, array_flip($nasK));
+            } else {
+                $aRS = array();
+                foreach ($nasK as $sK) {
+                    $aRS[$sK] = isset($aData[$sK]) ? $aData[$sK] : null;
+                }
+                return $aRS;
             }
-            return $aRS;
         } else {
             return isset($aData[$sK = (string)$nasK]) ? $aData[$sK] : null;
         }

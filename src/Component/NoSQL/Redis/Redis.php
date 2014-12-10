@@ -84,6 +84,9 @@ class Redis
                     );
                 }
             }
+            if (isset($aCFG['db'])) {
+                $OBJ->select($aCFG['db']);
+            }
 
             $this->aInst[$sK] = $OBJ;
         }

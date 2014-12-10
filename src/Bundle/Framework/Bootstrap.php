@@ -14,13 +14,11 @@ use Slime\Component\Support\Context;
  */
 class Bootstrap
 {
-    public static function run(Router $Router, Context $CTX)
+    public static function run(Router $Router, Context $CTX, $nsSAPI = null)
     {
-        if (PHP_SAPI == 'cli') {
-            self::runCli($Router, $CTX);
-        } else {
+        ($nsSAPI === null ? PHP_SAPI : $nsSAPI) === 'cli' ?
+            self::runCli($Router, $CTX):
             self::runHttp($Router, $CTX);
-        }
     }
 
     protected static function runCli(Router $Router, Context $CTX)
@@ -38,7 +36,7 @@ class Bootstrap
     {
         try {
             $REQ  = REQ::createFromGlobal();
-            $RESP = new RESP();
+            $RESP = new RESP($REQ->getProtocol());
             $CTX->bindMulti(array('REQ' => $REQ, 'RESP' => $RESP));
             $Router->runHttp($REQ, $RESP, $CTX);
             $RESP->send();

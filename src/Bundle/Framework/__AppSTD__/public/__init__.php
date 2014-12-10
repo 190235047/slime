@@ -15,14 +15,3 @@ require DIR_BASE . '/vendor/autoload.php';
 #/** @var Composer\Autoload\ClassLoader $AL */
 #$AL = require DIR_BASE . '/../../../../vendor/autoload.php';
 #$AL->addPsr4('AppSTD\\', DIR_CLASS);
-
-function __($sStr)
-{
-    /** @var \Slime\Component\I18N\I18N $I18N */
-    static $I18N = null;
-    if ($I18N === null) {
-        $I18N = \AppSTD\System\Support\CTX::inst()->get('I18N');
-    }
-
-    return $I18N->get($sStr);
-}

@@ -105,14 +105,22 @@ class Url
         $sPass     = isset($aBlock['pass']) ? ":{$aBlock['pass']}" : '';
         $sPass     = ($sUser === '' && $sPass === '') ? '' : "$sPass@";
         $sPath     = isset($aBlock['path']) ?
-            (is_array($aBlock['path']) ? '/' . implode('/', $aBlock['path']) : $aBlock['path']) : '';
+            (
+            is_array($aBlock['path']) ?
+                '/' . implode('/', $aBlock['path']) :
+                $aBlock['path']
+            )
+            : '';
         $sQuery    = isset($aBlock['query']) ?
             '?' . (
             is_array($aBlock['query']) ?
-                http_build_query($aBlock['query'], null, null, $iBuildQueryEncTypeIfQueryIsArr) : $aBlock['query']
-            ) : '';
+                http_build_query($aBlock['query'], null, '&', $iBuildQueryEncTypeIfQueryIsArr) :
+                $aBlock['query']
+            )
+            : '';
         $sFragment = isset($aBlock['fragment']) ? '#' . $aBlock['fragment'] : '';
 
         return "{$sScheme}{$sUser}{$sPass}{$sHost}{$sPort}{$sPath}{$sQuery}{$sFragment}";
     }
+
 }

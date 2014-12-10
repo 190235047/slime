@@ -22,6 +22,11 @@ abstract class Controller_API extends Controller_ABS
 
     protected $aData = array();
 
+    /** @var \Slime\Component\Http\REQ */
+    protected $REQ;
+    /** @var \Slime\Component\Http\RESP */
+    protected $RESP;
+
     public function __construct($CTX, array $aParam = array())
     {
         parent::__construct($CTX, $aParam);
