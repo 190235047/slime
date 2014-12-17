@@ -15,5 +15,6 @@ class C_Page extends Controller_Page
         if ($this->bLoadI18N && $this->isPageRender()) {
             $this->aData['I18N'] = $this->CTX->I18N;
         }
+        parent::__after__();
     }
 }

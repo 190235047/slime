@@ -1,4 +1,6 @@
 <?php
-require __DIR__ . '/__init__.php';
-
-require '../public/api_dev.php';
+if (is_file($sREQFile = dirname(__DIR__) . '/public' . $_SERVER['REQUEST_URI']) && file_exists($sREQFile)) {
+    return false;
+} else {
+    require dirname(__DIR__) . '/public/api_dev.php';
+}

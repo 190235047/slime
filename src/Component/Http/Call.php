@@ -146,6 +146,17 @@ class Call
         $this->aHeader = empty($this->aHeader) ? $aKV : array_merge($this->aHeader, $aKV);
     }
 
+    /**
+     * @param string $sMethod
+     * @param array  $aArgv
+     *
+     * @return Call
+     */
+    public function call($sMethod, $aArgv = array())
+    {
+        return $this->__call($sMethod, $aArgv);
+    }
+
     public function __call($sMethodName, $aArgv)
     {
         $aOpt = $this->aOpt;

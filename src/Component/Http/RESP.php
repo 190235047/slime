@@ -316,6 +316,7 @@ class RESP
                         }
                         header(sprintf('Set-Cookie: %s', implode('; ', $aTidy)));
                     } else {
+                        unset($aArr['__Other__']);
                         call_user_func_array('setcookie', $aArr);
                     }
                 }
